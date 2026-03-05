@@ -14,6 +14,7 @@
     box-sizing: border-box;
 }
 
+html,
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -22,6 +23,7 @@ body {
     /* padding-left foi removido para corrigir o layout com a nova navbar */
     transition: padding-left var(--transition-speed) ease;
     line-height: 1.5;
+    min-height: 100vh;
 }
 
 /* Regra obsoleta para o layout antigo da sidebar */
@@ -47,11 +49,177 @@ ul {
    pois foi substituído pela navbar do Bootstrap.
 */
 
+/* --- BARRA DE NAVEGAÇÃO (NAVBAR DO BOOTSTRAP) --- */
+.navbar {
+    background-color: var(--surface-color) !important;
+    border-bottom: 2px solid #333;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--text-color) !important;
+    transition: color 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+    color: var(--primary-color) !important;
+}
+
+.navbar-brand img {
+    max-height: 40px;
+}
+
+.navbar-dark .navbar-nav .dropdown-menu {
+    background-color: var(--surface-color);
+    border: 1px solid #333;
+}
+
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item {
+    color: var(--text-color);
+    transition: all 0.2s ease;
+}
+
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item:hover {
+    background-color: #333;
+    color: var(--primary-color);
+}
+
+/* --- BOOTSTRAP OVERRIDES PARA TEMA DARK --- */
+/* Card e componentes Bootstrap */
+.card {
+    background-color: var(--surface-color);
+    border-color: #333;
+    color: var(--text-color);
+}
+
+.card-header {
+    background-color: #252525;
+    border-color: #333;
+    color: var(--text-color);
+}
+
+.card-header.bg-primary {
+    background-color: var(--primary-color) !important;
+    color: #000 !important;
+}
+
+/* Alerts e notificações */
+.alert {
+    color: var(--text-color);
+}
+
+.alert-primary {
+    background-color: rgba(230, 184, 0, 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.alert-success {
+    background-color: rgba(39, 174, 96, 0.15);
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+}
+
+.alert-danger {
+    background-color: rgba(192, 57, 43, 0.15);
+    border-color: var(--brand-red);
+    color: var(--brand-red);
+}
+
+/* Badges */
+.badge {
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+.badge.bg-primary {
+    background-color: var(--primary-color) !important;
+    color: #000 !important;
+}
+
+.badge.bg-success {
+    background-color: var(--brand-green) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--brand-red) !important;
+}
+
+/* Tabelas Bootstrap */
+.table {
+    color: var(--text-color);
+    border-color: #333;
+}
+
+.table-dark {
+    background-color: var(--surface-color);
+    color: var(--text-color);
+}
+
+.table thead th {
+    background-color: #252525;
+    color: #aaa;
+    border-color: #333;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.table tbody td {
+    border-color: #2a2a2a;
+}
+
+.table tbody tr:hover {
+    background-color: #252525;
+}
+
+/* Pagination */
+.pagination .page-link {
+    background-color: var(--surface-color);
+    color: var(--text-color);
+    border-color: #333;
+}
+
+.pagination .page-link:hover {
+    background-color: #333;
+    color: var(--primary-color);
+    border-color: #444;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #000;
+}
+
+/* Modal */
+.modal-content {
+    background-color: var(--surface-color);
+    border-color: #333;
+    color: var(--text-color);
+}
+
+.modal-header {
+    background-color: #252525;
+    border-color: #333;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+/* Tooltips (Popovers) */
+.tooltip-inner {
+    background-color: #333;
+    color: var(--text-color);
+}
+
 /* --- CONTEÚDO PRINCIPAL --- */
-.main-content {
-    padding: 30px;
+.main-content,
+main {
+    padding: 30px 20px;
     max-width: 1400px;
     margin: 0 auto;
+    background-color: var(--bg-color);
 }
 
 /* --- ESTILO ESPECÍFICO PARA O LOGO NO LOGIN --- */
@@ -160,6 +328,52 @@ ul {
     outline: none;
 }
 
+/* Bootstrap Form Controls Override */
+.form-control,
+.form-select {
+    background-color: #252525;
+    border-color: #444;
+    color: var(--text-color);
+}
+
+.form-control::placeholder {
+    color: #666;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #252525;
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.2rem rgba(230, 184, 0, 0.25);
+}
+
+.form-control:disabled,
+.form-control[readonly],
+.form-select:disabled {
+    background-color: #1a1a1a;
+    color: #666;
+}
+
+.form-check-input {
+    background-color: #252525;
+    border-color: #444;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(230, 184, 0, 0.25);
+}
+
+.form-check-label {
+    color: var(--text-color);
+}
+
 /* --- BOTÕES --- */
 .btn {
     padding: 12px 20px;
@@ -252,6 +466,95 @@ ul {
     .kpi-value {
         font-size: 28px;
     }
+}
+
+/* --- LINKS E SCROLL --- */
+a {
+    color: var(--primary-color);
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #ffd700;
+    text-decoration: underline;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* --- BADGES E LABELS --- */
+.label {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.label-primary {
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+.label-success {
+    background-color: var(--brand-green);
+    color: #fff;
+}
+
+.label-danger {
+    background-color: var(--brand-red);
+    color: #fff;
+}
+
+.label-warning {
+    background-color: #f39c12;
+    color: #000;
+}
+
+/* --- KPI CARDS --- */
+.kpi-card {
+    background: var(--surface-color);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(230, 184, 0, 0.2);
+}
+
+.kpi-title {
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.kpi-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--primary-color);
 }
 
 /* --- IMPRESSÃO --- */

@@ -1,6 +1,6 @@
     </main> <!-- Fecha a tag <main> aberta no header.php -->
 
-    <footer class="footer mt-auto py-3 bg-light">
+    <footer class="footer mt-auto py-3 bg-dark border-top" style="border-color: #333 !important;">
         <div class="container text-center">
             <span class="text-muted">&copy; <?php echo date("Y"); ?> Ripfire System. Todos os direitos reservados.</span>
         </div>

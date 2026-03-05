@@ -19,16 +19,13 @@ $isAdmin = (isset($_SESSION['user_nivel']) && $_SESSION['user_nivel'] == 'admin'
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#212529"> <!-- Cor da barra de navegação escura -->
+    <meta name="theme-color" content="#121212"> <!-- Cor da barra de navegação escura -->
 
     <!-- Ícones do Google (opcional, se quiser usar no novo layout) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
         /* Pequenos ajustes para o Bootstrap se integrar melhor */
-        body {
-            background-color: #f8f9fa;
-        }
         .navbar-brand img {
             max-height: 40px;
         }
