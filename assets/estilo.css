@@ -19,15 +19,17 @@ body {
     color: var(--text-color);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    padding-left: var(--sidebar-width);
+    /* padding-left foi removido para corrigir o layout com a nova navbar */
     transition: padding-left var(--transition-speed) ease;
     line-height: 1.5;
 }
 
-/* Estado quando a sidebar está escondida ou no mobile */
+/* Regra obsoleta para o layout antigo da sidebar */
+/*
 body.sidebar-hidden {
     padding-left: 0;
 }
+*/
 
 a {
     text-decoration: none;
@@ -40,95 +42,10 @@ ul {
     margin: 0;
 }
 
-/* --- SIDEBAR --- */
-.sidebar {
-    height: 100vh;
-    width: var(--sidebar-width);
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: var(--surface-color);
-    border-right: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    transition: transform var(--transition-speed) ease;
-}
-
-/* Classe para esconder a sidebar no PC se desejar */
-body.sidebar-hidden .sidebar {
-    transform: translateX(-100%);
-}
-
-.logo {
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 0 15px;
-    font-size: 22px;
-    font-weight: bold;
-    color: var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.logo img {
-    max-width: 40px;
-    height: auto;
-}
-
-.menu-links {
-    flex-grow: 1;
-    overflow-y: auto;
-}
-
-.menu-group-title {
-    font-size: 11px;
-    color: #666;
-    padding: 15px 25px 5px;
-    text-transform: uppercase;
-    font-weight: bold;
-    border-top: 1px solid #2a2a2a;
-    margin-top: 5px;
-}
-
-.menu-links a {
-    padding: 12px 25px;
-    color: #aaa;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: 0.2s;
-    border-left: 4px solid transparent;
-}
-
-.menu-links a:hover,
-.menu-links a.active {
-    background-color: #2a2a2a;
-    color: #fff;
-    border-left-color: var(--primary-color);
-}
-
-.user-panel {
-    padding: 20px;
-    background-color: #181818;
-    border-top: 1px solid #333;
-}
-
-.btn-sair {
-    background-color: #cf2e2e;
-    color: white;
-    padding: 10px;
-    border-radius: 4px;
-    display: block;
-    text-align: center;
-    font-size: 13px;
-    font-weight: bold;
-}
+/* --- ANTIGA SIDEBAR REMOVIDA --- 
+   O bloco de CSS para a sidebar antiga, .logo, .menu-links, e .user-panel foi removido 
+   pois foi substituído pela navbar do Bootstrap.
+*/
 
 /* --- CONTEÚDO PRINCIPAL --- */
 .main-content {
@@ -290,38 +207,7 @@ body.sidebar-hidden .sidebar {
 }
 
 @media (max-width: 768px) {
-    body {
-        padding-left: 0;
-    }
 
-    .sidebar {
-        left: 0;
-        transform: translateX(-100%);
-    }
-
-    body.sidebar-visible .sidebar {
-        transform: translateX(0);
-    }
-
-    .main-content {
-        padding: 80px 15px 20px;
-    }
-
-    .menu-toggle {
-        display: flex;
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        z-index: 1100;
-        background: var(--primary-color);
-        color: #000;
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
 
     /* Transformação da Tabela em Cards no Mobile */
     .stock-table thead {
