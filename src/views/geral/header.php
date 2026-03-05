@@ -13,6 +13,7 @@ $isAdmin = (isset($_SESSION['user_nivel']) && $_SESSION['user_nivel'] == 'admin'
     <title>Ripfire System</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="assets/estilo.css">
+    <link rel="stylesheet" href="assets/responsivo.css">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
