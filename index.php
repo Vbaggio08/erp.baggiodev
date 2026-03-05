@@ -1,12 +1,29 @@
 <?php
-// --- 1. CONFIGURAÇÕES GERAIS ---
-// Define o fuso horário (Importante para as datas ficarem certas no Brasil)
-date_default_timezone_set('America/Sao_Paulo');
+// --- 0. CARREGAR VARIÁVEIS DE AMBIENTE ---
+require_once 'src/config/env.php';
 
-// Ligar modo de depuração (Para você ver erros se acontecerem)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// --- 1. CONFIGURAÇÕES GERAIS ---
+// Define o fuso horário
+date_default_timezone_set(env('APP_TIMEZONE', 'America/Sao_Paulo'));
+
+// Modo debug baseado na variável de ambiente
+$appDebug = env('APP_DEBUG', false);
+
+if ($appDebug) {
+    // Modo DESENVOLVIMENTO - mostra erros
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+} else {
+    // Modo PRODUÇÃO - oculta erros
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    error_reporting(E_ALL);
+    
+    // Log de erros em arquivo
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/logs/error.log');
+}
 
 // Inicia a sessão se não estiver iniciada
 if (session_status() === PHP_SESSION_NONE) {

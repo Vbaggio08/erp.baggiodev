@@ -1,0 +1,52 @@
+# Arquivos de Configuração Sensíveis
+.env
+.env.local
+.env.*.local
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.directory
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+.phpstorm.meta.php
+_IDE_HELPER.php
+
+# Logs
+logs/
+*.log
+
+# Cache e Temporários
+tmp/
+temp/
+cache/
+.cache/
+
+# Dependências (se usar Composer ou npm)
+vendor/
+node_modules/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Build e Dist
+dist/
+build/
+.env.production
+
+# Uploads (opcional - descomente se quiser versioná-los)
+# assets/uploads/
+
+# Sistema de banco de dados local
+*.sqlite
+*.sqlite3
+
+# OS
+.gitkeep

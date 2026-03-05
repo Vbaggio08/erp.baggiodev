@@ -72,16 +72,51 @@ ul {
 .navbar-dark .navbar-nav .dropdown-menu {
     background-color: var(--surface-color);
     border: 1px solid #333;
+    z-index: 1000;
+    min-width: 200px;
+}
+
+.navbar-dark .navbar-nav .dropdown-menu.show {
+    display: block !important;
 }
 
 .navbar-dark .navbar-nav .dropdown-menu .dropdown-item {
     color: var(--text-color);
     transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
 }
 
-.navbar-dark .navbar-nav .dropdown-menu .dropdown-item:hover {
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item:hover,
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item:focus {
     background-color: #333;
     color: var(--primary-color);
+}
+
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-divider {
+    border-top-color: #444;
+}
+
+/* Navbar Toggler (Mobile) */
+.navbar-toggler {
+    border-color: rgba(230, 184, 0, 0.5) !important;
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.25rem rgba(230, 184, 0, 0.25) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23e6b800' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Navegação responsiva */
+.collapse.show {
+    display: block !important;
+}
+
+.navbar-collapse {
+    padding-top: 10px;
 }
 
 /* --- BOOTSTRAP OVERRIDES PARA TEMA DARK --- */
