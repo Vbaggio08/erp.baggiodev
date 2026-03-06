@@ -8,7 +8,9 @@ class ProdutoController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         // Chama o método estático do Model
         $produtos = Produto::listarTodos();
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/produtos/listar.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function criar() {
@@ -17,7 +19,9 @@ class ProdutoController {
         // Busca os produtos para exibir na tabela lateral
         $produtos = Produto::listarTodos(); 
         
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/produtos/criar.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function salvar() {

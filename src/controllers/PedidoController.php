@@ -16,7 +16,9 @@ class PedidoController {
             $pedidos = [];
         }
         
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/fila.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // Abre o formulário de novo pedido
@@ -24,7 +26,9 @@ class PedidoController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (!isset($_SESSION['user_id'])) header('Location: index.php?rota=login');
         
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/nova_venda.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // Salva o pedido no banco
@@ -74,7 +78,9 @@ class PedidoController {
         if (!isset($_SESSION['user_id'])) header('Location: index.php?rota=login');
         
         // A view não precisa de dados extras por enquanto
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/nova_dtf.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // Salva o pedido DTF no banco de dados

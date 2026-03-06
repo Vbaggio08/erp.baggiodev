@@ -25,7 +25,9 @@ class CadastroController {
         $empresas = $pdo->query("SELECT * FROM empresas ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         
         if (!is_dir(__DIR__ . '/../views/cadastros')) mkdir(__DIR__ . '/../views/cadastros', 0777, true);
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/cadastros/empresas.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function salvarEmpresa() {
@@ -75,7 +77,9 @@ class CadastroController {
         }
 
         $clientes = $pdo->query("SELECT * FROM clientes ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/cadastros/clientes.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function salvarCliente() {
@@ -121,7 +125,9 @@ class CadastroController {
         }
 
         $fornecedores = $pdo->query("SELECT * FROM fornecedores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/cadastros/fornecedores.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function salvarFornecedor() {

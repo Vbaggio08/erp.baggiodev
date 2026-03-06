@@ -24,7 +24,9 @@ class EmpresaController {
         }
         
         // Carrega a view (passando a variável $empresaEdit)
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/cadastros/empresas.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function salvar() {

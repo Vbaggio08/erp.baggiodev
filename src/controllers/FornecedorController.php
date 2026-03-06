@@ -8,12 +8,16 @@ class FornecedorController {
         $pdo = Database::getConnection();
         
         $fornecedores = $pdo->query("SELECT * FROM fornecedores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/fornecedores/lista.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function novo() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/fornecedores/novo.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function editar() {
@@ -27,7 +31,9 @@ class FornecedorController {
             $fornecedor = $stmt->fetch(PDO::FETCH_ASSOC);
         }
         
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/fornecedores/novo.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function salvar() {

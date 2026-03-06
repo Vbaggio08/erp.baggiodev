@@ -7,7 +7,9 @@ class ServicoController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $pdo = Database::getConnection();
         $servicos = $pdo->query("SELECT * FROM servicos_os ORDER BY id DESC LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/servicos/lista.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function nova() {
@@ -18,7 +20,9 @@ class ServicoController {
         $empresas = $pdo->query("SELECT * FROM empresas WHERE ativo = 1 ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         $prestadores = $pdo->query("SELECT * FROM fornecedores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/servicos/nova.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // AQUI É IMPORTANTE: O CÁLCULO DO VALOR
