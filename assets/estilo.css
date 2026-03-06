@@ -11,6 +11,8 @@
 
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html,
@@ -18,10 +20,8 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    margin: 0;
     line-height: 1.5;
     min-height: 100vh;
-    display: flex;
 }
 
 /* --- SIDEBAR LATERAL --- */
@@ -170,9 +170,9 @@ body {
 /* --- CONTEÚDO PRINCIPAL --- */
 .main-content {
     margin-left: var(--sidebar-width);
-    flex: 1;
     padding: 20px;
     overflow-y: auto;
+    min-height: 100vh;
 }
 
 /* --- SIDEBAR FOOTER --- */
@@ -273,7 +273,7 @@ ul {
     background-color: var(--surface-color);
 }
 
-.table-striped > tbody > tr:nth-of-type(odd) {
+.table-striped>tbody>tr:nth-of-type(odd) {
     background-color: #252525;
 }
 
