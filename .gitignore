@@ -1,0 +1,29 @@
+# Arquivos de ambiente (NUNCA commite!)
+.env
+
+# Logs
+logs/error.log
+logs/*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+*~
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node.js (se usar no futuro)
+node_modules/
+npm-debug.log*
+
+# Backups
+*_backup.zip
+*.tar.gz
