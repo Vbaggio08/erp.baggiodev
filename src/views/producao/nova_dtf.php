@@ -1,4 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
 
 <?php
     // Mantém os dados do cliente e do pedido, se vierem via GET

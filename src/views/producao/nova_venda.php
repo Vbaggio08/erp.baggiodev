@@ -1,4 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
 
 <div class="login-box">
     <h1 class="login-title">Nova Venda</h1>

@@ -1,4 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
 
 <div class="box-relatorio">
     <h1 class="login-title">Minhas Empresas / Filiais</h1>

@@ -1,4 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
 
 <div class="main-content">
     <h1 class="login-title">Gerenciar Fornecedores</h1>
