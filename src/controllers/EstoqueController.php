@@ -7,7 +7,8 @@ class EstoqueController {
 
     public function index() {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        $estoque = Estoque::getEstoqueAgrupado();
+        $busca = $_GET['busca'] ?? '';
+        $estoque = Estoque::getEstoqueAgrupado($busca);
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/saldo.php';
         require __DIR__ . '/../views/geral/footer.php';
@@ -64,7 +65,8 @@ class EstoqueController {
 
     public function historico() {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        $movimentacoes = Estoque::getHistoricoCompleto();
+        $busca = $_GET['busca'] ?? '';
+        $movimentacoes = Estoque::getHistoricoCompleto($busca);
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/historico.php';
         require __DIR__ . '/../views/geral/footer.php';
@@ -72,7 +74,8 @@ class EstoqueController {
 
     public function relatorioPerdas() {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        $perdas = Estoque::getRelatorioPerdas();
+        $busca = $_GET['busca'] ?? '';
+        $perdas = Estoque::getRelatorioPerdas($busca);
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/relatorio_perdas.php';
         require __DIR__ . '/../views/geral/footer.php';

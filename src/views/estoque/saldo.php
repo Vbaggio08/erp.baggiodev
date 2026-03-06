@@ -18,6 +18,19 @@
         </div>
     </div>
 
+    <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
+        <form method="GET" action="index.php" style="display: flex; gap: 10px; align-items: center;">
+            <input type="hidden" name="rota" value="estoque_saldo">
+            <input type="text" name="busca" placeholder="Buscar por SKU, produto ou cor..." 
+                   value="<?= htmlspecialchars($_GET['busca'] ?? '') ?>" 
+                   style="flex: 1; padding: 10px; background: #222; border: 1px solid #555; color: #fff; border-radius: 4px;">
+            <button type="submit" style="padding: 10px 15px; background: #2ecc71; color: #fff; border: none; border-radius: 4px; cursor: pointer;">🔍 Buscar</button>
+            <?php if (!empty($_GET['busca'])): ?>
+                <a href="index.php?rota=estoque_saldo" style="padding: 10px 15px; background: #e74c3c; color: #fff; text-decoration: none; border-radius: 4px;">❌ Limpar</a>
+            <?php endif; ?>
+        </form>
+    </div>
+
     <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444;">
         <table style="width:100%; border-collapse: collapse; color:#ddd; font-size:14px;">
             <thead>
