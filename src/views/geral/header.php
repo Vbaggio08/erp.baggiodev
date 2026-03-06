@@ -19,12 +19,13 @@ $isAdmin = (isset($_SESSION['user_nivel']) && $_SESSION['user_nivel'] == 'admin'
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#121212"> <!-- Cor da barra de navegação escura -->
 
-    <!-- Ícones do Google -->
+    <!-- Ícones do Google (opcional, se quiser usar no novo layout) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
+        /* Pequenos ajustes para o Bootstrap se integrar melhor */
         .navbar-brand img {
             max-height: 40px;
         }
@@ -32,83 +33,76 @@ $isAdmin = (isset($_SESSION['user_nivel']) && $_SESSION['user_nivel'] == 'admin'
 </head>
 <body>
 
-<!-- SIDEBAR LATERAL -->
-<aside class="sidebar">
-    <div class="sidebar-header">
-        <img src="assets/img/logo_rip.png" alt="Ripfire" class="logo">
-        <h5>Ripfire</h5>
-    </div>
-
-    <nav class="sidebar-menu">
-        <a href="index.php?rota=dashboard" class="menu-item">
-            <span class="menu-icon">📊</span>
-            <span class="menu-text">Dashboard</span>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="index.php?rota=dashboard">
+            <img src="assets/img/logo_rip.png" alt="Ripfire">
         </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?rota=dashboard">Dashboard</a>
+                </li>
 
-        <!-- DROPDOWN 1: ESTOQUE -->
-        <div class="menu-dropdown">
-            <button class="menu-item dropdown-btn">
-                <span class="menu-icon">📦</span>
-                <span class="menu-text">Estoque</span>
-                <span class="menu-arrow">▼</span>
-            </button>
-            <div class="dropdown-content">
-                <a href="index.php?rota=estoque_saldo" class="dropdown-item">Saldo Atual</a>
-                <a href="index.php?rota=entrada" class="dropdown-item">Movimentar</a>
-                <a href="index.php?rota=estoque_historico" class="dropdown-item">Histórico</a>
-                <a href="index.php?rota=relatorio_perdas" class="dropdown-item">Perdas / Quebras</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="estoqueDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Estoque
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="estoqueDropdown">
+                        <li><a class="dropdown-item" href="index.php?rota=estoque_saldo">Saldo Atual</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=entrada">Movimentar</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=estoque_historico">Histórico</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=relatorio_perdas">Perdas / Quebras</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="operacionalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Operacional
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="operacionalDropdown">
+                        <li><a class="dropdown-item" href="index.php?rota=novo_gabarito">Nova Ficha Técnica</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=novo_dtf">Novo Pedido DTF</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=listar_gabaritos">Ver Fichas</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="index.php?rota=pedidos">Produção (Pedidos)</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=compras">Compras</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=servicos">Serviços / OS</a></li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="cadastrosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Cadastros
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="cadastrosDropdown">
+                        <li><a class="dropdown-item" href="index.php?rota=produtos">Produtos</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=clientes">Clientes</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=fornecedores">Fornecedores</a></li>
+                        <li><a class="dropdown-item" href="index.php?rota=empresas">Minhas Empresas</a></li>
+                    </ul>
+                </li>
+
+                <?php if ($isAdmin): ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="index.php?rota=gerenciar_usuarios">Administração</a>
+                </li>
+                <?php endif; ?>
+            </ul>
+
+            <div class="d-flex align-items-center text-white">
+                <div class="me-3 text-end">
+                    <div class="fw-bold"><?= htmlspecialchars($_SESSION['user_name'] ?? 'Visitante') ?></div>
+                    <div class="small text-muted"><?= htmlspecialchars($_SESSION['user_nivel'] ?? '') ?></div>
+                </div>
+                <a href="index.php?rota=logout" class="btn btn-outline-danger">Sair</a>
             </div>
         </div>
-
-        <!-- DROPDOWN 2: OPERACIONAL -->
-        <div class="menu-dropdown">
-            <button class="menu-item dropdown-btn">
-                <span class="menu-icon">⚙️</span>
-                <span class="menu-text">Operacional</span>
-                <span class="menu-arrow">▼</span>
-            </button>
-            <div class="dropdown-content">
-                <a href="index.php?rota=novo_gabarito" class="dropdown-item">Nova Ficha Técnica</a>
-                <a href="index.php?rota=novo_dtf" class="dropdown-item">Novo Pedido DTF</a>
-                <a href="index.php?rota=listar_gabaritos" class="dropdown-item">Ver Fichas</a>
-                <hr class="dropdown-divider">
-                <a href="index.php?rota=pedidos" class="dropdown-item">Produção (Pedidos)</a>
-                <a href="index.php?rota=compras" class="dropdown-item">Compras</a>
-                <a href="index.php?rota=servicos" class="dropdown-item">Serviços / OS</a>
-            </div>
-        </div>
-
-        <!-- DROPDOWN 3: CADASTROS -->
-        <div class="menu-dropdown">
-            <button class="menu-item dropdown-btn">
-                <span class="menu-icon">📝</span>
-                <span class="menu-text">Cadastros</span>
-                <span class="menu-arrow">▼</span>
-            </button>
-            <div class="dropdown-content">
-                <a href="index.php?rota=produtos" class="dropdown-item">Produtos</a>
-                <a href="index.php?rota=clientes" class="dropdown-item">Clientes</a>
-                <a href="index.php?rota=fornecedores" class="dropdown-item">Fornecedores</a>
-                <a href="index.php?rota=empresas" class="dropdown-item">Minhas Empresas</a>
-            </div>
-        </div>
-
-        <?php if ($isAdmin): ?>
-        <a href="index.php?rota=gerenciar_usuarios" class="menu-item">
-            <span class="menu-icon">👥</span>
-            <span class="menu-text">Administração</span>
-        </a>
-        <?php endif; ?>
-    </nav>
-
-    <div class="sidebar-footer">
-        <div class="user-info">
-            <div class="user-name"><?= htmlspecialchars($_SESSION['user_name'] ?? 'Visitante') ?></div>
-            <div class="user-level"><?= htmlspecialchars($_SESSION['user_nivel'] ?? '') ?></div>
-        </div>
-        <a href="index.php?rota=logout" class="btn-logout">Sair</a>
     </div>
-</aside>
+</nav>
 
 <!-- Abre o container principal do conteúdo da página -->
-<main class="main-content">
+<main class="container-fluid py-4">
