@@ -1,6 +1,5 @@
 # ==============================================================
-# CONFIGURAÇÃO TEMPORÁRIA PARA DESENVOLVIMENTO
-# ATENÇÃO: REGRAS DE SEGURANÇA DESABILITADAS!
+# 🔐 PROTEÇÃO DE DIRETÓRIOS E REWRITE RULES
 # ==============================================================
 
 # Desativa listagem de diretórios
@@ -17,17 +16,17 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
 
-# TEMPORÁRIO: Permite acesso a arquivos sensíveis para desenvolvimento
-# <FilesMatch "(\.env|\.env\.example|\.git|\.gitignore|config\.php|database\.php)$">
-#     Order allow,deny
-#     Deny from all
-# </FilesMatch>
+# Bloqueia acesso a arquivos sensíveis
+<FilesMatch "(\.git|\.gitignore|\.env\.example|config\.php)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
 
-# TEMPORÁRIO: Permite acesso a diretórios sensíveis
-# <DirectoryMatch "(^|/)(\.git|\.env|logs|vendor)">
-#     Order allow,deny
-#     Deny from all
-# </DirectoryMatch>
+# Bloqueia acesso a diretórios sensíveis
+<DirectoryMatch "(^|/)(\.git)">
+    Order allow,deny
+    Deny from all
+</DirectoryMatch>
 
 # Adiciona headers de segurança
 <IfModule mod_headers.c>
