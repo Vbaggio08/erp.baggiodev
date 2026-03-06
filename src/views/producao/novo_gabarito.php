@@ -115,10 +115,10 @@
                 <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom:20px;">
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Modelo / Produto</label>
-                        <select name="modelo" required style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                        <select name="modelo" id="modelo" required style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
                             <option value="">-- Selecione o Modelo --</option>
-                            <?php foreach($produtos as $prod): ?>
-                                <option value="<?= htmlspecialchars($prod['nome']) ?>" <?= (isset($ficha['modelo']) && $ficha['modelo'] == $prod['nome']) ? 'selected' : '' ?>><?= htmlspecialchars($prod['nome']) ?></option>
+                            <?php foreach($modelos_unicos as $modelo): ?>
+                                <option value="<?= htmlspecialchars($modelo) ?>" <?= (isset($ficha['modelo']) && $ficha['modelo'] == $modelo) ? 'selected' : '' ?>><?= htmlspecialchars($modelo) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -132,17 +132,36 @@
                     <label style="color:#e6b800; font-weight:bold; display:block; margin-bottom:10px;">Grade de Tamanhos</label>
                     <?php 
                         $gradeArr = isset($ficha['itens_json']) ? json_decode($ficha['itens_json'], true) : [];
-                        $tamanhos = ['PP', 'P', 'M', 'G', 'GG', 'G1', 'G2'];
+                        $tamanhos_infantil = ['2', '4', '6', '8', '10', '12', '14', '16'];
+                        $tamanhos_adulto = ['PP', 'P', 'M', 'G', 'GG', 'G1', 'G2', 'G3', 'UNIC'];
                     ?>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <?php foreach($tamanhos as $tam): ?>
-                            <div style="text-align:center;">
-                                <span style="font-size:12px; color:#aaa;"><?= $tam ?></span><br>
-                                <input type="number" name="grade[<?= $tam ?>]" value="<?= $gradeArr[$tam] ?? '' ?>" 
-                                       class="input-grade" min="0" oninput="somarTotal()"
-                                       style="width:55px; padding:8px; text-align:center; background:#111; border:1px solid #444; color:#fff; font-weight:bold;">
-                            </div>
-                        <?php endforeach; ?>
+                    
+                    <div id="grade-infantil" style="margin-bottom:15px;">
+                        <span style="color:#aaa; font-size:12px; font-weight:bold;">Infantil</span>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;">
+                            <?php foreach($tamanhos_infantil as $tam): ?>
+                                <div class="tamanho-input" data-tamanho="<?= $tam ?>" style="text-align:center;">
+                                    <span style="font-size:12px; color:#aaa;"><?= $tam ?></span><br>
+                                    <input type="number" name="grade[<?= $tam ?>]" value="<?= $gradeArr[$tam] ?? '' ?>" 
+                                           class="input-grade" min="0" oninput="somarTotal()"
+                                           style="width:55px; padding:8px; text-align:center; background:#111; border:1px solid #444; color:#fff; font-weight:bold;">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    
+                    <div id="grade-adulto">
+                        <span style="color:#aaa; font-size:12px; font-weight:bold;">Adulto</span>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;">
+                            <?php foreach($tamanhos_adulto as $tam): ?>
+                                <div class="tamanho-input" data-tamanho="<?= $tam ?>" style="text-align:center;">
+                                    <span style="font-size:12px; color:#aaa;"><?= $tam ?></span><br>
+                                    <input type="number" name="grade[<?= $tam ?>]" value="<?= $gradeArr[$tam] ?? '' ?>" 
+                                           class="input-grade" min="0" oninput="somarTotal()"
+                                           style="width:55px; padding:8px; text-align:center; background:#111; border:1px solid #444; color:#fff; font-weight:bold;">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
 
@@ -211,6 +230,32 @@ function somarTotal() {
         document.getElementById('vlrTotal').value = final.replace('.', ',');
     }
 }
+
+window.tamanhosPorModelo = <?php echo json_encode($tamanhos_por_modelo); ?>;
+
+document.getElementById('modelo').addEventListener('change', function() {
+    const modelo = this.value;
+    const tamanhosDisponiveis = window.tamanhosPorModelo[modelo] || [];
+    const inputs = document.querySelectorAll('.tamanho-input');
+    inputs.forEach(div => {
+        const tam = div.getAttribute('data-tamanho');
+        if (tamanhosDisponiveis.includes(tam)) {
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+            const input = div.querySelector('input');
+            if (input) input.value = '';
+        }
+    });
+    somarTotal();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modeloSelect = document.getElementById('modelo');
+    if (modeloSelect.value) {
+        modeloSelect.dispatchEvent(new Event('change'));
+    }
+});
 </script>
 
 </body>
