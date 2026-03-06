@@ -47,7 +47,9 @@ class LoginController {
         $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
         // Variável vazia para o formulário de cadastro
         $usuarioEdit = null; 
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/admin/usuarios.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // NOVA FUNÇÃO: Carrega dados para edição
@@ -64,7 +66,9 @@ class LoginController {
         // Busca a lista para mostrar na tabela abaixo
         $usuarios = $pdo->query("SELECT * FROM usuarios")->fetchAll(PDO::FETCH_ASSOC);
 
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/admin/usuarios.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function salvarUsuario() {
