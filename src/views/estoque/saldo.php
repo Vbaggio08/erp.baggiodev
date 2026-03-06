@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
-
 <style>
     .badge-estoque { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
     .status-vazio { background: #e74c3c; color: #fff; }
@@ -70,5 +68,3 @@
         </table>
     </div>
 </div>
-</body>
-</html>

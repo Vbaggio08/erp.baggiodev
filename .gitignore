@@ -1,1 +1,20 @@
-# Tudo no repositório
+# Arquivos de ambiente - NUNCA ENVIE PARA O REPOSITÓRIO!
+.env
+
+# Logs
+/logs/*
+!/logs/.htaccess
+!/logs/.gitkeep
+
+# Arquivos de upload de usuário
+/assets/uploads/*
+!/assets/uploads/.gitkeep
+!/assets/uploads/comprovantes/.gitkeep
+
+# Arquivos de dependências (se usar composer)
+/vendor/
+composer.lock
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db

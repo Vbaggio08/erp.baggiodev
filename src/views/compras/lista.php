@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
-
 <style>
     .status-select {
         padding: 6px 10px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; color: #fff; text-align: center; width: 100%; max-width: 130px; font-size: 12px; appearance: none; -webkit-appearance: none; text-align-last: center; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
@@ -87,6 +85,3 @@ function mudarStatusCompra(select, id) {
     window.location.href = 'index.php?rota=compra_mudar_status&id=' + id + '&status=' + novoStatus;
 }
 </script>
-
-</body>
-</html>

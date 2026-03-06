@@ -1,4 +1,4 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
+
 <?php
     // Lista oficial de cores da Ripfire
     $lista_cores = ['Preta', 'Branca', 'Off-White', 'Azul-Marinho', 'Bordô', 'Verde', 'Marrom', 'Vermelha', 'Doce de Leite'];

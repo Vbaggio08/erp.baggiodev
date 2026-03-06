@@ -69,63 +69,18 @@ ul {
     max-height: 40px;
 }
 
-/* --- DROPDOWN MENU --- */
-.nav-item.dropdown {
-    position: relative;
-}
-
+/* --- DROPDOWN MENU (SOBRESCRITA SEGURA DO BOOTSTRAP) --- */
 .dropdown-menu {
-    background-color: var(--surface-color);
-    border: 1px solid #333;
-    z-index: 1050;
-    min-width: 200px;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    display: none;
-    list-style: none;
-    padding: 0.5rem 0;
-    margin: 0;
-    border-radius: 0.25rem;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    background-color: var(--surface-color) !important;
+    border-color: #333 !important;
+    --bs-dropdown-link-color: var(--text-color);
+    --bs-dropdown-link-hover-color: var(--primary-color);
+    --bs-dropdown-link-hover-bg: #333;
+    --bs-dropdown-link-active-color: #000;
+    --bs-dropdown-link-active-bg: var(--primary-color);
+    --bs-dropdown-divider-bg: #444;
 }
 
-.dropdown-menu.show {
-    display: block !important;
-}
-
-.dropdown-item {
-    display: block;
-    width: 100%;
-    padding: 0.5rem 1.5rem;
-    clear: both;
-    color: var(--text-color);
-    text-align: inherit;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.dropdown-item:hover,
-.dropdown-item:focus {
-    background-color: #333;
-    color: var(--primary-color);
-}
-
-.dropdown-item.active,
-.dropdown-item:active {
-    background-color: var(--primary-color);
-    color: #000;
-}
-
-.dropdown-divider {
-    height: 0;
-    margin: 0.5rem 0;
-    overflow: hidden;
-    border-top: 1px solid #444;
-}
 
 /* Navbar Toggler (Mobile) */
 .navbar-toggler {

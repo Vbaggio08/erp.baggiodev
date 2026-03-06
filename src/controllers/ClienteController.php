@@ -10,7 +10,9 @@ class ClienteController {
         
         $clientes = $pdo->query("SELECT * FROM clientes ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/cadastros/clientes.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // 2. MODO EDIÇÃO (Formulário preenchido em cima, tabela embaixo)
@@ -29,7 +31,9 @@ class ClienteController {
             $clienteEdit = $stmt->fetch(PDO::FETCH_ASSOC);
         }
         
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/cadastros/clientes.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // 3. SALVAR (Cadastra um novo ou atualiza um existente)

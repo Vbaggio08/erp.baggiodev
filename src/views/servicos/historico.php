@@ -1,4 +1,4 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
+
 
 <div class="main-content">
     <div class="header-actions">

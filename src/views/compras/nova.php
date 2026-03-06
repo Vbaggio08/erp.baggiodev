@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
-
 <?php
     $totalGeral = 0;
     if (!empty($_SESSION['lista_compra'])) {

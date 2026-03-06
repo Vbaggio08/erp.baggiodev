@@ -42,6 +42,9 @@ class DashboardController {
             $produzidosHoje = Gabarito::contarProducaoHoje();
         }
 
+        // Carrega a view do dashboard, passando as variáveis
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/geral/dashboard.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 }

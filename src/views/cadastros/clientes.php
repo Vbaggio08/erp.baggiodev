@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
-
 <div class="main-content">
     <h1 class="login-title">Gerenciar Clientes</h1>
 
@@ -83,5 +81,3 @@
         </table>
     </div>
 </div>
-</body>
-</html>

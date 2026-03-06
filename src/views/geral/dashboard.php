@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/header.php'; ?>
-
 <div class="main-content">
     <h1 class="login-title">📊 Visão Geral</h1>
     <p class="login-subtitle">Bem-vindo, <strong><?= $_SESSION['user_name'] ?></strong>!</p>
@@ -90,6 +88,3 @@
 
     </div>
 </div>
-
-</body>
-</html>

@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
-
 <div class="box-relatorio">
     <h1 class="login-title">Importar Vendas (CSV)</h1>
     <p class="login-subtitle">Carregue sua planilha original da Shopee/Mercado Livre.</p>
@@ -36,5 +34,3 @@
         </form>
     </div>
 </div>
-</body>
-</html>

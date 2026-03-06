@@ -9,7 +9,9 @@ class CompraController {
         $pdo = Database::getConnection();
         // Busca as últimas 50 compras
         $compras = $pdo->query("SELECT * FROM compras ORDER BY id DESC LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/compras/lista.php'; // ATENÇÃO AO CAMINHO
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // 2. NOVA COMPRA (Tela)
@@ -23,7 +25,9 @@ class CompraController {
         // Busca fornecedores
         $fornecedores = $pdo->query("SELECT * FROM fornecedores ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
 
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/compras/nova.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // 3. ADICIONAR ITEM NA SESSÃO

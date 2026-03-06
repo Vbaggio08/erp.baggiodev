@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
-
 <div class="box-relatorio">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <h1 class="login-title">📦 Nova Movimentação</h1>
@@ -77,6 +75,3 @@ function atualizarCampos() {
     }
 }
 </script>
-
-</body>
-</html>

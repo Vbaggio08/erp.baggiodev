@@ -8,13 +8,17 @@ class EstoqueController {
     public function index() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $estoque = Estoque::getEstoqueAgrupado();
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/saldo.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function telaEntrada() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $listaProdutos = Produto::listarTodos();
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/entrada.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     // --- ATUALIZADO PARA ACEITAR PERDA ---
@@ -61,12 +65,16 @@ class EstoqueController {
     public function historico() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $movimentacoes = Estoque::getHistoricoCompleto();
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/historico.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 
     public function relatorioPerdas() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $perdas = Estoque::getRelatorioPerdas();
+        require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/relatorio_perdas.php';
+        require __DIR__ . '/../views/geral/footer.php';
     }
 }

@@ -1,4 +1,4 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
+
 
 <div class="box-relatorio">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">

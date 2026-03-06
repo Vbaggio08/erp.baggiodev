@@ -1,5 +1,3 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
-
 <style>
     .status-select {
         padding: 6px 10px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; color: #fff; text-align: center; width: 100%; max-width: 140px; font-size: 11px; appearance: none; text-align-last: center; transition: 0.2s;

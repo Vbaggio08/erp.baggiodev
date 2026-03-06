@@ -71,3 +71,10 @@ if (file_exists($envFile)) {
         }
     }
 }
+
+// --- Define a URL base da aplicação ---
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST'];
+// Garante que o caminho termine com /
+$script_name = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '/') . '/';
+define('BASE_URL', $protocol . $host . $script_name);

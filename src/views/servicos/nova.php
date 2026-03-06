@@ -1,4 +1,4 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
+
 
 <?php
     $totalGeral = 0;

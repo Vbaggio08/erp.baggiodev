@@ -1,4 +1,4 @@
-<?php include __DIR__ . '/../geral/header.php'; ?>
+
 
 <style>
     /* Estilos dos Botões de Status */
