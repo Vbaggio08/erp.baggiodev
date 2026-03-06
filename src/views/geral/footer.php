@@ -1,57 +1,33 @@
     </main> <!-- Fecha a tag <main> aberta no header.php -->
 
-    <footer class="footer mt-auto py-3 bg-dark border-top" style="border-color: #333 !important;">
-        <div class="container text-center">
-            <span class="text-muted">&copy; <?php echo date("Y"); ?> Ripfire System. Todos os direitos reservados.</span>
-        </div>
-    </footer>
-
-    <!-- JavaScript do Bootstrap (Essencial para componentes como menu dropdown, modais, etc) -->
+    <!-- JavaScript do Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
-        // Dropdown menu manual com fallback
+        // Dropdown menu funcional na sidebar
         document.addEventListener('DOMContentLoaded', function() {
-            // Encontrar todos os toggle de dropdown
-            const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            const dropdownBtns = document.querySelectorAll('.dropdown-btn');
             
-            dropdownToggles.forEach(toggle => {
-                toggle.addEventListener('click', function(e) {
+            dropdownBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     
-                    // Encontrar o menu correspondente
-                    const menuId = this.getAttribute('aria-labelledby');
-                    const menu = document.querySelector('[aria-labelledby="' + menuId + '"]');
+                    // Encontrar o container dropdown pai
+                    const menuDropdown = this.parentElement;
+                    const dropdownContent = menuDropdown.querySelector('.dropdown-content');
+                    const arrow = this.querySelector('.menu-arrow');
                     
-                    if (menu) {
-                        // Fechar todos os outros menus
-                        document.querySelectorAll('.dropdown-menu.show').forEach(m => {
-                            if (m !== menu) {
-                                m.classList.remove('show');
-                            }
-                        });
-                        
-                        // Toggle o menu atual
-                        menu.classList.toggle('show');
-                    }
-                });
-            });
-            
-            // Fechar dropdown quando clicar fora
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.nav-item.dropdown')) {
-                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                        menu.classList.remove('show');
+                    // Fechar outros dropdowns
+                    document.querySelectorAll('.dropdown-content.active').forEach(content => {
+                        if (content !== dropdownContent) {
+                            content.classList.remove('active');
+                            content.parentElement.querySelector('.menu-arrow').classList.remove('active');
+                        }
                     });
-                }
-            });
-            
-            // Fechar dropdown quando clicar em um item
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
+                    
+                    // Toggle o dropdown atual
+                    dropdownContent.classList.toggle('active');
+                    arrow.classList.toggle('active');
                 });
             });
         });
