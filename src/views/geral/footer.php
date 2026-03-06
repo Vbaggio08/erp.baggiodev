@@ -10,12 +10,49 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
-        // Garantir que os dropdowns do Bootstrap funcionem
+        // Dropdown menu manual com fallback
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar todos os dropdowns
-            const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-            dropdownElements.forEach(element => {
-                new bootstrap.Dropdown(element);
+            // Encontrar todos os toggle de dropdown
+            const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Encontrar o menu correspondente
+                    const menuId = this.getAttribute('aria-labelledby');
+                    const menu = document.querySelector('[aria-labelledby="' + menuId + '"]');
+                    
+                    if (menu) {
+                        // Fechar todos os outros menus
+                        document.querySelectorAll('.dropdown-menu.show').forEach(m => {
+                            if (m !== menu) {
+                                m.classList.remove('show');
+                            }
+                        });
+                        
+                        // Toggle o menu atual
+                        menu.classList.toggle('show');
+                    }
+                });
+            });
+            
+            // Fechar dropdown quando clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.nav-item.dropdown')) {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                }
+            });
+            
+            // Fechar dropdown quando clicar em um item
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                });
             });
         });
     </script>
