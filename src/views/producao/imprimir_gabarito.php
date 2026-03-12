@@ -56,7 +56,15 @@
     <?php 
         // Detecta a URL base para as imagens aparecerem no PDF/Impressão
         $protocolo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
-        $url_base = $protocolo . "://" . $_SERVER['HTTP_HOST'] . "/tes/"; 
+        
+        // Detecta se está em raiz ou em pasta
+        $script = $_SERVER['SCRIPT_NAME'] ?? '';
+        $path = substr($script, 0, strrpos($script, '/index.php'));
+        if (empty($path) || $path === '') {
+            $path = '';
+        }
+        
+        $url_base = $protocolo . "://" . $_SERVER['HTTP_HOST'] . $path . "/";
     ?>
 
     <?php if(!empty($lista_fichas)): foreach($lista_fichas as $index => $ficha): ?>
@@ -149,13 +157,13 @@
                 ?>
 
                 <?php if ($extensao === 'pdf'): ?>
-                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="100%" style="border:none;"></iframe>
+                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="600px" style="border:2px solid #000;"></iframe>
                 <?php else: ?>
-                    <img src="<?= $arquivo ?>" style="max-width:100%; max-height:100%; object-fit: contain; display: block;">
+                    <img src="<?= $arquivo ?>" style="max-width:100%; max-height:600px; object-fit: contain; display: block; border:2px solid #000; padding:10px; background:#fff;">
                 <?php endif; ?>
 
             <?php else: ?>
-                <p style="color:#aaa; font-style:italic;">Nenhuma arte ou mockup anexado a este item.</p>
+                <p style="color:#aaa; font-style:italic; padding:20px;">Nenhuma arte ou mockup anexado a este item.</p>
             <?php endif; ?>
         </div>
 
