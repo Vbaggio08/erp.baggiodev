@@ -85,6 +85,23 @@ class GabaritoController {
         
         $produtos = $pdo->query("SELECT * FROM produtos WHERE ativo = 1 ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         $usuarios = $pdo->query("SELECT * FROM usuarios ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Preparar modelos únicos e tamanhos disponíveis por modelo
+        $modelos_unicos = [];
+        $tamanhos_por_modelo = [];
+        foreach ($produtos as $p) {
+            $modelo = $p['nome'];
+            if (!in_array($modelo, $modelos_unicos)) {
+                $modelos_unicos[] = $modelo;
+            }
+            if (!isset($tamanhos_por_modelo[$modelo])) {
+                $tamanhos_por_modelo[$modelo] = [];
+            }
+            if (!in_array($p['tamanho'], $tamanhos_por_modelo[$modelo])) {
+                $tamanhos_por_modelo[$modelo][] = $p['tamanho'];
+            }
+        }
+        
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/novo_gabarito.php';
         require __DIR__ . '/../views/geral/footer.php';
