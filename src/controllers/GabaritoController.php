@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/ImageOptimizer.php';
 require_once __DIR__ . '/../models/Gabarito.php';
 
 class GabaritoController {

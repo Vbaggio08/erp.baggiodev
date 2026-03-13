@@ -1,4 +1,6 @@
-<?php require_once __DIR__ . '/../config/ImageOptimizer.php'; ?>
+<?php
+// ImageOptimizer já foi carregado no Controller
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
