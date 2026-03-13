@@ -156,9 +156,9 @@
                 ?>
 
                 <?php if ($extensao === 'pdf'): ?>
-                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="160px" style="border:1px solid #000;"></iframe>
+                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="100%" style="border:none;"></iframe>
                 <?php else: ?>
-                    <img src="<?= $arquivo ?>" style="max-width:100%; max-height:160px; object-fit: contain; display: block; border:1px solid #000; padding:5px; background:#fff;">
+                    <img src="<?= $arquivo ?>" style="width:100%; height:100%; object-fit: cover; display: block; border:none;">
                 <?php endif; ?>
 
             <?php else: ?>
@@ -196,7 +196,7 @@
             <?php if ($extComp === 'pdf'): ?>
                 <iframe src="<?= $arquivoComp ?>" width="100%" height="100%" style="border:none;"></iframe>
             <?php else: ?>
-                <img src="<?= $arquivoComp ?>" style="max-width:100%; max-height:100%; object-fit: contain; display: block;">
+                <img src="<?= $arquivoComp ?>" style="width:100%; height:100%; object-fit: cover; display: block;">
             <?php endif; ?>
         </div>
     </div>
