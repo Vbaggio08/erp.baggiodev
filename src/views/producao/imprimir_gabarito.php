@@ -34,7 +34,7 @@
         
         /* CONTAINER DO MOCKUP (SUPORTA IMG E PDF) */
         .box-imagem {
-            border: 1px solid #000; margin: 6px 0;
+            border: 1px solid #000; margin: 0 auto;
             display: flex; align-items: center; justify-content: center;
             background: #f9f9f9;
             width: 14cm;
