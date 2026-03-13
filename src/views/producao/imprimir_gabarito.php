@@ -37,9 +37,8 @@
             border: 1px solid #000; margin: 6px 0;
             display: flex; align-items: center; justify-content: center;
             background: #f9f9f9;
-            flex: 1;
-            min-height: 120px;
-            max-height: 160px;
+            width: 14cm;
+            height: 14cm;
         }
 
         .aviso { font-weight: bold; background: #eee; padding: 5px; border: 1px solid #000; margin-top: 5px; font-size: 9px; }
