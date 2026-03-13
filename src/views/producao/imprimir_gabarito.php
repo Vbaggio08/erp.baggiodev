@@ -22,15 +22,15 @@
         /* QUEBRA DE PÁGINA NA IMPRESSÃO */
         .quebra-pagina { page-break-after: always; }
 
-        h1 { text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin: 0 0 8px 0; font-size: 18px; }
-        .campo { margin-bottom: 3px; font-size: 11px; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
-        .campo strong { font-weight: bold; font-size: 12px; margin-right: 3px; }
+        h1 { text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin: 0 0 10px 0; font-size: 20px; }
+        .campo { margin-bottom: 4px; font-size: 12px; border-bottom: 1px dotted #ccc; padding-bottom: 2px; }
+        .campo strong { font-weight: bold; font-size: 13px; margin-right: 3px; }
         
-        .grid-topo { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+        .grid-topo { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
         /* BOX DO PRODUTO (MODELO, COR E GRADE) */
-        .box-produto { border: 1px solid #000; padding: 8px; margin: 6px 0; background: #f4f4f4; }
+        .box-produto { border: 1px solid #000; padding: 10px; margin: 8px 0; background: #f4f4f4; }
         
         /* CONTAINER DO MOCKUP (SUPORTA IMG E PDF) */
         .box-imagem {
@@ -38,8 +38,8 @@
             display: flex; align-items: center; justify-content: center;
             background: #f9f9f9;
             flex: 1;
-            min-height: 80px;
-            max-height: 100px;
+            min-height: 120px;
+            max-height: 160px;
         }
 
         .aviso { font-weight: bold; background: #eee; padding: 5px; border: 1px solid #000; margin-top: 5px; font-size: 9px; }
@@ -96,59 +96,59 @@
             <div style="display:grid; grid-template-columns: 2.5fr 2fr 1fr; gap: 5px; align-items: center;">
                 
                 <div style="border-right: 1px dashed #999; padding-right:5px;">
-                    <span style="font-size: 9px; text-transform: uppercase; color:#555;">Modelo:</span><br>
-                    <strong style="font-size: 13px; text-transform: uppercase; display:block; margin-bottom:4px;">
+                    <span style="font-size: 10px; text-transform: uppercase; color:#555;">Modelo:</span><br>
+                    <strong style="font-size: 14px; text-transform: uppercase; display:block; margin-bottom:5px;">
                         <?= htmlspecialchars($ficha['modelo'] ?? '') ?>
                     </strong>
-                    <span style="font-size: 9px; text-transform: uppercase; color:#555;">Cor:</span><br>
-                    <strong style="font-size: 12px; text-transform: uppercase;">
+                    <span style="font-size: 10px; text-transform: uppercase; color:#555;">Cor:</span><br>
+                    <strong style="font-size: 13px; text-transform: uppercase;">
                         <?= htmlspecialchars($ficha['cor'] ?? 'Padrão') ?>
                     </strong>
                 </div>
 
                 <div style="text-align:center; border-right: 1px dashed #999; padding-right:5px;">
-                    <span style="font-size: 9px; text-transform: uppercase; color:#555;">Distribuição:</span><br>
+                    <span style="font-size: 10px; text-transform: uppercase; color:#555;">Distribuição:</span><br>
                     <?php if(!empty($grade) && is_array($grade)): ?>
-                        <table style="width:100%; margin-top:2px; border-collapse:collapse; font-size:10px;">
+                        <table style="width:100%; margin-top:2px; border-collapse:collapse; font-size:11px;">
                             <tr style="border-bottom:1px solid #ccc;">
                                 <?php foreach($grade as $tam => $qtd): ?>
-                                    <th style="padding:1px; color:#555; font-size:8px;"><?= $tam ?></th>
+                                    <th style="padding:1px; color:#555; font-size:9px;"><?= $tam ?></th>
                                 <?php endforeach; ?>
                             </tr>
                             <tr>
                                 <?php foreach($grade as $tam => $qtd): ?>
-                                    <td style="font-weight:bold; font-size:12px; padding:1px;"><?= $qtd ?></td>
+                                    <td style="font-weight:bold; font-size:13px; padding:1px;"><?= $qtd ?></td>
                                 <?php endforeach; ?>
                             </tr>
                         </table>
                     <?php else: ?>
-                        <strong style="font-size: 16px; display:block;"><?= htmlspecialchars($ficha['tamanho'] ?? 'UN') ?></strong>
+                        <strong style="font-size: 18px; display:block;"><?= htmlspecialchars($ficha['tamanho'] ?? 'UN') ?></strong>
                     <?php endif; ?>
                 </div>
 
                 <div style="text-align:center;">
-                    <span style="font-size: 9px; text-transform: uppercase; color:#555;">Qtd:</span><br>
-                    <strong style="font-size: 22px;"><?= htmlspecialchars($ficha['quantidade'] ?? '0') ?></strong>
+                    <span style="font-size: 10px; text-transform: uppercase; color:#555;">Qtd:</span><br>
+                    <strong style="font-size: 24px;"><?= htmlspecialchars($ficha['quantidade'] ?? '0') ?></strong>
                 </div>
             </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px; margin:4px 0;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px; margin:5px 0;">
             <div class="campo"><strong>Contato:</strong> <?= htmlspecialchars($ficha['contato'] ?? '-') ?></div>
             <div class="campo"><strong>Data Ped:</strong> <?= !empty($ficha['data_pedido']) ? date('d/m/Y', strtotime($ficha['data_pedido'])) : '-' ?></div>
             <div class="campo"><strong>Entrega:</strong> <?= !empty($ficha['data_entrega']) ? date('d/m/Y', strtotime($ficha['data_entrega'])) : 'A DEFINIR' ?></div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin:3px 0;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin:4px 0;">
             <div class="campo"><strong>Valor Unit:</strong> R$ <?= number_format($ficha['valor_unit'] ?? 0, 2, ',', '.') ?></div>
             <div class="campo"><strong>Valor Total:</strong> R$ <?= number_format($ficha['valor_total'] ?? 0, 2, ',', '.') ?></div>
         </div>
 
-        <div class="campo" style="background: #f4f4f4; padding: 4px 6px; border-left: 3px solid #3498db; margin-top: 3px; font-size:10px;">
+        <div class="campo" style="background: #f4f4f4; padding: 5px 6px; border-left: 3px solid #3498db; margin-top: 4px; font-size:11px;">
             <strong>Pagamento:</strong> <?= htmlspecialchars($ficha['meio_pagamento'] ?? 'Não informado') ?>
         </div>
 
-        <h3 style="margin-bottom:3px; margin-top:3px; font-size:12px; text-transform: uppercase;">Mockup / Referência Visual</h3>
+        <h3 style="margin-bottom:4px; margin-top:4px; font-size:13px; text-transform: uppercase;">Mockup / Referência Visual</h3>
         <div class="box-imagem">
             <?php if (!empty($ficha['imagem_mockup'])): ?>
                 <?php 
@@ -157,9 +157,9 @@
                 ?>
 
                 <?php if ($extensao === 'pdf'): ?>
-                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="100px" style="border:1px solid #000;"></iframe>
+                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="160px" style="border:1px solid #000;"></iframe>
                 <?php else: ?>
-                    <img src="<?= $arquivo ?>" style="max-width:100%; max-height:100px; object-fit: contain; display: block; border:1px solid #000; padding:5px; background:#fff;">
+                    <img src="<?= $arquivo ?>" style="max-width:100%; max-height:160px; object-fit: contain; display: block; border:1px solid #000; padding:5px; background:#fff;">
                 <?php endif; ?>
 
             <?php else: ?>
