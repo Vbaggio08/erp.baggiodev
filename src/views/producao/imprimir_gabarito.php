@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../config/ImageOptimizer.php'; ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -156,9 +157,10 @@
                 ?>
 
                 <?php if ($extensao === 'pdf'): ?>
-                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="100%" style="border:none;"></iframe>
+                    <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="100%" style="border:none;" loading="lazy"></iframe>
                 <?php else: ?>
-                    <img src="<?= $arquivo ?>" style="width:100%; height:100%; object-fit: cover; display: block; border:none;">
+                    <?php $img_url = ImageOptimizer::getOptimizedImageUrl($ficha['imagem_mockup'], 530, 530); ?>
+                    <img src="<?= $img_url ?: $arquivo ?>" style="width:100%; height:100%; object-fit: cover; display: block; border:none;" loading="lazy">
                 <?php endif; ?>
 
             <?php else: ?>
@@ -194,9 +196,10 @@
         
         <div class="box-imagem" style="height: 650px; border: 2px dashed #ccc;">
             <?php if ($extComp === 'pdf'): ?>
-                <iframe src="<?= $arquivoComp ?>" width="100%" height="100%" style="border:none;"></iframe>
+                <iframe src="<?= $arquivoComp ?>" width="100%" height="100%" style="border:none;" loading="lazy"></iframe>
             <?php else: ?>
-                <img src="<?= $arquivoComp ?>" style="width:100%; height:100%; object-fit: cover; display: block;">
+                <?php $img_comp_url = ImageOptimizer::getOptimizedImageUrl($ficha['caminho_comprovante'], 800, 800); ?>
+                <img src="<?= $img_comp_url ?: $arquivoComp ?>" style="width:100%; height:100%; object-fit: cover; display: block;" loading="lazy">
             <?php endif; ?>
         </div>
     </div>
