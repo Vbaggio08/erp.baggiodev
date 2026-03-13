@@ -1,6 +1,19 @@
 <?php
 
 class ImageOptimizer {
+
+    /**
+     * Helper para obter URL base do projeto
+     */
+    private static function getBaseUrl() {
+        $protocolo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+        $script = $_SERVER['SCRIPT_NAME'] ?? '';
+        $path = substr($script, 0, strrpos($script, '/index.php'));
+        if (empty($path) || $path === '') {
+            $path = '';
+        }
+        return $protocolo . "://" . $_SERVER['HTTP_HOST'] . $path . "/";
+    }
     
     /**
      * Retorna URL optimizada da imagem com redimensionamento em cache
@@ -34,14 +47,7 @@ class ImageOptimizer {
         
         // Se já existe em cache e é mais novo que original, usa cache
         if (file_exists($cache_file) && filemtime($cache_file) > filemtime($original_file)) {
-            $protocolo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
-            $script = $_SERVER['SCRIPT_NAME'] ?? '';
-            $path = substr($script, 0, strrpos($script, '/index.php'));
-            if (empty($path) || $path === '') {
-                $path = '';
-            }
-            $url_base = $protocolo . "://" . $_SERVER['HTTP_HOST'] . $path . "/";
-            return $url_base . "assets/uploads/.cache/" . basename($cache_file);
+            return self::getBaseUrl() . "assets/uploads/.cache/" . basename($cache_file);
         }
 
         // Carregar imagem original
@@ -49,39 +55,46 @@ class ImageOptimizer {
         
         if ($ext === 'pdf') {
             // PDFs não precisam de otimização
-            $protocolo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
-            $script = $_SERVER['SCRIPT_NAME'] ?? '';
-            $path = substr($script, 0, strrpos($script, '/index.php'));
-            if (empty($path) || $path === '') {
-                $path = '';
-            }
-            $url_base = $protocolo . "://" . $_SERVER['HTTP_HOST'] . $path . "/";
-            return $url_base . "assets/uploads/" . $filename;
+            return self::getBaseUrl() . "assets/uploads/" . $filename;
+        }
+
+        // Verificar se GD está disponível
+        if (!extension_loaded('gd')) {
+            // GD não disponível, retorna URL original
+            return self::getBaseUrl() . "assets/uploads/" . $filename;
         }
 
         // Carregar imagem conforme extensão
-        if ($ext === 'jpg' || $ext === 'jpeg') {
-            $image = @imagecreatefromjpeg($original_file);
-        } elseif ($ext === 'png') {
-            $image = @imagecreatefrompng($original_file);
-        } elseif ($ext === 'gif') {
-            $image = @imagecreatefromgif($original_file);
-        } elseif ($ext === 'webp') {
-            $image = @imagecreatefromwebp($original_file);
-        } else {
-            // Extensão não suportada, retorna URL original
-            $protocolo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
-            $script = $_SERVER['SCRIPT_NAME'] ?? '';
-            $path = substr($script, 0, strrpos($script, '/index.php'));
-            if (empty($path) || $path === '') {
-                $path = '';
+        try {
+            if ($ext === 'jpg' || $ext === 'jpeg') {
+                $image = @imagecreatefromjpeg($original_file);
+            } elseif ($ext === 'png') {
+                if (!function_exists('imagecreatefrompng')) {
+                    throw new Exception('imagecreatefrompng not available');
+                }
+                $image = @imagecreatefrompng($original_file);
+            } elseif ($ext === 'gif') {
+                if (!function_exists('imagecreatefromgif')) {
+                    throw new Exception('imagecreatefromgif not available');
+                }
+                $image = @imagecreatefromgif($original_file);
+            } elseif ($ext === 'webp') {
+                if (!function_exists('imagecreatefromwebp')) {
+                    throw new Exception('imagecreatefromwebp not available');
+                }
+                $image = @imagecreatefromwebp($original_file);
+            } else {
+                // Extensão não suportada, retorna URL original
+                throw new Exception('Unsupported file type');
             }
-            $url_base = $protocolo . "://" . $_SERVER['HTTP_HOST'] . $path . "/";
-            return $url_base . "assets/uploads/" . $filename;
+        } catch (Exception $e) {
+            // Se falhar nas funções de imagem, retorna URL original
+            return self::getBaseUrl() . "assets/uploads/" . $filename;
         }
 
         if (!$image) {
-            return '';
+            // Falha ao criar imagem, retorna URL original
+            return self::getBaseUrl() . "assets/uploads/" . $filename;
         }
 
         // Calcular novas dimensões mantendo proporção
@@ -123,14 +136,7 @@ class ImageOptimizer {
         imagedestroy($image_resized);
 
         // Retornar URL do cache
-        $protocolo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
-        $script = $_SERVER['SCRIPT_NAME'] ?? '';
-        $path = substr($script, 0, strrpos($script, '/index.php'));
-        if (empty($path) || $path === '') {
-            $path = '';
-        }
-        $url_base = $protocolo . "://" . $_SERVER['HTTP_HOST'] . $path . "/";
-        return $url_base . "assets/uploads/.cache/" . basename($cache_file);
+        return self::getBaseUrl() . "assets/uploads/.cache/" . basename($cache_file);
     }
 }
 ?>
