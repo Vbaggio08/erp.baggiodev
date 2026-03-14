@@ -642,38 +642,79 @@ class PontoController {
 
         require __DIR__ . '/../views/geral/header.php';
         
-        // View simples de edição de ponto pessoal
-        echo '<div class="container mt-4">';
-        echo '<h2>Gerenciar Meu Ponto</h2>';
-        echo '<p class="text-muted">Ajuste suas batidas de ponto (últimos 30 dias)</p>';
+        // Obter apontamentos do último mês
+        $data_inicio = date('Y-m-01');
+        $data_fim = date('Y-m-t');
         
-        // Aqui você pode carregar apontamentos do usuário e exibir tabela
-        $apontamentos = Ponto::listarApontamentosUsuario($usuario_id, date('Y-m-01'), date('Y-m-t'));
+        try {
+            $apontamentos = Ponto::listarJornadaUsuario($usuario_id, $data_inicio, $data_fim);
+        } catch (\Exception $e) {
+            $apontamentos = [];
+        }
+        
+        // View simples de edição de ponto pessoal
+        echo '<div class="container-fluid mt-4">';
+        echo '<div class="row mb-4">';
+        echo '<div class="col-md-8">';
+        echo '<h2><i class="fas fa-clock"></i> Gerenciar Meu Ponto</h2>';
+        echo '<p class="text-muted">Ajuste suas batidas de ponto (últimos 30 dias)</p>';
+        echo '</div>';
+        echo '<div class="col-md-4 text-end">';
+        echo '<a href="' . BASE_URL . 'index.php?rota=dashboard_ponto" class="btn btn-outline-primary">';
+        echo '<i class="fas fa-chart-line"></i> Dashboard';
+        echo '</a>';
+        echo '</div>';
+        echo '</div>';
         
         echo '<div class="table-responsive">';
-        echo '<table class="table table-striped">';
-        echo '<thead><tr><th>Data</th><th>Entrada 1</th><th>Saída 1</th><th>Entrada 2</th><th>Saída 2</th><th>Total</th><th>Ação</th></tr></thead>';
+        echo '<table class="table table-striped table-hover">';
+        echo '<thead class="table-dark">';
+        echo '<tr>';
+        echo '<th>Data</th>';
+        echo '<th class="text-center">Entrada 1</th>';
+        echo '<th class="text-center">Saída 1</th>';
+        echo '<th class="text-center">Entrada 2</th>';
+        echo '<th class="text-center">Saída 2</th>';
+        echo '<th class="text-center">Total</th>';
+        echo '<th class="text-center">Ação</th>';
+        echo '</tr>';
+        echo '</thead>';
         echo '<tbody>';
         
         if (empty($apontamentos)) {
-            echo '<tr><td colspan="7" class="text-center text-muted">Nenhum apontamento</td></tr>';
+            echo '<tr><td colspan="7" class="text-center text-muted py-4">';
+            echo '<i class="fas fa-inbox" style="font-size: 2rem;"></i><br>Nenhum apontamento neste período';
+            echo '</td></tr>';
         } else {
             foreach ($apontamentos as $apt) {
+                $data_fmt = date('d/m/Y', strtotime($apt['data'] ?? $apt['data_apontamento'] ?? ''));
                 echo '<tr>';
-                echo '<td>' . date('d/m/Y', strtotime($apt['data_apontamento'])) . '</td>';
-                echo '<td>' . ($apt['hora_entrada_1'] ?? '-') . '</td>';
-                echo '<td>' . ($apt['hora_saida_1'] ?? '-') . '</td>';
-                echo '<td>' . ($apt['hora_entrada_2'] ?? '-') . '</td>';
-                echo '<td>' . ($apt['hora_saida_2'] ?? '-') . '</td>';
-                echo '<td><strong>' . ($apt['total_horas'] ?? 0) . 'h</strong></td>';
-                echo '<td>';
-                echo '<a href="' . BASE_URL . 'index.php?rota=editar_ponto&id=' . $apt['id'] . '" class="btn btn-sm btn-warning">Editar</a>';
+                echo '<td><strong>' . $data_fmt . '</strong></td>';
+                echo '<td class="text-center">' . ($apt['hora_entrada_1'] ?? '-') . '</td>';
+                echo '<td class="text-center">' . ($apt['hora_saida_1'] ?? '-') . '</td>';
+                echo '<td class="text-center">' . ($apt['hora_entrada_2'] ?? '-') . '</td>';
+                echo '<td class="text-center">' . ($apt['hora_saida_2'] ?? '-') . '</td>';
+                echo '<td class="text-center">';
+                echo '<span class="badge bg-primary">' . number_format($apt['total_horas'] ?? 0, 2, ',', '.') . 'h</span>';
+                echo '</td>';
+                echo '<td class="text-center">';
+                echo '<a href="' . BASE_URL . 'index.php?rota=editar_ponto&id=' . ($apt['id'] ?? 0) . '" class="btn btn-sm btn-warning">';
+                echo '<i class="fas fa-edit"></i>';
+                echo '</a>';
                 echo '</td>';
                 echo '</tr>';
             }
         }
         
-        echo '</tbody></table></div>';
+        echo '</tbody>';
+        echo '</table>';
+        echo '</div>';
+        
+        echo '<div class="mt-4">';
+        echo '<a href="' . BASE_URL . 'index.php?rota=meu_ponto" class="btn btn-primary">';
+        echo '<i class="fas fa-arrow-left"></i> Voltar';
+        echo '</a>';
+        echo '</div>';
         echo '</div>';
         
         require __DIR__ . '/../views/geral/footer.php';

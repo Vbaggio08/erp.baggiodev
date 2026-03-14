@@ -3,7 +3,11 @@
  * Dashboard de Ponto - FASE 5
  * View para funcionários acompanharem seu saldo, horas extras e DSR
  */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
+<?php require_once __DIR__ . '/../geral/header.php'; ?>
 
 <div class="container-fluid p-4">
     <!-- Header do Dashboard -->
@@ -515,3 +519,5 @@
         document.getElementById('modalExportacao').style.display = 'none';
     }
 </script>
+
+<?php require_once __DIR__ . '/../geral/footer.php'; ?>

@@ -3,7 +3,11 @@
  * Dashboard RH - FASE 5
  * View para gestão de RH com métricas consolidadas, horas extras, faltas
  */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
+<?php require_once __DIR__ . '/../geral/header.php'; ?>
 
 <div class="container-fluid p-4">
     <!-- Header do Dashboard -->
@@ -451,3 +455,5 @@
         alert('[DESENVOLVIMENTO] Exportar top 10 horas extras');
     }
 </script>
+
+<?php require_once __DIR__ . '/../geral/footer.php'; ?>
