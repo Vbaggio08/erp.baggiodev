@@ -371,6 +371,136 @@ switch ($rota) {
         break;
 
 
+    // --- ⏱️ PONTO ELETRÔNICO (NOVO SISTEMA) ---
+    case 'bater_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->baterPonto();
+        break;
+    
+    case 'bater_ponto_ajax':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->baterPontoAjax();
+        break;
+    
+    case 'confirmar_alteracao':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->confirmarAlteracao();
+        break;
+    
+    case 'meu_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->meuPonto();
+        break;
+    
+    case 'saldo_horas':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->saldoHoras();
+        break;
+    
+    case 'ponto_todos':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->listarPontosTodos();
+        break;
+    
+    case 'editar_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->editarPonto();
+        break;
+    
+    case 'salvar_edicao_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->salvarEdicaoPonto();
+        break;
+    
+    case 'solicitar_alteracao_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->solicitarAlteracao();
+        break;
+    
+    case 'sincronizar_offline':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->sincronizarOffline();
+        break;
+    
+    case 'status_sincronizacao':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->statusSincronizacao();
+        break;
+    
+    case 'relatorio_ponto_mes':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->relatorioPonto();
+        break;
+
+
+    // --- 📋 ATESTADOS ---
+    case 'solicitar_atestado':
+        require_once 'src/controllers/AtestadoController.php';
+        (new AtestadoController())->solicitarAtestado();
+        break;
+    
+    case 'salvar_solicitacao_atestado':
+        require_once 'src/controllers/AtestadoController.php';
+        (new AtestadoController())->salvarSolicitacao();
+        break;
+    
+    case 'meus_atestados':
+        require_once 'src/controllers/AtestadoController.php';
+        (new AtestadoController())->meusAtestados();
+        break;
+    
+    case 'atestados_pendentes':
+        require_once 'src/controllers/AtestadoController.php';
+        (new AtestadoController())->atestadosPendentes();
+        break;
+    
+    case 'aprovar_atestado':
+        require_once 'src/controllers/AtestadoController.php';
+        (new AtestadoController())->aprovarAtestado();
+        break;
+    
+    case 'rejeitar_atestado':
+        require_once 'src/controllers/AtestadoController.php';
+        (new AtestadoController())->rejeitarAtestado();
+        break;
+    
+    case 'relatorio_atestados':
+        require_once 'src/controllers/AtestadoController.php';
+        (new AtestadoController())->relatorioAtestados();
+        break;
+
+
+    // --- 🔍 AUDITORIA ---
+    case 'auditoria_dashboard':
+        require_once 'src/controllers/AuditoriaController.php';
+        (new AuditoriaController())->dashboard();
+        break;
+    
+    case 'auditoria_apontamento':
+        require_once 'src/controllers/AuditoriaController.php';
+        (new AuditoriaController())->historicoApontamento($_GET['id'] ?? 0);
+        break;
+    
+    case 'auditoria_usuario':
+        require_once 'src/controllers/AuditoriaController.php';
+        (new AuditoriaController())->historicoUsuario(
+            $_GET['usuario_id'] ?? 0,
+            $_GET['data_inicio'] ?? date('Y-m-01'),
+            $_GET['data_fim'] ?? date('Y-m-t')
+        );
+        break;
+    
+    case 'auditoria_relatorio':
+        require_once 'src/controllers/AuditoriaController.php';
+        (new AuditoriaController())->relatorio();
+        break;
+    
+    case 'validar_integridade':
+        require_once 'src/controllers/AuditoriaController.php';
+        (new AuditoriaController())->validarIntegridade();
+        break;
+
+
     // --- 🚫 ROTA PADRÃO (404) ---
     default:
         header('Location: index.php?rota=dashboard');

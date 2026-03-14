@@ -75,30 +75,33 @@ class LoginController {
         $this->verificarAdmin();
         $pdo = Database::getConnection();
 
-        $id = $_POST['id'] ?? null; // Verifica se tem ID
+        $id = $_POST['id'] ?? null;
         $nome = $_POST['nome'];
         $email = $_POST['email'];
         $nivel = $_POST['nivel'];
         $senha = $_POST['senha'];
+        $departamento = $_POST['departamento'] ?? 'Geral';
+        $cargo = $_POST['cargo'] ?? 'Operacional';
+        $carga_horaria_diaria = $_POST['carga_horaria_diaria'] ?? 8.0;
+        $data_admissao = $_POST['data_admissao'] ?? date('Y-m-d');
+        $tipo_contrato = $_POST['tipo_contrato'] ?? 'CLT';
 
         if ($id) {
             // --- É UMA EDIÇÃO (UPDATE) ---
             if (!empty($senha)) {
-                // Se digitou senha, atualiza tudo
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("UPDATE usuarios SET nome=?, email=?, senha=?, nivel=? WHERE id=?");
-                $stmt->execute([$nome, $email, $senhaHash, $nivel, $id]);
+                $stmt = $pdo->prepare("UPDATE usuarios SET nome=?, email=?, senha=?, nivel=?, departamento=?, cargo=?, carga_horaria_diaria=?, data_admissao=?, tipo_contrato=? WHERE id=?");
+                $stmt->execute([$nome, $email, $senhaHash, $nivel, $departamento, $cargo, $carga_horaria_diaria, $data_admissao, $tipo_contrato, $id]);
             } else {
-                // Se NÃO digitou senha, mantém a antiga
-                $stmt = $pdo->prepare("UPDATE usuarios SET nome=?, email=?, nivel=? WHERE id=?");
-                $stmt->execute([$nome, $email, $nivel, $id]);
+                $stmt = $pdo->prepare("UPDATE usuarios SET nome=?, email=?, nivel=?, departamento=?, cargo=?, carga_horaria_diaria=?, data_admissao=?, tipo_contrato=? WHERE id=?");
+                $stmt->execute([$nome, $email, $nivel, $departamento, $cargo, $carga_horaria_diaria, $data_admissao, $tipo_contrato, $id]);
             }
         } else {
             // --- É UM NOVO (INSERT) ---
             if (!empty($senha)) {
                 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare("INSERT INTO usuarios (nome, email, senha, nivel) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$nome, $email, $senhaHash, $nivel]);
+                $stmt = $pdo->prepare("INSERT INTO usuarios (nome, email, senha, nivel, departamento, cargo, carga_horaria_diaria, data_admissao, tipo_contrato) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$nome, $email, $senhaHash, $nivel, $departamento, $cargo, $carga_horaria_diaria, $data_admissao, $tipo_contrato]);
             }
         }
 
@@ -116,27 +119,60 @@ class LoginController {
         header('Location: index.php?rota=gerenciar_usuarios');
     }
 
+    public function definirCargoUnidade() {
+        $this->verificarAdmin();
+        $pdo = Database::getConnection();
+        
+        $usuario_id = $_POST['usuario_id'];
+        $departamento = $_POST['departamento'];
+        $cargo = $_POST['cargo'];
+        $carga_horaria_diaria = $_POST['carga_horaria_diaria'];
+        
+        $stmt = $pdo->prepare("UPDATE usuarios SET departamento=?, cargo=?, carga_horaria_diaria=? WHERE id=?");
+        $stmt->execute([$departamento, $cargo, $carga_horaria_diaria, $usuario_id]);
+        
+        header('Location: index.php?rota=gerenciar_usuarios');
+    }
+
     private function verificarAdmin() {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
         if (!isset($_SESSION['user_nivel']) || $_SESSION['user_nivel'] !== 'admin') {
             
-            // 1. Defina as variáveis primeiro
-            // DICA: Use caminho relativo para funcionar em qualquer IP
             $url = "index.php?rota=dashboard"; 
             $tempo = 3; 
 
-            // 2. Mostra a mensagem BONITA na tela
             echo "<div style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px;'>";
             echo "<h1 style='color: #e74c3c;'>🚫 Acesso Negado</h1>";
             echo "<p style='font-size: 18px;'>Você não tem permissão para acessar esta área.</p>";
             echo "<p>Redirecionando em <strong>$tempo</strong> segundos...</p>";
             
-            // 3. Insere o comando de redirecionamento
             echo "<meta http-equiv='refresh' content='$tempo;url=$url'>";
             echo "</div>";
 
             
+            exit; 
+        }
+        
+        return true; 
+    }
+
+    protected function verificarRH() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        if (!isset($_SESSION['user_nivel']) || !in_array($_SESSION['user_nivel'], ['admin', 'rh'])) {
+            
+            $url = "index.php?rota=dashboard"; 
+            $tempo = 3; 
+
+            echo "<div style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px;'>";
+            echo "<h1 style='color: #e74c3c;'>🚫 Acesso Negado</h1>";
+            echo "<p style='font-size: 18px;'>Apenas RH e Admin podem acessar.</p>";
+            echo "<p>Redirecionando em <strong>$tempo</strong> segundos...</p>";
+            
+            echo "<meta http-equiv='refresh' content='$tempo;url=$url'>";
+            echo "</div>";
+
             exit; 
         }
         
