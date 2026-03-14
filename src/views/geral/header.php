@@ -42,54 +42,56 @@ $isAdmin = (isset($_SESSION['user_nivel']) && $_SESSION['user_nivel'] == 'admin'
         </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= BASE_URL ?>index.php?rota=dashboard">Dashboard</a>
-                </li>
+                <?php
+                // Carregar menu centralizado
+                $menu_config = require_once __DIR__ . '/../../config/menu.php';
+                $nivel_usuario = $_SESSION['user_nivel'] ?? 'usuario';
+                $contador = 0;
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="estoqueDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Estoque
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="estoqueDropdown">
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=estoque_saldo">Saldo Atual</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=entrada">Movimentar</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=estoque_historico">Histórico</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=relatorio_perdas">Perdas / Quebras</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="operacionalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Operacional
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="operacionalDropdown">
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=novo_gabarito">Nova Ficha Técnica</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=novo_dtf">Novo Pedido DTF</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=listar_gabaritos">Ver Fichas</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=pedidos">Produção (Pedidos)</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=compras">Compras</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=servicos">Serviços / OS</a></li>
-                    </ul>
-                </li>
-                
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="cadastrosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Cadastros
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="cadastrosDropdown">
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=produtos">Produtos</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=clientes">Clientes</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=fornecedores">Fornecedores</a></li>
-                        <li><a class="dropdown-item" href="<?= BASE_URL ?>index.php?rota=empresas">Minhas Empresas</a></li>
-                    </ul>
-                </li>
-
-                <?php if ($isAdmin): ?>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= BASE_URL ?>index.php?rota=gerenciar_usuarios">Administração</a>
-                </li>
-                <?php endif; ?>
+                foreach ($menu_config['itens'] as $item) {
+                    $contador++;
+                    
+                    // Verificar permissão: se requer 'admin' e usuário não é admin, pula
+                    if (!empty($item['requer']) && in_array('admin', $item['requer']) && $nivel_usuario !== 'admin') {
+                        continue;
+                    }
+                    
+                    // Se não tem submenu, é um link direto
+                    if (empty($item['submenu'])) {
+                        echo '<li class="nav-item">';
+                        echo '<a class="nav-link" href="' . BASE_URL . 'index.php?rota=' . $item['rota'] . '">';
+                        echo $item['label'];
+                        echo '</a></li>';
+                    } else {
+                        // Se tem submenu, cria dropdown
+                        $id_dropdown = 'dropdown' . $contador;
+                        echo '<li class="nav-item dropdown">';
+                        echo '<a class="nav-link dropdown-toggle" href="#" id="' . $id_dropdown . '" role="button" data-bs-toggle="dropdown" aria-expanded="false">';
+                        echo $item['label'];
+                        echo '</a>';
+                        echo '<ul class="dropdown-menu" aria-labelledby="' . $id_dropdown . '">';
+                        
+                        foreach ($item['submenu'] as $subitem) {
+                            // Verificar permissão do subitem
+                            if (!empty($subitem['requer']) && in_array('admin', $subitem['requer']) && $nivel_usuario !== 'admin') {
+                                continue;
+                            }
+                            
+                            if (isset($subitem['divisor']) && $subitem['divisor']) {
+                                echo '<li><hr class="dropdown-divider"></li>';
+                            } else {
+                                echo '<li>';
+                                echo '<a class="dropdown-item" href="' . BASE_URL . 'index.php?rota=' . $subitem['rota'] . '">';
+                                echo $subitem['label'];
+                                echo '</a>';
+                                echo '</li>';
+                            }
+                        }
+                        
+                        echo '</ul></li>';
+                    }
+                }
+                ?>
             </ul>
 
             <div class="d-flex align-items-center text-white">

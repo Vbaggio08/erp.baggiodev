@@ -557,7 +557,24 @@ switch ($rota) {
         }
         break;
 
-    // --- 📄 EXPORTAÇÃO - FASE 5 ---
+    // --- � PONTO - GERENCIAMENTO PESSOAL E ADMIN ---
+    case 'gerenciar_ponto_pessoal':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->gerenciarMeuPonto();
+        break;
+
+    case 'gerenciar_ponto_todos':
+        // Apenas admin pode gerenciar todos os pontos
+        if (!isset($_SESSION['usuario_admin']) || $_SESSION['usuario_admin'] != 1) {
+            header('HTTP/1.1 403 Forbidden');
+            echo 'Acesso negado. Apenas administradores.';
+            exit;
+        }
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->gerenciarPontosTodos();
+        break;
+
+    // --- �📄 EXPORTAÇÃO - FASE 5 ---
     case 'exportar_ponto':
         require_once 'src/controllers/PontoController.php';
         $mes_ano = $_GET['mes_ano'] ?? date('Y-m');

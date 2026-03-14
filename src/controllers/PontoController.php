@@ -632,6 +632,153 @@ class PontoController {
     }
 
     /**
+     * Gerenciar ponto pessoal - NOVO - Menu centralizado
+     * GET /index.php?rota=gerenciar_ponto_pessoal
+     * Mostra apenas o ponto do usuário logado
+     */
+    public function gerenciarMeuPonto() {
+        $this->verificarLogin();
+        $usuario_id = $_SESSION['user_id'];
+
+        require __DIR__ . '/../views/geral/header.php';
+        
+        // View simples de edição de ponto pessoal
+        echo '<div class="container mt-4">';
+        echo '<h2>Gerenciar Meu Ponto</h2>';
+        echo '<p class="text-muted">Ajuste suas batidas de ponto (últimos 30 dias)</p>';
+        
+        // Aqui você pode carregar apontamentos do usuário e exibir tabela
+        $apontamentos = Ponto::listarApontamentosUsuario($usuario_id, date('Y-m-01'), date('Y-m-t'));
+        
+        echo '<div class="table-responsive">';
+        echo '<table class="table table-striped">';
+        echo '<thead><tr><th>Data</th><th>Entrada 1</th><th>Saída 1</th><th>Entrada 2</th><th>Saída 2</th><th>Total</th><th>Ação</th></tr></thead>';
+        echo '<tbody>';
+        
+        if (empty($apontamentos)) {
+            echo '<tr><td colspan="7" class="text-center text-muted">Nenhum apontamento</td></tr>';
+        } else {
+            foreach ($apontamentos as $apt) {
+                echo '<tr>';
+                echo '<td>' . date('d/m/Y', strtotime($apt['data_apontamento'])) . '</td>';
+                echo '<td>' . ($apt['hora_entrada_1'] ?? '-') . '</td>';
+                echo '<td>' . ($apt['hora_saida_1'] ?? '-') . '</td>';
+                echo '<td>' . ($apt['hora_entrada_2'] ?? '-') . '</td>';
+                echo '<td>' . ($apt['hora_saida_2'] ?? '-') . '</td>';
+                echo '<td><strong>' . ($apt['total_horas'] ?? 0) . 'h</strong></td>';
+                echo '<td>';
+                echo '<a href="' . BASE_URL . 'index.php?rota=editar_ponto&id=' . $apt['id'] . '" class="btn btn-sm btn-warning">Editar</a>';
+                echo '</td>';
+                echo '</tr>';
+            }
+        }
+        
+        echo '</tbody></table></div>';
+        echo '</div>';
+        
+        require __DIR__ . '/../views/geral/footer.php';
+    }
+
+    /**
+     * Gerenciar todos os pontos - ADMIN ONLY - Menu centralizado
+     * GET /index.php?rota=gerenciar_ponto_todos
+     * Mostra pontos de TODOS os usuários (apenas admin)
+     */
+    public function gerenciarPontosTodos() {
+        $this->verificarLogin();
+        
+        // Verificação extra de admin
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['usuario_admin']) || $_SESSION['usuario_admin'] != 1) {
+            header('HTTP/1.1 403 Forbidden');
+            echo 'Acesso negado';
+            exit;
+        }
+
+        $mes = $_GET['mes'] ?? date('m');
+        $ano = $_GET['ano'] ?? date('Y');
+
+        require __DIR__ . '/../views/geral/header.php';
+        
+        echo '<div class="container-fluid mt-4">';
+        echo '<div class="row mb-4">';
+        echo '<div class="col-md-8">';
+        echo '<h2>Gerenciar Pontos de Todos</h2>';
+        echo '<p class="text-muted">Visualize e edite pontos de qualquer funcionário</p>';
+        echo '</div>';
+        echo '<div class="col-md-4">';
+        echo '<form method="GET" class="row">';
+        echo '<input type="hidden" name="rota" value="gerenciar_ponto_todos">';
+        echo '<div class="col-6">';
+        echo '<select name="mes" class="form-select form-select-sm">';
+        for ($m = 1; $m <= 12; $m++) {
+            $selected = ($m == $mes) ? 'selected' : '';
+            echo '<option value="' . $m . '" ' . $selected . '>' . str_pad($m, 2, '0', STR_PAD_LEFT) . '</option>';
+        }
+        echo '</select></div>';
+        echo '<div class="col-6">';
+        echo '<input type="number" name="ano" class="form-control form-control-sm" value="' . $ano . '" min="2020" max="2030">';
+        echo '</div>';
+        echo '</form>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Tabela de usuários e seus pontos
+        $sql = "
+            SELECT DISTINCT 
+                u.id, 
+                u.nome, 
+                u.email,
+                COUNT(a.id) as total_apontamentos,
+                SUM(a.total_horas) as total_horas
+            FROM usuarios u
+            LEFT JOIN apontamentos a ON u.id = a.usuario_id 
+                AND MONTH(a.data_apontamento) = ? 
+                AND YEAR(a.data_apontamento) = ?
+            WHERE u.ativo = 1
+            GROUP BY u.id, u.nome, u.email
+            ORDER BY u.nome
+        ";
+
+        $stmt = Ponto::$db->prepare($sql);
+        $stmt->execute([$mes, $ano]);
+        $usuarios = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        echo '<div class="table-responsive">';
+        echo '<table class="table table-striped table-hover">';
+        echo '<thead class="table-dark"><tr>';
+        echo '<th>Usuário</th>';
+        echo '<th class="text-center">Email</th>';
+        echo '<th class="text-center">Apontamentos</th>';
+        echo '<th class="text-center">Total Horas</th>';
+        echo '<th class="text-center">Ações</th>';
+        echo '</tr></thead>';
+        echo '<tbody>';
+        
+        if (empty($usuarios)) {
+            echo '<tr><td colspan="5" class="text-center text-muted">Nenhum usuário encontrado</td></tr>';
+        } else {
+            foreach ($usuarios as $user) {
+                echo '<tr>';
+                echo '<td><strong>' . htmlspecialchars($user['nome']) . '</strong></td>';
+                echo '<td class="text-center"><small>' . htmlspecialchars($user['email']) . '</small></td>';
+                echo '<td class="text-center"><span class="badge bg-info">' . ($user['total_apontamentos'] ?? 0) . '</span></td>';
+                echo '<td class="text-center"><strong>' . number_format($user['total_horas'] ?? 0, 2, ',', '.') . 'h</strong></td>';
+                echo '<td class="text-center">';
+                echo '<a href="' . BASE_URL . 'index.php?rota=ponto_todos&usuario_id=' . $user['id'] . '&mes=' . $mes . '&ano=' . $ano . '" class="btn btn-sm btn-primary">Ver</a> ';
+                echo '<a href="' . BASE_URL . 'index.php?rota=relatorio_ponto_mes&usuario_id=' . $user['id'] . '&mes=' . $mes . '&ano=' . $ano . '" class="btn btn-sm btn-secondary">Relatório</a>';
+                echo '</td>';
+                echo '</tr>';
+            }
+        }
+        
+        echo '</tbody></table></div>';
+        echo '</div>';
+        
+        require __DIR__ . '/../views/geral/footer.php';
+    }
+
+    /**
      * Exporta relatório de ponto em PDF ou Excel - FASE 5
      * GET /index.php?rota=exportar_ponto&mes_ano=YYYY-MM&formato=pdf|excel
      */
