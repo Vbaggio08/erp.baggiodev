@@ -6,6 +6,7 @@ use Src\Models\HorasExtras;
 use Src\Models\PontoCalculador;
 use Src\Models\ConfiguracaoPontos;
 use Src\Models\Usuario;
+use Src\Models\NotificadorEmail;
 
 /**
  * HorasExtrasController
@@ -209,6 +210,24 @@ class HorasExtrasController
                 return json_encode(['erro' => 'Não foi possível aprovar. Verifique status.']);
             }
 
+            // ✅ ENVIAR EMAIL DE APROVAÇÃO - FASE 5
+            try {
+                $hora_extra = HorasExtras::buscarPorId($id);
+                $usuario = Usuario::buscarPorId($hora_extra['usuario_id']);
+                
+                if ($usuario && $usuario['email']) {
+                    NotificadorEmail::notificarHoraExtraAprovada(
+                        email: $usuario['email'],
+                        nome: $usuario['nome'],
+                        horas: $hora_extra['horas_extras'],
+                        observacao: $dados['observacao'] ?? 'Aprovado conforme solicitação'
+                    );
+                }
+            } catch (\Exception $e) {
+                // Log silencioso - não falha a operação
+                error_log('Erro ao enviar email de aprovação: ' . $e->getMessage());
+            }
+
             return json_encode([
                 'sucesso' => true,
                 'mensagem' => 'Hora extra aprovada com sucesso'
@@ -260,6 +279,24 @@ class HorasExtrasController
             if (!$resultado) {
                 http_response_code(400);
                 return json_encode(['erro' => 'Não foi possível rejeitar.']);
+            }
+
+            // ✅ ENVIAR EMAIL DE REJEIÇÃO - FASE 5
+            try {
+                $hora_extra = HorasExtras::buscarPorId($id);
+                $usuario = Usuario::buscarPorId($hora_extra['usuario_id']);
+                
+                if ($usuario && $usuario['email']) {
+                    NotificadorEmail::notificarHoraExtraRejeitada(
+                        email: $usuario['email'],
+                        nome: $usuario['nome'],
+                        horas: $hora_extra['horas_extras'],
+                        motivo: $motivo
+                    );
+                }
+            } catch (\Exception $e) {
+                // Log silencioso - não falha a operação
+                error_log('Erro ao enviar email de rejeição: ' . $e->getMessage());
             }
 
             return json_encode([

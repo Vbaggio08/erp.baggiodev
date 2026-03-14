@@ -2,6 +2,15 @@
 // --- 0. CARREGAR VARIÁVEIS DE AMBIENTE ---
 require_once 'src/config/env.php';
 
+// --- 0.1 FUNÇÕES AUXILIARES ---
+if (!function_exists('require_once_exists')) {
+    function require_once_exists($file) {
+        if (file_exists($file)) {
+            require_once $file;
+        }
+    }
+}
+
 // --- 1. CONFIGURAÇÕES GERAIS ---
 // Define o fuso horário
 date_default_timezone_set(env('APP_TIMEZONE', 'America/Sao_Paulo'));
@@ -501,7 +510,77 @@ switch ($rota) {
         break;
 
 
-    // --- 🚫 ROTA PADRÃO (404) ---
+    // --- � DASHBOARD DE PONTO - FASE 5 ---
+    case 'dashboard_ponto':
+        require_once_exists('src/views/producao/dashboard_ponto.php');
+        break;
+
+    case 'dashboard_ponto_json':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/DashboardController.php';
+        $controller = new DashboardController();
+        echo json_encode($controller->getDadosUsuario());
+        break;
+
+    case 'dashboard_graficos_json':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/DashboardController.php';
+        $controller = new DashboardController();
+        echo json_encode($controller->getGraficosHoras());
+        break;
+
+    case 'dashboard_saldo_json':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/DashboardController.php';
+        $controller = new DashboardController();
+        echo json_encode($controller->getGraficoSaldoMensal());
+        break;
+
+    // --- 📊 DASHBOARD RH - FASE 5 ---
+    case 'dashboard_rh':
+        if (isset($_SESSION['usuario_admin']) && $_SESSION['usuario_admin'] == 1) {
+            require_once_exists('src/views/admin/dashboard_rh.php');
+        } else {
+            header('HTTP/1.1 403 Forbidden');
+            echo 'Acesso negado. Apenas administradores.';
+        }
+        break;
+
+    case 'dashboard_rh_json':
+        header('Content-Type: application/json');
+        if (isset($_SESSION['usuario_admin']) && $_SESSION['usuario_admin'] == 1) {
+            require_once 'src/controllers/DashboardController.php';
+            $controller = new DashboardController();
+            echo json_encode($controller->getDadosRH());
+        } else {
+            echo json_encode(['status' => 'erro', 'mensagem' => 'Acesso negado']);
+        }
+        break;
+
+    // --- 📄 EXPORTAÇÃO - FASE 5 ---
+    case 'exportar_ponto':
+        require_once 'src/controllers/PontoController.php';
+        $mes_ano = $_GET['mes_ano'] ?? date('Y-m');
+        $formato = $_GET['formato'] ?? 'pdf';
+        (new PontoController())->exportarRelatorioPonto($mes_ano, $formato);
+        break;
+
+    case 'exportar_recibo':
+        require_once 'src/controllers/PontoController.php';
+        $batida_id = $_GET['batida_id'] ?? 0;
+        (new PontoController())->exportarReciboPonto($batida_id);
+        break;
+
+    // --- 📧 TESTE EMAIL - FASE 5 ---
+    case 'testar_email':
+        require_once 'src/models/NotificadorEmail.php';
+        $email_teste = $_GET['email'] ?? $_SESSION['user_email'] ?? '';
+        \Src\Models\NotificadorEmail::testar($email_teste);
+        echo '<pre>Email de teste enviado para: ' . $email_teste . '</pre>';
+        break;
+
+
+    // --- �🚫 ROTA PADRÃO (404) ---
     default:
         header('Location: index.php?rota=dashboard');
         exit;
