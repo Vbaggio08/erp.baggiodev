@@ -382,6 +382,223 @@ class PontoController {
     }
     
     /**
+     * FASE 3: Calcular Saldo Mensal Avançado
+     * GET /ponto/saldo-mensal?mes=2026-03&usuario_id=123
+     * 
+     * Retorna saldo completo com:
+     * - Horas trabalhadas vs esperadas
+     * - Faltas e atestados
+     * - Horas extras aprovadas
+     * - Cálculo de DSR
+     */
+    public function calcularSaldoMensal() {
+        $this->verificarLogin();
+        header('Content-Type: application/json');
+        
+        try {
+            $usuario_id = intval($_GET['usuario_id'] ?? $_SESSION['user_id']);
+            $mes_ano = $_GET['mes'] ?? date('Y-m');
+            
+            // Apenas RH pode ver de outros usuários
+            if ($usuario_id !== $_SESSION['user_id'] && !$this->ehRH()) {
+                http_response_code(403);
+                return json_encode(['erro' => 'Acesso negado']);
+            }
+            
+            // Integração com FASE 3
+            require_once __DIR__ . '/../models/PontoCalculador.php';
+            require_once __DIR__ . '/../models/HorasExtras.php';
+            require_once __DIR__ . '/../models/Feriados.php';
+            
+            $calculador = new \Src\Models\PontoCalculador();
+            $saldo = $calculador->calcularSaldoMensalUsuario($usuario_id, $mes_ano);
+            
+            http_response_code(200);
+            return json_encode([
+                'sucesso' => true,
+                'saldo' => $saldo,
+                'mes' => $mes_ano,
+                'calculado_em' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode([
+                'erro' => 'Erro ao calcular saldo',
+                'detalhes' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * FASE 3: Relatório Mensal Avançado com DSR e Horas Extras
+     * GET /ponto/relatorio-avancado?mes=2026-03&usuario_id=123
+     * 
+     * Retorna relatório consolidado:
+     * - Saldo mensal
+     * - Horas extras registradas e detectadas
+     * - DSR por semana
+     * - Sugestões de ações
+     */
+    public function relatorioMensalAvancado() {
+        $this->verificarLogin();
+        header('Content-Type: application/json');
+        
+        try {
+            $usuario_id = intval($_GET['usuario_id'] ?? $_SESSION['user_id']);
+            $mes_ano = $_GET['mes'] ?? date('Y-m');
+            
+            if ($usuario_id !== $_SESSION['user_id'] && !$this->ehRH()) {
+                http_response_code(403);
+                return json_encode(['erro' => 'Acesso negado']);
+            }
+            
+            require_once __DIR__ . '/../models/PontoCalculador.php';
+            
+            $calculador = new \Src\Models\PontoCalculador();
+            $relatorio = $calculador->gerarRelatorioMensal($usuario_id, $mes_ano);
+            
+            http_response_code(200);
+            return json_encode([
+                'sucesso' => true,
+                'relatorio' => $relatorio,
+                'formato' => 'avancado_fase3'
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * FASE 3: Detectar Horas Extras Automaticamente
+     * GET /ponto/detectar-extras?mes=2026-03&usuario_id=123
+     * 
+     * Analisa apontamentos do mês e sugere horas extras não registradas
+     * baseado em limite diário configurado
+     */
+    public function detectarHorasExtrasAutomaticamente() {
+        $this->verificarLogin();
+        header('Content-Type: application/json');
+        
+        try {
+            $usuario_id = intval($_GET['usuario_id'] ?? $_SESSION['user_id']);
+            $mes_ano = $_GET['mes'] ?? date('Y-m');
+            
+            if ($usuario_id !== $_SESSION['user_id'] && !$this->ehRH()) {
+                http_response_code(403);
+                return json_encode(['erro' => 'Acesso negado']);
+            }
+            
+            require_once __DIR__ . '/../models/PontoCalculador.php';
+            
+            $calculador = new \Src\Models\PontoCalculador();
+            $potenciais = $calculador->detectarHorasExtras($usuario_id, $mes_ano);
+            
+            $total_horas = array_sum(array_map(function($p) { return $p['horas_poten']; }, $potenciais));
+            
+            http_response_code(200);
+            return json_encode([
+                'sucesso' => true,
+                'total_detectados' => count($potenciais),
+                'total_horas' => round($total_horas, 2),
+                'potenciais' => $potenciais,
+                'recomendacao' => count($potenciais) > 0 
+                    ? "Foram detectadas $total_horas horas extras. Revise e registre aquelas que procedem."
+                    : "Nenhuma hora extra potencial detectada neste período."
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * FASE 3: Obter Configuração de Ponto do Sistema
+     * GET /ponto/configuracao?empresa_id=1
+     * 
+     * Retorna configurações da FASE 3:
+     * - Limites de horas extras
+     * - Cálculo de DSR
+     * - Tolerâncias
+     * - Percentuais
+     */
+    public function obterConfiguracaoPonto() {
+        header('Content-Type: application/json');
+        
+        try {
+            $empresa_id = intval($_GET['empresa_id'] ?? $_SESSION['empresa_id'] ?? 1);
+            
+            require_once __DIR__ . '/../models/ConfiguracaoPontos.php';
+            
+            $configuracao = \Src\Models\ConfiguracaoPontos::obterConfiguracao($empresa_id);
+            
+            http_response_code(200);
+            return json_encode([
+                'sucesso' => true,
+                'configuracao' => $configuracao,
+                'empresa_id' => $empresa_id
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * FASE 3: Visualizar DSR da Semana
+     * GET /ponto/dsr-semana?data=2026-03-15&usuario_id=123
+     * 
+     * Retorna cálculo de DSR para a semana (Seg-Dom) contendo a data
+     */
+    public function visualizarDSRSemana() {
+        $this->verificarLogin();
+        header('Content-Type: application/json');
+        
+        try {
+            $usuario_id = intval($_GET['usuario_id'] ?? $_SESSION['user_id']);
+            $data = $_GET['data'] ?? date('Y-m-d');
+            
+            if ($usuario_id !== $_SESSION['user_id'] && !$this->ehRH()) {
+                http_response_code(403);
+                return json_encode(['erro' => 'Acesso negado']);
+            }
+            
+            require_once __DIR__ . '/../models/PontoCalculador.php';
+            
+            // Converter data para DateTime da semana
+            $data_obj = new \DateTime($data);
+            // Voltar para segunda-feira
+            $dia_semana = (int)$data_obj->format('w');
+            if ($dia_semana === 0) {
+                $data_obj->modify('-1 day'); // Se domingo, volta para sábado noturno, então para segunda anterior
+            }
+            
+            $calculador = new \Src\Models\PontoCalculador();
+            $dsr = $calculador->calcularDSRSemana($usuario_id, $data_obj);
+            
+            http_response_code(200);
+            return json_encode([
+                'sucesso' => true,
+                'dsr' => $dsr,
+                'usuario_id' => $usuario_id
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Verifica se usuário atual é RH/Manager
+     */
+    private function ehRH(): bool {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        return isset($_SESSION['user_nivel']) && 
+               in_array($_SESSION['user_nivel'], ['admin', 'rh', 'gerente', 'manager']);
+    }
+
+    /**
      * Salva foto de ponto
      * Retorna o caminho relativo do arquivo
      */
@@ -419,22 +636,6 @@ class PontoController {
         
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?rota=login');
-            exit;
-        }
-    }
-    
-    private function verificarRH() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        
-        if (!isset($_SESSION['user_nivel']) || !in_array($_SESSION['user_nivel'], ['admin', 'rh'])) {
-            $url = "index.php?rota=dashboard";
-            $tempo = 3;
-            
-            echo "<div style='font-family: Arial, sans-serif; text-align: center; margin-top: 50px;'>";
-            echo "<h1 style='color: #e74c3c;'>🚫 Acesso Negado</h1>";
-            echo "<p>Apenas RH e Admin podem acessar.</p>";
-            echo "<meta http-equiv='refresh' content='$tempo;url=$url'>";
-            echo "</div>";
             exit;
         }
     }
