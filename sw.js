@@ -50,9 +50,9 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && 
-              cacheName !== ASSETS_CACHE && 
-              cacheName !== API_CACHE) {
+          if (cacheName !== CACHE_NAME &&
+            cacheName !== ASSETS_CACHE &&
+            cacheName !== API_CACHE) {
             console.log('[SW] Deletando cache antigo:', cacheName);
             return caches.delete(cacheName);
           }
@@ -84,9 +84,9 @@ self.addEventListener('fetch', event => {
     event.respondWith(networkFirst(request));
   }
   // Estratégia: Cache First para assets
-  else if (request.url.includes('/assets/') || 
-           request.url.includes('/js/') || 
-           request.url.includes('/css/')) {
+  else if (request.url.includes('/assets/') ||
+    request.url.includes('/js/') ||
+    request.url.includes('/css/')) {
     event.respondWith(cacheFirst(request));
   }
   // Fallback: Network First
@@ -101,18 +101,18 @@ self.addEventListener('fetch', event => {
 async function networkFirst(request) {
   try {
     const response = await fetch(request);
-    
+
     if (!response.ok && response.status >= 400) {
       return response;
     }
 
     const cache = await caches.open(API_CACHE);
     cache.put(request, response.clone());
-    
+
     return response;
   } catch (error) {
     console.log('[SW] Offline, tentando cache:', request.url);
-    
+
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
       return cachedResponse;
@@ -180,7 +180,7 @@ async function handleSyncPonto(data, event) {
     });
 
     const result = await response.json();
-    
+
     event.ports[0].postMessage({
       type: 'SYNC_PONTO_RESULT',
       status: 'sucesso',

@@ -30,7 +30,10 @@
       "purpose": "maskable"
     }
   ],
-  "categories": ["business", "productivity"],
+  "categories": [
+    "business",
+    "productivity"
+  ],
   "screenshots": [
     {
       "src": "assets/img/screenshot1.png",
@@ -51,16 +54,25 @@
       "short_name": "Ponto",
       "description": "Registrar entrada ou saída",
       "url": "/index.php?rota=bater_ponto",
-      "icons": [{ "src": "assets/img/logo_rip.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "assets/img/logo_rip.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Meu Ponto",
       "short_name": "Histórico",
       "description": "Consultar histórico de batidas",
       "url": "/index.php?rota=meu_ponto",
-      "icons": [{ "src": "assets/img/logo_rip.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "assets/img/logo_rip.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
-
 }
