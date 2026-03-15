@@ -840,7 +840,6 @@ class PontoController {
             LEFT JOIN apontamentos_ponto a ON u.id = a.usuario_id 
                 AND MONTH(a.data) = ? 
                 AND YEAR(a.data) = ?
-            WHERE u.ativo = 1
             GROUP BY u.id, u.nome, u.email
             ORDER BY u.nome
         ";
