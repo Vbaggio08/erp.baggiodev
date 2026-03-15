@@ -829,7 +829,8 @@ class PontoController {
             ORDER BY u.nome
         ";
 
-        $stmt = Ponto::$db->prepare($sql);
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([$mes, $ano]);
         $usuarios = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
