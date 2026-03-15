@@ -648,46 +648,92 @@ class PontoController {
         
         try {
             $apontamentos = Ponto::listarJornadaUsuario($usuario_id, $data_inicio, $data_fim);
+            $total_dias = count($apontamentos);
+            $total_horas = array_sum(array_column($apontamentos, 'total_horas'));
         } catch (\Exception $e) {
             $apontamentos = [];
+            $total_dias = 0;
+            $total_horas = 0;
         }
         
-        // View simples de edição de ponto pessoal
-        echo '<div class="container-fluid mt-4">';
+        // View com estilo melhorado
+        echo '<div class="container-fluid p-4">';
+        
+        // Header
         echo '<div class="row mb-4">';
         echo '<div class="col-md-8">';
         echo '<h2><i class="fas fa-clock"></i> Gerenciar Meu Ponto</h2>';
-        echo '<p class="text-muted">Ajuste suas batidas de ponto (últimos 30 dias)</p>';
+        echo '<p class="text-muted">Visualize e edite suas batidas de ponto (mês atual)</p>';
         echo '</div>';
         echo '<div class="col-md-4 text-end">';
         echo '<a href="' . BASE_URL . 'index.php?rota=dashboard_ponto" class="btn btn-outline-primary">';
-        echo '<i class="fas fa-chart-line"></i> Dashboard';
+        echo '<i class="fas fa-chart-line"></i> Voltar ao Dashboard';
         echo '</a>';
         echo '</div>';
         echo '</div>';
         
+        // KPI Cards
+        echo '<div class="row mb-4">';
+        echo '<div class="col-md-4">';
+        echo '<div class="card border-left-primary shadow h-100 py-2">';
+        echo '<div class="card-body">';
+        echo '<div class="text-primary text-uppercase mb-1 small">dias Registrados</div>';
+        echo '<div class="h3 mb-0">' . $total_dias . '</div>';
+        echo '<small class="text-muted">este mês</small>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="col-md-4">';
+        echo '<div class="card border-left-success shadow h-100 py-2">';
+        echo '<div class="card-body">';
+        echo '<div class="text-success text-uppercase mb-1 small">Total de Horas</div>';
+        echo '<div class="h3 mb-0">' . number_format($total_horas, 1, ',', '.') . ' <small>h</small></div>';
+        echo '<small class="text-muted">acumuladas</small>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="col-md-4">';
+        echo '<div class="card border-left-info shadow h-100 py-2">';
+        echo '<div class="card-body">';
+        echo '<div class="text-info text-uppercase mb-1 small">Período</div>';
+        echo '<div class="h3 mb-0" style="font-size: 1.1rem;">' . date('d/m', strtotime($data_inicio)) . ' a ' . date('d/m') . '</div>';
+        echo '<small class="text-muted">mês vigente</small>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Tabela
+        echo '<div class="card shadow mb-4">';
+        echo '<div class="card-header bg-light">';
+        echo '<h5 class="mb-0"><i class="fas fa-table"></i> Histórico de Apontamentos</h5>';
+        echo '</div>';
         echo '<div class="table-responsive">';
-        echo '<table class="table table-striped table-hover">';
-        echo '<thead class="table-dark">';
-        echo '<tr>';
+        echo '<table class="table table-striped table-hover mb-0">';
+        echo '<thead class="table-light">';
+        echo '<tr class="text-center small">';
         echo '<th>Data</th>';
-        echo '<th class="text-center">Entrada 1</th>';
-        echo '<th class="text-center">Saída 1</th>';
-        echo '<th class="text-center">Entrada 2</th>';
-        echo '<th class="text-center">Saída 2</th>';
-        echo '<th class="text-center">Total</th>';
-        echo '<th class="text-center">Ação</th>';
+        echo '<th>Entrada 1</th>';
+        echo '<th>Saída 1</th>';
+        echo '<th>Entrada 2</th>';
+        echo '<th>Saída 2</th>';
+        echo '<th>Total</th>';
+        echo '<th>Editar</th>';
         echo '</tr>';
         echo '</thead>';
         echo '<tbody>';
         
         if (empty($apontamentos)) {
-            echo '<tr><td colspan="7" class="text-center text-muted py-4">';
-            echo '<i class="fas fa-inbox" style="font-size: 2rem;"></i><br>Nenhum apontamento neste período';
+            echo '<tr><td colspan="7" class="text-center text-muted py-5">';
+            echo '<i class="fas fa-inbox" style="font-size: 2.5rem; margin-bottom: 10px;"></i><br>';
+            echo 'Nenhum apontamento neste período';
             echo '</td></tr>';
         } else {
             foreach ($apontamentos as $apt) {
                 $data_fmt = date('d/m/Y', strtotime($apt['data'] ?? $apt['data_apontamento'] ?? ''));
+                $total = number_format($apt['total_horas'] ?? 0, 2, ',', '.');
                 echo '<tr>';
                 echo '<td><strong>' . $data_fmt . '</strong></td>';
                 echo '<td class="text-center">' . ($apt['hora_entrada_1'] ?? '-') . '</td>';
@@ -695,10 +741,10 @@ class PontoController {
                 echo '<td class="text-center">' . ($apt['hora_entrada_2'] ?? '-') . '</td>';
                 echo '<td class="text-center">' . ($apt['hora_saida_2'] ?? '-') . '</td>';
                 echo '<td class="text-center">';
-                echo '<span class="badge bg-primary">' . number_format($apt['total_horas'] ?? 0, 2, ',', '.') . 'h</span>';
+                echo '<span class="badge bg-primary">' . $total . 'h</span>';
                 echo '</td>';
                 echo '<td class="text-center">';
-                echo '<a href="' . BASE_URL . 'index.php?rota=editar_ponto&id=' . ($apt['id'] ?? 0) . '" class="btn btn-sm btn-warning">';
+                echo '<a href="' . BASE_URL . 'index.php?rota=editar_ponto&id=' . ($apt['id'] ?? 0) . '" class="btn btn-sm btn-outline-warning">';
                 echo '<i class="fas fa-edit"></i>';
                 echo '</a>';
                 echo '</td>';
@@ -709,8 +755,10 @@ class PontoController {
         echo '</tbody>';
         echo '</table>';
         echo '</div>';
+        echo '</div>';
         
-        echo '<div class="mt-4">';
+        // Botões de ação
+        echo '<div class="mb-4">';
         echo '<a href="' . BASE_URL . 'index.php?rota=meu_ponto" class="btn btn-primary">';
         echo '<i class="fas fa-arrow-left"></i> Voltar';
         echo '</a>';

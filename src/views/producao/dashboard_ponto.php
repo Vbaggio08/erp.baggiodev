@@ -241,41 +241,60 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <style>
     .card {
-        border: none;
+        border: 0;
         border-radius: 8px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15) !important;
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
     }
 
+    .card-header {
+        background-color: #f8f9fa !important;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 500;
+    }
+
+    /* Cores harmoniosas e sólidas - Padrão Bootstrap consistente */
     .border-left-primary {
-        border-left: 4px solid #667cea !important;
+        border-left: 4px solid #007bff !important;
     }
 
     .border-left-success {
-        border-left: 4px solid #48bb78 !important;
+        border-left: 4px solid #28a745 !important;
     }
 
     .border-left-warning {
-        border-left: 4px solid #fcd34d !important;
+        border-left: 4px solid #ffc107 !important;
     }
 
     .border-left-info {
-        border-left: 4px solid #4fd1c5 !important;
+        border-left: 4px solid #17a2b8 !important;
     }
 
-    .text-primary { color: #667cea !important; }
-    .text-success { color: #48bb78 !important; }
-    .text-warning { color: #ed8936 !important; }
-    .text-info { color: #4fd1c5 !important; }
+    .border-left-danger {
+        border-left: 4px solid #dc3545 !important;
+    }
+
+    .text-primary { color: #007bff !important; }
+    .text-success { color: #28a745 !important; }
+    .text-warning { color: #856404 !important; }
+    .text-info { color: #17a2b8 !important; }
+    .text-danger { color: #dc3545 !important; }
 
     .badge {
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
         font-size: 0.85rem;
+        font-weight: 600;
     }
+
+    .badge-primary { background-color: #007bff !important; }
+    .badge-success { background-color: #28a745 !important; }
+    .badge-warning { background-color: #ffc107 !important; color: #000 !important; }
+    .badge-info { background-color: #17a2b8 !important; }
+    .badge-danger { background-color: #dc3545 !important; }
 
     .table-hover tbody tr:hover {
         background-color: #f8f9fa;

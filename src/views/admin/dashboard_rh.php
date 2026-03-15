@@ -305,6 +305,75 @@ if (session_status() === PHP_SESSION_NONE) {
     .badge-danger { background-color: #f56565 !important; }
     .badge-warning { background-color: #ed8936 !important; }
     .badge-success { background-color: #48bb78 !important; }
+
+    /* ===== ESTILOS DE CORES HARMONIOSAS ===== */
+    
+    /* Border-left color styles - Padrão consistente */
+    .border-left-primary {
+        border-left: 4px solid #007bff !important;
+    }
+
+    .border-left-success {
+        border-left: 4px solid #28a745 !important;
+    }
+
+    .border-left-warning {
+        border-left: 4px solid #ffc107 !important;
+    }
+
+    .border-left-danger {
+        border-left: 4px solid #dc3545 !important;
+    }
+
+    .border-left-info {
+        border-left: 4px solid #17a2b8 !important;
+    }
+
+    /* Card enhancements - Estilo sólido e profissional */
+    .card {
+        border: 0;
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa !important;
+        font-weight: 500;
+        color: #333;
+    }
+
+    /* Table improvements - Melhor legibilidade */
+    .table thead tr {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        color: #495057;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Bootstrap icons and text styling */
+    .text-primary { color: #007bff !important; }
+    .text-success { color: #28a745 !important; }
+    .text-warning { color: #856404 !important; }
+    .text-danger { color: #dc3545 !important; }
+    .text-info { color: #17a2b8 !important; }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .col-md-3 {
+            margin-bottom: 15px;
+        }
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
