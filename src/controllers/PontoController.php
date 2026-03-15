@@ -871,16 +871,20 @@ class PontoController {
      * Exporta relatório de ponto em PDF ou Excel - FASE 5
      * GET /index.php?rota=exportar_ponto&mes_ano=YYYY-MM&formato=pdf|excel
      */
-    public function exportarRelatorioPonto($mes_ano = null, $formato = 'pdf') {
+    public function exportarRelatorioPonto($mes_ano = null, $formato = 'html') {
         $this->verificarLogin();
         
         $mes_ano = $mes_ano ?? ($_GET['mes_ano'] ?? date('Y-m'));
-        $formato = $formato ?? ($_GET['formato'] ?? 'pdf');
+        $formato = $formato ?? ($_GET['formato'] ?? 'html');
         $usuario_id = $_SESSION['user_id'];
         
         try {
             require_once __DIR__ . '/../models/GeradorRelatorioPDF.php';
-            $gerador = new \Src\Models\GeradorRelatorioPDF();
+            
+            // Mapear dos formatos antigos para novos
+            if ($formato === 'pdf') $formato = 'html';
+            
+            $gerador = new \Src\Models\GeradorRelatorioPDF($formato);
             
             // Obter dados do usuário
             $sql = "SELECT nome, email FROM usuarios WHERE id = ?";
@@ -888,35 +892,60 @@ class PontoController {
             $stmt->execute([$usuario_id]);
             $usuario = $stmt->fetch(\PDO::FETCH_ASSOC);
             
+            if (!$usuario) {
+                throw new \Exception('Usuário não encontrado');
+            }
+            
             // Obter apontamentos do mês
             $sql = "SELECT * FROM apontamentos WHERE usuario_id = ? AND YEAR(data_apontamento) = ? AND MONTH(data_apontamento) = ? ORDER BY data_apontamento ASC";
             $parts = explode('-', $mes_ano);
+            if (count($parts) !== 2) {
+                throw new \Exception('Formato de mês inválido. Use YYYY-MM');
+            }
+            
             $stmt = $GLOBALS['db']->prepare($sql);
             $stmt->execute([$usuario_id, $parts[0], $parts[1]]);
             $apontamentos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
+            // Calcular totais
+            $total_horas = 0;
+            foreach ($apontamentos as $apt) {
+                $total_horas += ($apt['total_horas'] ?? 0);
+            }
+            
             // Gerar relatório
             $caminho = $gerador->gerarRelatorioPonto(
-                usuario_nome: $usuario['nome'],
+                usuario_nome: $usuario['nome'] ?? 'N/A',
                 mes_ano: $mes_ano,
                 dados_ponto: [
                     'dias_trabalhados' => count($apontamentos),
                     'dias_uteis' => 22,
                     'faltas' => 0,
                     'atestados' => 0,
-                    'horas_trabalhadas' => array_sum(array_column($apontamentos, 'total_horas')),
-                    'horas_esperadas' => 160,
+                    'horas_trabalhadas' => $total_horas,
+                    'horas_esperadas' => 176,
                     'horas_extras_aprovadas' => 0,
                     'saldo_final' => 0
                 ],
                 apontamentos: $apontamentos
             );
             
-            // Download
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: attachment; filename=' . basename($caminho));
-            readfile($caminho);
+            // Enviar arquivo
+            $extensao = pathinfo($caminho, PATHINFO_EXTENSION);
+            
+            if ($extensao === 'html') {
+                // Exibir HTML no navegador
+                header('Content-Type: text/html; charset=utf-8');
+                readfile($caminho);
+            } elseif ($extensao === 'csv') {
+                // Download CSV
+                header('Content-Type: text/csv; charset=utf-8');
+                header('Content-Disposition: attachment; filename=relatório_ponto_' . $mes_ano . '.csv');
+                readfile($caminho);
+            }
+            
             exit;
+            
             
         } catch (\Exception $e) {
             header('Content-Type: application/json');

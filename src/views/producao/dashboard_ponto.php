@@ -720,8 +720,14 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     function exportarPDF() {
-        document.getElementById('modalExportacao').classList.add('show');
-        document.getElementById('modalExportacao').style.display = 'block';
+        // Abrir modal usando Bootstrap
+        const modal = new (window.bootstrap?.Modal || function() {})($('#modalExportacao')[0]);
+        if (window.bootstrap?.Modal) {
+            modal.show();
+        } else {
+            // Fallback se Bootstrap não estiver disponível
+            $('#modalExportacao').modal('show');
+        }
     }
 
     function realizarExportacao() {
@@ -734,10 +740,18 @@ if (session_status() === PHP_SESSION_NONE) {
         }
 
         const url = `<?php echo $base_url ?? ''; ?>index.php?rota=exportar_ponto&mes_ano=${mes}&formato=${formato}`;
+        
+        // Abrir em nova aba/janela
         window.open(url, '_blank');
         
-        document.getElementById('modalExportacao').classList.remove('show');
-        document.getElementById('modalExportacao').style.display = 'none';
+        // Fechar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalExportacao'));
+        if (modal) {
+            modal.hide();
+        } else {
+            // Fallback
+            $('#modalExportacao').modal('hide');
+        }
     }
 </script>
 
