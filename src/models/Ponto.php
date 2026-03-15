@@ -452,7 +452,39 @@ class Ponto {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$usuario_id, $data_inicio, $data_fim]);
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $apontamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Calcular total_horas para cada apontamento
+        foreach ($apontamentos as &$apt) {
+            $horas = 0;
+            // Batida 1
+            if (!empty($apt['hora_entrada_1']) && !empty($apt['hora_saida_1'])) {
+                $entrada = strtotime($apt['hora_entrada_1']);
+                $saida = strtotime($apt['hora_saida_1']);
+                if ($entrada !== false && $saida !== false) {
+                    $horas += ($saida - $entrada) / 3600;
+                }
+            }
+            // Batida 2
+            if (!empty($apt['hora_entrada_2']) && !empty($apt['hora_saida_2'])) {
+                $entrada = strtotime($apt['hora_entrada_2']);
+                $saida = strtotime($apt['hora_saida_2']);
+                if ($entrada !== false && $saida !== false) {
+                    $horas += ($saida - $entrada) / 3600;
+                }
+            }
+            // Batida 3
+            if (!empty($apt['hora_entrada_3']) && !empty($apt['hora_saida_3'])) {
+                $entrada = strtotime($apt['hora_entrada_3']);
+                $saida = strtotime($apt['hora_saida_3']);
+                if ($entrada !== false && $saida !== false) {
+                    $horas += ($saida - $entrada) / 3600;
+                }
+            }
+            $apt['total_horas'] = round($horas, 2);
+        }
+        
+        return $apontamentos;
     }
     
     /**

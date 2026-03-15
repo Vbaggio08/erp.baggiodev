@@ -819,11 +819,27 @@ class PontoController {
                 u.nome, 
                 u.email,
                 COUNT(a.id) as total_apontamentos,
-                SUM(a.total_horas) as total_horas
+                ROUND(COALESCE(SUM(
+                    CASE 
+                        WHEN a.hora_saida_1 IS NOT NULL AND a.hora_entrada_1 IS NOT NULL
+                        THEN (TIME_TO_SEC(a.hora_saida_1) - TIME_TO_SEC(a.hora_entrada_1)) / 3600.0
+                        ELSE 0
+                    END +
+                    CASE 
+                        WHEN a.hora_saida_2 IS NOT NULL AND a.hora_entrada_2 IS NOT NULL
+                        THEN (TIME_TO_SEC(a.hora_saida_2) - TIME_TO_SEC(a.hora_entrada_2)) / 3600.0
+                        ELSE 0
+                    END +
+                    CASE 
+                        WHEN a.hora_saida_3 IS NOT NULL AND a.hora_entrada_3 IS NOT NULL
+                        THEN (TIME_TO_SEC(a.hora_saida_3) - TIME_TO_SEC(a.hora_entrada_3)) / 3600.0
+                        ELSE 0
+                    END
+                ), 0), 2) as total_horas
             FROM usuarios u
-            LEFT JOIN apontamentos a ON u.id = a.usuario_id 
-                AND MONTH(a.data_apontamento) = ? 
-                AND YEAR(a.data_apontamento) = ?
+            LEFT JOIN apontamentos_ponto a ON u.id = a.usuario_id 
+                AND MONTH(a.data) = ? 
+                AND YEAR(a.data) = ?
             WHERE u.ativo = 1
             GROUP BY u.id, u.nome, u.email
             ORDER BY u.nome
@@ -898,7 +914,7 @@ class PontoController {
             }
             
             // Obter apontamentos do mês
-            $sql = "SELECT * FROM apontamentos WHERE usuario_id = ? AND YEAR(data_apontamento) = ? AND MONTH(data_apontamento) = ? ORDER BY data_apontamento ASC";
+            $sql = "SELECT * FROM apontamentos_ponto WHERE usuario_id = ? AND YEAR(data) = ? AND MONTH(data) = ? ORDER BY data ASC";
             $parts = explode('-', $mes_ano);
             if (count($parts) !== 2) {
                 throw new \Exception('Formato de mês inválido. Use YYYY-MM');
@@ -907,6 +923,30 @@ class PontoController {
             $stmt = $GLOBALS['db']->prepare($sql);
             $stmt->execute([$usuario_id, $parts[0], $parts[1]]);
             $apontamentos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Calcular total_horas para cada apontamento
+            foreach ($apontamentos as &$apt) {
+                $horas = 0;
+                // Batida 1
+                if (!empty($apt['hora_entrada_1']) && !empty($apt['hora_saida_1'])) {
+                    $entrada = strtotime($apt['hora_entrada_1']);
+                    $saida = strtotime($apt['hora_saida_1']);
+                    $horas += ($saida - $entrada) / 3600;
+                }
+                // Batida 2
+                if (!empty($apt['hora_entrada_2']) && !empty($apt['hora_saida_2'])) {
+                    $entrada = strtotime($apt['hora_entrada_2']);
+                    $saida = strtotime($apt['hora_saida_2']);
+                    $horas += ($saida - $entrada) / 3600;
+                }
+                // Batida 3
+                if (!empty($apt['hora_entrada_3']) && !empty($apt['hora_saida_3'])) {
+                    $entrada = strtotime($apt['hora_entrada_3']);
+                    $saida = strtotime($apt['hora_saida_3']);
+                    $horas += ($saida - $entrada) / 3600;
+                }
+                $apt['total_horas'] = round($horas, 2);
+            }
             
             // Calcular totais
             $total_horas = 0;
@@ -970,7 +1010,7 @@ class PontoController {
             $gerador = new \Src\Models\GeradorRelatorioPDF();
             
             // Obter dados da batida
-            $sql = "SELECT a.*, u.nome FROM apontamentos a JOIN usuarios u ON a.usuario_id = u.id WHERE a.id = ? AND a.usuario_id = ?";
+            $sql = "SELECT a.*, u.nome FROM apontamentos_ponto a JOIN usuarios u ON a.usuario_id = u.id WHERE a.id = ? AND a.usuario_id = ?";
             $stmt = $GLOBALS['db']->prepare($sql);
             $stmt->execute([$batida_id, $usuario_id]);
             $batida = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -982,7 +1022,7 @@ class PontoController {
             // Gerar recibo
             $caminho = $gerador->gerarReciboPonto(
                 usuario_nome: $batida['nome'],
-                data_ponto: $batida['data_apontamento'],
+                data_ponto: $batida['data'],
                 dados_batida: [$batida]
             );
             

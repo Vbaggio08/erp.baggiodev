@@ -73,7 +73,23 @@ class DashboardController {
             $usuario = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             // Horas de hoje
-            $sql = "SELECT COALESCE(SUM(total_horas), 0) as horas FROM apontamentos WHERE usuario_id = ? AND DATE(data_apontamento) = CURDATE()";
+            $sql = "SELECT COALESCE(ROUND(COALESCE(SUM(
+                    CASE 
+                        WHEN hora_saida_1 IS NOT NULL AND hora_entrada_1 IS NOT NULL
+                        THEN (TIME_TO_SEC(hora_saida_1) - TIME_TO_SEC(hora_entrada_1)) / 3600.0
+                        ELSE 0
+                    END +
+                    CASE 
+                        WHEN hora_saida_2 IS NOT NULL AND hora_entrada_2 IS NOT NULL
+                        THEN (TIME_TO_SEC(hora_saida_2) - TIME_TO_SEC(hora_entrada_2)) / 3600.0
+                        ELSE 0
+                    END +
+                    CASE 
+                        WHEN hora_saida_3 IS NOT NULL AND hora_entrada_3 IS NOT NULL
+                        THEN (TIME_TO_SEC(hora_saida_3) - TIME_TO_SEC(hora_entrada_3)) / 3600.0
+                        ELSE 0
+                    END
+                ), 0), 2), 0) as horas FROM apontamentos_ponto WHERE usuario_id = ? AND data = CURDATE()";
             $stmt = $db->prepare($sql);
             $stmt->execute([$usuario_id]);
             $hoje = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -135,11 +151,27 @@ class DashboardController {
 
             $sql = "
                 SELECT 
-                    DATE(data_apontamento) as data,
-                    SUM(total_horas) as horas
-                FROM apontamentos
-                WHERE usuario_id = ? AND data_apontamento >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                GROUP BY DATE(data_apontamento)
+                    data,
+                    ROUND(COALESCE(SUM(
+                        CASE 
+                            WHEN hora_saida_1 IS NOT NULL AND hora_entrada_1 IS NOT NULL
+                            THEN (TIME_TO_SEC(hora_saida_1) - TIME_TO_SEC(hora_entrada_1)) / 3600.0
+                            ELSE 0
+                        END +
+                        CASE 
+                            WHEN hora_saida_2 IS NOT NULL AND hora_entrada_2 IS NOT NULL
+                            THEN (TIME_TO_SEC(hora_saida_2) - TIME_TO_SEC(hora_entrada_2)) / 3600.0
+                            ELSE 0
+                        END +
+                        CASE 
+                            WHEN hora_saida_3 IS NOT NULL AND hora_entrada_3 IS NOT NULL
+                            THEN (TIME_TO_SEC(hora_saida_3) - TIME_TO_SEC(hora_entrada_3)) / 3600.0
+                            ELSE 0
+                        END
+                    ), 0), 2) as horas
+                FROM apontamentos_ponto
+                WHERE usuario_id = ? AND data >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                GROUP BY data
                 ORDER BY data ASC
             ";
 
@@ -255,9 +287,25 @@ class DashboardController {
             $sql = "
                 SELECT 
                     COUNT(DISTINCT usuario_id) as usuarios,
-                    SUM(total_horas) as horas_total
-                FROM apontamentos
-                WHERE MONTH(data_apontamento) = ? AND YEAR(data_apontamento) = ?
+                    ROUND(COALESCE(SUM(
+                        CASE 
+                            WHEN hora_saida_1 IS NOT NULL AND hora_entrada_1 IS NOT NULL
+                            THEN (TIME_TO_SEC(hora_saida_1) - TIME_TO_SEC(hora_entrada_1)) / 3600.0
+                            ELSE 0
+                        END +
+                        CASE 
+                            WHEN hora_saida_2 IS NOT NULL AND hora_entrada_2 IS NOT NULL
+                            THEN (TIME_TO_SEC(hora_saida_2) - TIME_TO_SEC(hora_entrada_2)) / 3600.0
+                            ELSE 0
+                        END +
+                        CASE 
+                            WHEN hora_saida_3 IS NOT NULL AND hora_entrada_3 IS NOT NULL
+                            THEN (TIME_TO_SEC(hora_saida_3) - TIME_TO_SEC(hora_entrada_3)) / 3600.0
+                            ELSE 0
+                        END
+                    ), 0), 2) as horas_total
+                FROM apontamentos_ponto
+                WHERE MONTH(data) = ? AND YEAR(data) = ?
             ";
 
             $stmt = $db->prepare($sql);
