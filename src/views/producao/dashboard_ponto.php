@@ -384,17 +384,79 @@ if (session_status() === PHP_SESSION_NONE) {
         background-color: #4a5568;
         border-color: #2d3748;
         color: #fff;
+        border-radius: 8px;
     }
 
     .modal-header {
         background-color: #2d3748;
         border-color: #1a202c;
         color: #fff;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .modal-header .modal-title {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* Botão de fechar (X) do modal */
+    .modal-header .close {
+        color: #fff !important;
+        opacity: 0.8;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .modal-header .close:hover {
+        opacity: 1;
+        color: #1e90ff !important;
     }
 
     .modal-footer {
         background-color: #2d3748;
         border-color: #1a202c;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .modal-footer .btn {
+        font-weight: 600;
+    }
+
+    .modal-footer .btn-secondary {
+        background-color: #36465a;
+        border-color: #2d3748;
+        color: #fff;
+    }
+
+    .modal-footer .btn-secondary:hover {
+        background-color: #2d3748;
+        border-color: #1a202c;
+        color: #fff;
+    }
+
+    .modal-footer .btn-primary {
+        background-color: #1e90ff;
+        border-color: #1e90ff;
+    }
+
+    .modal-footer .btn-primary:hover {
+        background-color: #1873cc;
+        border-color: #1873cc;
+    }
+
+    /* Modal body specific */
+    .modal-body {
+        background-color: #4a5568;
+        color: #fff;
+    }
+
+    .modal-body label {
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .modal-body .form-group {
+        margin-bottom: 1rem;
     }
 
     /* Form elements */
