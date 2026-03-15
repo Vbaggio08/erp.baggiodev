@@ -25,6 +25,8 @@ class LoginController {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['nome'];
             $_SESSION['user_nivel'] = $user['nivel'];
+            // Flag para compatibilidade com resto do código
+            $_SESSION['usuario_admin'] = ($user['nivel'] === 'admin') ? 1 : 0;
             header('Location: index.php?rota=dashboard');
             exit; 
         } else {
