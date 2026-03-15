@@ -1046,5 +1046,22 @@ class PontoController {
             exit;
         }
     }
+
+    private function verificarRH() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        if (!isset($_SESSION['user_nivel']) || !in_array($_SESSION['user_nivel'], ['admin', 'rh'])) {
+            $url = "index.php?rota=dashboard";
+            echo "<meta http-equiv='refresh' content='3;url=$url'>";
+            exit;
+        }
+    }
+
+    private function ehRH(): bool {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        return isset($_SESSION['user_nivel']) && 
+               in_array($_SESSION['user_nivel'], ['admin', 'rh', 'gerente', 'manager']);
+    }
 }
 ?>
