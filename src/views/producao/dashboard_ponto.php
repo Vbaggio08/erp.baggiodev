@@ -9,11 +9,11 @@ if (session_status() === PHP_SESSION_NONE) {
 ?>
 <?php require_once __DIR__ . '/../geral/header.php'; ?>
 
-<div class="container-fluid p-4">
+<div class="container-fluid p-4" style="background-color: #2d3748; min-height: 100vh;">
     <!-- Header do Dashboard -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <h2>
+            <h2 style="color: #fff;">
                 <i class="fas fa-chart-line"></i> Meu Dashboard de Ponto
             </h2>
         </div>
@@ -244,45 +244,60 @@ if (session_status() === PHP_SESSION_NONE) {
         border: 0;
         border-radius: 8px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background-color: #4a5568;
+        color: #fff;
     }
 
     .card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.25) !important;
     }
 
     .card-header {
-        background-color: #f8f9fa !important;
-        border-bottom: 1px solid #e9ecef;
-        font-weight: 500;
+        background-color: #2d3748 !important;
+        border-bottom: 1px solid #1a202c;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .card-body {
+        background-color: #4a5568;
+        color: #fff;
+    }
+
+    .card-footer {
+        background-color: #2d3748 !important;
+        border-top: 1px solid #1a202c;
+        color: #fff;
     }
 
     /* Cores harmoniosas e sólidas - Padrão Bootstrap consistente */
     .border-left-primary {
-        border-left: 4px solid #007bff !important;
+        border-left: 4px solid #1e90ff !important;
     }
 
     .border-left-success {
-        border-left: 4px solid #28a745 !important;
+        border-left: 4px solid #2ecc71 !important;
     }
 
     .border-left-warning {
-        border-left: 4px solid #ffc107 !important;
+        border-left: 4px solid #f39c12 !important;
     }
 
     .border-left-info {
-        border-left: 4px solid #17a2b8 !important;
+        border-left: 4px solid #3498db !important;
     }
 
     .border-left-danger {
-        border-left: 4px solid #dc3545 !important;
+        border-left: 4px solid #e74c3c !important;
     }
 
-    .text-primary { color: #007bff !important; }
-    .text-success { color: #28a745 !important; }
-    .text-warning { color: #856404 !important; }
-    .text-info { color: #17a2b8 !important; }
-    .text-danger { color: #dc3545 !important; }
+    .text-primary { color: #1e90ff !important; }
+    .text-success { color: #2ecc71 !important; }
+    .text-warning { color: #f39c12 !important; }
+    .text-info { color: #3498db !important; }
+    .text-danger { color: #e74c3c !important; }
+    .text-muted { color: #a0aec0 !important; }
 
     .badge {
         padding: 0.4rem 0.8rem;
@@ -290,23 +305,148 @@ if (session_status() === PHP_SESSION_NONE) {
         font-weight: 600;
     }
 
-    .badge-primary { background-color: #007bff !important; }
-    .badge-success { background-color: #28a745 !important; }
-    .badge-warning { background-color: #ffc107 !important; color: #000 !important; }
-    .badge-info { background-color: #17a2b8 !important; }
-    .badge-danger { background-color: #dc3545 !important; }
+    .badge-primary { background-color: #1e90ff !important; }
+    .badge-success { background-color: #2ecc71 !important; }
+    .badge-warning { background-color: #f39c12 !important; color: #000 !important; }
+    .badge-info { background-color: #3498db !important; }
+    .badge-danger { background-color: #e74c3c !important; }
 
     .table-hover tbody tr:hover {
-        background-color: #f8f9fa;
+        background-color: #36465a;
     }
 
     .list-group-item {
         border: none;
-        border-bottom: 1px solid #e3e6f0;
+        border-bottom: 1px solid #2d3748;
+        background-color: #4a5568;
+        color: #fff;
     }
 
     .list-group-item:last-child {
         border-bottom: none;
+    }
+
+    .list-group {
+        background-color: #4a5568;
+    }
+
+    /* Alert styles para tema escuro */
+    .alert {
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .alert-info {
+        background-color: #2b5a8a !important;
+        border-color: #1e4676 !important;
+        color: #fff !important;
+    }
+
+    .alert-danger {
+        background-color: #742c2c !important;
+        border-color: #5a1f1f !important;
+        color: #fff !important;
+    }
+
+    .alert-warning {
+        background-color: #7a6a2a !important;
+        border-color: #5a4a1a !important;
+        color: #fff !important;
+    }
+
+    /* Table styles */
+    .table {
+        background-color: #4a5568;
+        color: #fff;
+        border-color: #2d3748;
+    }
+
+    .table thead th {
+        background-color: #2d3748 !important;
+        border-color: #1a202c !important;
+        color: #fff !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+
+    .table tbody td {
+        border-color: #2d3748;
+        color: #fff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #36465a !important;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        background-color: #4a5568;
+        border-color: #2d3748;
+        color: #fff;
+    }
+
+    .modal-header {
+        background-color: #2d3748;
+        border-color: #1a202c;
+        color: #fff;
+    }
+
+    .modal-footer {
+        background-color: #2d3748;
+        border-color: #1a202c;
+    }
+
+    /* Form elements */
+    .form-control,
+    .form-select {
+        background-color: #36465a;
+        border-color: #2d3748;
+        color: #fff;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background-color: #36465a;
+        border-color: #1e90ff;
+        color: #fff;
+        box-shadow: 0 0 0 0.2rem rgba(30, 144, 255, 0.25);
+    }
+
+    .form-control::placeholder {
+        color: #8892a4;
+    }
+
+    /* Input label */
+    label {
+        color: #fff;
+    }
+
+    /* Buttons adjustments */
+    .btn {
+        font-weight: 600;
+    }
+
+    .btn-outline-primary {
+        color: #1e90ff;
+        border-color: #1e90ff;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #1e90ff;
+        color: #fff;
+        border-color: #1e90ff;
+    }
+
+    .btn-outline-secondary {
+        color: #a0aec0;
+        border-color: #a0aec0;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #a0aec0;
+        color: #2d3748;
+        border-color: #a0aec0;
     }
 </style>
 
