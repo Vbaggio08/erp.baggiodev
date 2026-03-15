@@ -1056,12 +1056,5 @@ class PontoController {
             exit;
         }
     }
-
-    private function ehRH(): bool {
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        
-        return isset($_SESSION['user_nivel']) && 
-               in_array($_SESSION['user_nivel'], ['admin', 'rh', 'gerente', 'manager']);
-    }
 }
 ?>
