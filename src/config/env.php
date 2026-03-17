@@ -35,12 +35,38 @@ function env($key, $default = null) {
     }
 }
 
-// Carrega arquivo .env da raiz do projeto
-$envFile = dirname(dirname(__DIR__)) . '/.env';
+// Carrega arquivo de ambiente da raiz do projeto
+$projectRoot = dirname(dirname(__DIR__));
+$parentRoot = dirname($projectRoot);
+$httpHost = $_SERVER['HTTP_HOST'] ?? '';
+$isLocalHost = (
+    $httpHost === '' ||
+    stripos($httpHost, 'localhost') === 0 ||
+    stripos($httpHost, '127.0.0.1') === 0
+);
 
-if (!file_exists($envFile)) {
-    // Se não existir .env, tenta .env.example
-    $envFile = dirname(dirname(__DIR__)) . '/.env.example';
+$envFile = '';
+if (!$isLocalHost) {
+    // Em produção, tenta raiz do projeto e pasta pai (hospedagem compartilhada).
+    $candidatos = [
+        $projectRoot . '/.env.production',
+        $projectRoot . '/.env',
+        $parentRoot . '/.env.production',
+        $parentRoot . '/.env',
+    ];
+} else {
+    // Em localhost, prioriza .env local e usa .env.example como fallback.
+    $candidatos = [
+        $projectRoot . '/.env',
+        $projectRoot . '/.env.example',
+    ];
+}
+
+foreach ($candidatos as $caminhoEnv) {
+    if (file_exists($caminhoEnv)) {
+        $envFile = $caminhoEnv;
+        break;
+    }
 }
 
 if (file_exists($envFile)) {

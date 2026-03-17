@@ -7,13 +7,17 @@ class Database {
 
     public static function getConnection() {
         if (!self::$pdo) {
+            $appDebug = env('APP_DEBUG', false);
             try {
                 // Lê credenciais das variáveis de ambiente (.env)
                 $host = env('DB_HOST', 'localhost');
-                $dbname = env('DB_NAME', 'ripfire');
-                $user = env('DB_USER', 'root');
-                $password = env('DB_PASSWORD', '');
-                $appDebug = env('APP_DEBUG', false);
+                $dbname = env('DB_NAME', null);
+                $user = env('DB_USER', null);
+                $password = env('DB_PASSWORD', null);
+
+                if (empty($dbname) || empty($user) || $password === null) {
+                    throw new RuntimeException('Configuração de banco ausente. Verifique .env/.env.production (DB_NAME, DB_USER, DB_PASSWORD).');
+                }
 
                 self::$pdo = new PDO(
                     "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
@@ -28,32 +32,7 @@ class Database {
                 
                 // Desativa o modo ONLY_FULL_GROUP_BY para compatibilidade com servidores
                 self::$pdo->exec("SET sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
-            } catch (PDOException $e) {
-                // Se estamos em modo debug e o usuário não é o padrão, tentamos reconectar
-                // com as credenciais locais (`root` sem senha). Isso ajuda quando o dev
-                // esquece de atualizar o .env após copiar as configurações do servidor.
-                $appDebug = env('APP_DEBUG', false);
-                if ($appDebug && $user !== 'root') {
-                    try {
-                        self::$pdo = new PDO(
-                            "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-                            'root',
-                            '',
-                            [
-                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                                PDO::ATTR_EMULATE_PREPARES => false,
-                            ]
-                        );
-                        // novamente desativa ONLY_FULL_GROUP_BY
-                        self::$pdo->exec("SET sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
-                        return self::$pdo;
-                    } catch (PDOException $e2) {
-                        // continua para mostrar mensagem original abaixo
-                        $e = $e2;
-                    }
-                }
-
+            } catch (Throwable $e) {
                 if ($appDebug) {
                     die("Erro de conexão: " . $e->getMessage());
                 } else {

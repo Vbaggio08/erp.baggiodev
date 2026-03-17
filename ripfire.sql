@@ -1,11 +1,11 @@
--- phpMyAdmin SQL Dump
+﻿-- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 15/03/2026 às 02:28
--- Versão do servidor: 10.4.32-MariaDB
--- Versão do PHP: 8.2.12
+-- Tempo de geraÃ§Ã£o: 15/03/2026 Ã s 02:28
+-- VersÃ£o do servidor: 10.4.32-MariaDB
+-- VersÃ£o do PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,6 +27,7 @@ SET time_zone = "+00:00";
 -- Estrutura para tabela `apontamentos_ponto`
 --
 
+DROP TABLE IF EXISTS `apontamentos_ponto`;
 CREATE TABLE `apontamentos_ponto` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -37,7 +38,7 @@ CREATE TABLE `apontamentos_ponto` (
   `foto_saida_1` varchar(255) DEFAULT NULL,
   `geo_entrada_1` varchar(50) DEFAULT NULL COMMENT 'Formato: -23.5505,-46.6333',
   `geo_saida_1` varchar(50) DEFAULT NULL,
-  `geo_precisao_entrada_1` int(11) DEFAULT NULL COMMENT 'Precisão em metros',
+  `geo_precisao_entrada_1` int(11) DEFAULT NULL COMMENT 'PrecisÃ£o em metros',
   `geo_precisao_saida_1` int(11) DEFAULT NULL,
   `ip_origem_entrada_1` varchar(50) DEFAULT NULL,
   `ip_origem_saida_1` varchar(50) DEFAULT NULL,
@@ -65,7 +66,6 @@ CREATE TABLE `apontamentos_ponto` (
   `foto_saida_3` varchar(255) DEFAULT NULL,
   `geo_entrada_3` varchar(50) DEFAULT NULL,
   `geo_saida_3` varchar(50) DEFAULT NULL,
-  `geo_precisao_entrada_3` int(11) DEFAULT NULL,
   `geo_precisao_saida_3` int(11) DEFAULT NULL,
   `ip_origem_entrada_3` varchar(50) DEFAULT NULL,
   `ip_origem_saida_3` varchar(50) DEFAULT NULL,
@@ -85,6 +85,7 @@ CREATE TABLE `apontamentos_ponto` (
 -- Estrutura para tabela `atestados`
 --
 
+DROP TABLE IF EXISTS `atestados`;
 CREATE TABLE `atestados` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -105,6 +106,7 @@ CREATE TABLE `atestados` (
 -- Estrutura para tabela `clientes`
 --
 
+DROP TABLE IF EXISTS `clientes`;
 CREATE TABLE `clientes` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -123,6 +125,7 @@ CREATE TABLE `clientes` (
 -- Estrutura para tabela `compensacao_horas`
 --
 
+DROP TABLE IF EXISTS `compensacao_horas`;
 CREATE TABLE `compensacao_horas` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -141,6 +144,7 @@ CREATE TABLE `compensacao_horas` (
 -- Estrutura para tabela `compras`
 --
 
+DROP TABLE IF EXISTS `compras`;
 CREATE TABLE `compras` (
   `id` int(11) NOT NULL,
   `fornecedor` varchar(100) DEFAULT NULL,
@@ -161,6 +165,7 @@ CREATE TABLE `compras` (
 -- Estrutura para tabela `configuracao_ponto`
 --
 
+DROP TABLE IF EXISTS `configuracao_ponto`;
 CREATE TABLE `configuracao_ponto` (
   `id` int(11) NOT NULL DEFAULT 1,
   `tolerancia_atraso_minutos` int(11) DEFAULT 5,
@@ -169,13 +174,13 @@ CREATE TABLE `configuracao_ponto` (
   `considerar_feriados` tinyint(4) DEFAULT 1,
   `lista_feriados` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Array de datas: ["2026-03-14", "2026-04-21", ...]' CHECK (json_valid(`lista_feriados`)),
   `usar_dsr` tinyint(4) DEFAULT 1 COMMENT 'Descanso Semanal Remunerado',
-  `quantidade_batidas` int(11) DEFAULT 2 COMMENT 'Valores: 2 (entrada/saída), 4 (entrada/saída/entrada/saída), 6 (3x entrada/saída)',
+  `quantidade_batidas` int(11) DEFAULT 2 COMMENT 'Valores: 2 (entrada/saÃ­da), 4 (entrada/saÃ­da/entrada/saÃ­da), 6 (3x entrada/saÃ­da)',
   `usar_geolocalizacao` tinyint(4) DEFAULT 0,
   `raio_permitido_metros` int(11) DEFAULT 500,
   `exigir_foto_mobile` tinyint(4) DEFAULT 1,
   `exigir_foto_desktop` tinyint(4) DEFAULT 0,
-  `modo_multiplas_maquinas` tinyint(4) DEFAULT 0 COMMENT 'Se 0: apenas 1 máquina/usuário. Se 1: múltiplas permitidas',
-  `limiar_proximidade_minutos` int(11) DEFAULT 5 COMMENT 'Aviso de batida próxima',
+  `modo_multiplas_maquinas` tinyint(4) DEFAULT 0 COMMENT 'Se 0: apenas 1 mÃ¡quina/usuÃ¡rio. Se 1: mÃºltiplas permitidas',
+  `limiar_proximidade_minutos` int(11) DEFAULT 5 COMMENT 'Aviso de batida prÃ³xima',
   `atualizado_em` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -192,6 +197,7 @@ INSERT INTO `configuracao_ponto` (`id`, `tolerancia_atraso_minutos`, `horario_in
 -- Estrutura para tabela `configuracao_pontos_avancado`
 --
 
+DROP TABLE IF EXISTS `configuracao_pontos_avancado`;
 CREATE TABLE `configuracao_pontos_avancado` (
   `id` int(11) NOT NULL,
   `empresa_id` int(11) DEFAULT NULL,
@@ -225,11 +231,12 @@ INSERT INTO `configuracao_pontos_avancado` (`id`, `empresa_id`, `permite_horas_e
 -- Estrutura para tabela `dispositivos_autorizados`
 --
 
+DROP TABLE IF EXISTS `dispositivos_autorizados`;
 CREATE TABLE `dispositivos_autorizados` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
-  `device_id` varchar(255) NOT NULL COMMENT 'Fingerprint único da máquina (canvas hash)',
-  `device_nome` varchar(255) DEFAULT NULL COMMENT 'Notebook João, Desktop Oficina, etc',
+  `device_id` varchar(255) NOT NULL COMMENT 'Fingerprint Ãºnico da mÃ¡quina (canvas hash)',
+  `device_nome` varchar(255) DEFAULT NULL COMMENT 'Notebook JoÃ£o, Desktop Oficina, etc',
   `ip_address` varchar(100) DEFAULT NULL,
   `user_agent` text DEFAULT NULL,
   `tipo_dispositivo` varchar(50) DEFAULT NULL COMMENT 'desktop, mobile, tablet',
@@ -245,6 +252,7 @@ CREATE TABLE `dispositivos_autorizados` (
 -- Estrutura para tabela `dsr_descansos`
 --
 
+DROP TABLE IF EXISTS `dsr_descansos`;
 CREATE TABLE `dsr_descansos` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -265,6 +273,7 @@ CREATE TABLE `dsr_descansos` (
 -- Estrutura para tabela `empresas`
 --
 
+DROP TABLE IF EXISTS `empresas`;
 CREATE TABLE `empresas` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -283,6 +292,7 @@ CREATE TABLE `empresas` (
 -- Estrutura para tabela `estoque_movimentacao`
 --
 
+DROP TABLE IF EXISTS `estoque_movimentacao`;
 CREATE TABLE `estoque_movimentacao` (
   `id` int(11) NOT NULL,
   `produto_id` int(11) NOT NULL,
@@ -298,6 +308,7 @@ CREATE TABLE `estoque_movimentacao` (
 -- Estrutura para tabela `estoque_movimentacoes`
 --
 
+DROP TABLE IF EXISTS `estoque_movimentacoes`;
 CREATE TABLE `estoque_movimentacoes` (
   `id` int(11) NOT NULL,
   `tipo` enum('entrada','saida') NOT NULL,
@@ -316,6 +327,7 @@ CREATE TABLE `estoque_movimentacoes` (
 -- Estrutura para tabela `estoque_saldo`
 --
 
+DROP TABLE IF EXISTS `estoque_saldo`;
 CREATE TABLE `estoque_saldo` (
   `id` int(11) NOT NULL,
   `id_produto` int(11) NOT NULL,
@@ -329,6 +341,7 @@ CREATE TABLE `estoque_saldo` (
 -- Estrutura para tabela `feriados`
 --
 
+DROP TABLE IF EXISTS `feriados`;
 CREATE TABLE `feriados` (
   `id` int(11) NOT NULL,
   `data` date NOT NULL,
@@ -350,10 +363,10 @@ INSERT INTO `feriados` (`id`, `data`, `descricao`, `tipo`, `empresa_id`, `criado
 (4, '2026-04-03', 'Sexta-feira Santa', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (5, '2026-04-21', 'Tiradentes', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (6, '2026-05-01', 'Dia do Trabalho', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
-(7, '2026-09-07', 'Independência do Brasil', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
+(7, '2026-09-07', 'IndependÃªncia do Brasil', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (8, '2026-10-12', 'Nossa Senhora Aparecida', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (9, '2026-11-02', 'Finados', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
-(10, '2026-11-20', 'Consciência Negra', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
+(10, '2026-11-20', 'ConsciÃªncia Negra', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (11, '2026-12-25', 'Natal', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06');
 
 -- --------------------------------------------------------
@@ -362,6 +375,7 @@ INSERT INTO `feriados` (`id`, `data`, `descricao`, `tipo`, `empresa_id`, `criado
 -- Estrutura para tabela `fornecedores`
 --
 
+DROP TABLE IF EXISTS `fornecedores`;
 CREATE TABLE `fornecedores` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -380,6 +394,7 @@ CREATE TABLE `fornecedores` (
 -- Estrutura para tabela `gabaritos`
 --
 
+DROP TABLE IF EXISTS `gabaritos`;
 CREATE TABLE `gabaritos` (
   `id` int(11) NOT NULL,
   `cliente` varchar(100) DEFAULT NULL,
@@ -431,6 +446,7 @@ INSERT INTO `gabaritos` (`id`, `cliente`, `numero_pedido`, `plataforma`, `contat
 -- Estrutura para tabela `geolocation_empresa`
 --
 
+DROP TABLE IF EXISTS `geolocation_empresa`;
 CREATE TABLE `geolocation_empresa` (
   `id` int(11) NOT NULL,
   `empresa_id` int(11) DEFAULT 1 COMMENT 'Para multi-empresa, FK para tabela empresa (se houver)',
@@ -449,10 +465,11 @@ CREATE TABLE `geolocation_empresa` (
 -- Estrutura para tabela `historico_alteracoes_ponto`
 --
 
+DROP TABLE IF EXISTS `historico_alteracoes_ponto`;
 CREATE TABLE `historico_alteracoes_ponto` (
   `id` int(11) NOT NULL,
   `apontamento_id` int(11) NOT NULL,
-  `usuario_alterador_id` int(11) NOT NULL COMMENT 'Quem fez a alteração',
+  `usuario_alterador_id` int(11) NOT NULL COMMENT 'Quem fez a alteraÃ§Ã£o',
   `tipo_alteracao` varchar(100) NOT NULL COMMENT 'entrada_criada, saida_criada, entrada_editada, saida_editada, validacao_proximidade_confirmada_saida, etc',
   `valor_anterior` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Valores originais em JSON' CHECK (json_valid(`valor_anterior`)),
   `valor_novo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Novos valores em JSON' CHECK (json_valid(`valor_novo`)),
@@ -467,6 +484,7 @@ CREATE TABLE `historico_alteracoes_ponto` (
 -- Estrutura para tabela `historico_movimentacao`
 --
 
+DROP TABLE IF EXISTS `historico_movimentacao`;
 CREATE TABLE `historico_movimentacao` (
   `id` int(11) NOT NULL,
   `sku` varchar(50) DEFAULT NULL,
@@ -489,6 +507,7 @@ CREATE TABLE `historico_movimentacao` (
 -- Estrutura para tabela `horas_extras`
 --
 
+DROP TABLE IF EXISTS `horas_extras`;
 CREATE TABLE `horas_extras` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -510,6 +529,7 @@ CREATE TABLE `horas_extras` (
 -- Estrutura para tabela `notificacoes_ponto`
 --
 
+DROP TABLE IF EXISTS `notificacoes_ponto`;
 CREATE TABLE `notificacoes_ponto` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -528,6 +548,7 @@ CREATE TABLE `notificacoes_ponto` (
 -- Estrutura para tabela `pedidos_dtf`
 --
 
+DROP TABLE IF EXISTS `pedidos_dtf`;
 CREATE TABLE `pedidos_dtf` (
   `id` int(11) NOT NULL,
   `cliente` varchar(255) NOT NULL,
@@ -550,7 +571,7 @@ CREATE TABLE `pedidos_dtf` (
 --
 
 INSERT INTO `pedidos_dtf` (`id`, `cliente`, `contato`, `plataforma`, `numero_pedido`, `data_pedido`, `data_entrega`, `metros`, `valor_metro`, `valor_final`, `observacoes`, `arquivo_impressao`, `caminho_comprovante`, `data_criacao`) VALUES
-(1, 'test', '+55 47 8444-2116', 'Balcão', '01', '2026-03-03', NULL, 24.00, 44.99, 1079.76, '', '69a7085016bd2.png', '69a7085017223_comp.jpeg', '2026-03-03 16:12:00');
+(1, 'test', '+55 47 8444-2116', 'BalcÃ£o', '01', '2026-03-03', NULL, 24.00, 44.99, 1079.76, '', '69a7085016bd2.png', '69a7085017223_comp.jpeg', '2026-03-03 16:12:00');
 
 -- --------------------------------------------------------
 
@@ -558,6 +579,7 @@ INSERT INTO `pedidos_dtf` (`id`, `cliente`, `contato`, `plataforma`, `numero_ped
 -- Estrutura para tabela `pedidos_producao`
 --
 
+DROP TABLE IF EXISTS `pedidos_producao`;
 CREATE TABLE `pedidos_producao` (
   `id` int(11) NOT NULL,
   `sku` varchar(50) DEFAULT NULL,
@@ -585,6 +607,7 @@ CREATE TABLE `pedidos_producao` (
 -- Estrutura para tabela `produtos`
 --
 
+DROP TABLE IF EXISTS `produtos`;
 CREATE TABLE `produtos` (
   `id` int(11) NOT NULL,
   `sku` varchar(50) NOT NULL,
@@ -802,6 +825,7 @@ INSERT INTO `produtos` (`id`, `sku`, `nome`, `tamanho`, `cor`, `preco_venda`, `c
 -- Estrutura para tabela `servicos`
 --
 
+DROP TABLE IF EXISTS `servicos`;
 CREATE TABLE `servicos` (
   `id` int(11) NOT NULL,
   `cliente` varchar(100) NOT NULL,
@@ -819,6 +843,7 @@ CREATE TABLE `servicos` (
 -- Estrutura para tabela `servicos_os`
 --
 
+DROP TABLE IF EXISTS `servicos_os`;
 CREATE TABLE `servicos_os` (
   `id` int(11) NOT NULL,
   `cliente` varchar(100) NOT NULL,
@@ -839,6 +864,7 @@ CREATE TABLE `servicos_os` (
 -- Estrutura para tabela `sincronizacoes_offline`
 --
 
+DROP TABLE IF EXISTS `sincronizacoes_offline`;
 CREATE TABLE `sincronizacoes_offline` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -856,6 +882,7 @@ CREATE TABLE `sincronizacoes_offline` (
 -- Estrutura para tabela `usuarios`
 --
 
+DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -865,7 +892,7 @@ CREATE TABLE `usuarios` (
   `senha` varchar(255) NOT NULL,
   `nivel` varchar(20) DEFAULT 'comum',
   `carga_horaria_diaria` decimal(4,2) DEFAULT 8.00,
-  `data_admissao` date DEFAULT curdate(),
+  `data_admissao` date DEFAULT NULL,
   `tipo_contrato` varchar(50) DEFAULT 'CLT'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -884,8 +911,9 @@ INSERT INTO `usuarios` (`id`, `nome`, `email`, `departamento`, `cargo`, `senha`,
 
 --
 -- Estrutura stand-in para view `vw_horas_extras_resumo`
--- (Veja abaixo para a visão atual)
+-- (Veja abaixo para a visÃ£o atual)
 --
+DROP TABLE IF EXISTS `vw_horas_extras_resumo`;
 CREATE TABLE `vw_horas_extras_resumo` (
 `usuario_id` int(11)
 ,`nome` varchar(100)
@@ -901,8 +929,9 @@ CREATE TABLE `vw_horas_extras_resumo` (
 
 --
 -- Estrutura stand-in para view `vw_saldo_horas_mensais`
--- (Veja abaixo para a visão atual)
+-- (Veja abaixo para a visÃ£o atual)
 --
+DROP TABLE IF EXISTS `vw_saldo_horas_mensais`;
 CREATE TABLE `vw_saldo_horas_mensais` (
 `usuario_id` int(11)
 ,`nome` varchar(100)
@@ -922,7 +951,7 @@ CREATE TABLE `vw_saldo_horas_mensais` (
 --
 DROP TABLE IF EXISTS `vw_horas_extras_resumo`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_horas_extras_resumo`  AS SELECT `he`.`usuario_id` AS `usuario_id`, `u`.`nome` AS `nome`, year(`he`.`data_referencia`) AS `ano`, month(`he`.`data_referencia`) AS `mes`, count(0) AS `quantidade`, round(sum(`he`.`horas_extras`),2) AS `total_horas`, round(sum(case when `he`.`status` = 'aprovado' then `he`.`horas_extras` else 0 end),2) AS `horas_aprovadas`, round(sum(case when `he`.`status` = 'pago' then `he`.`horas_extras` else 0 end),2) AS `horas_pagas` FROM (`horas_extras` `he` join `usuarios` `u` on(`he`.`usuario_id` = `u`.`id`)) GROUP BY `he`.`usuario_id`, year(`he`.`data_referencia`), month(`he`.`data_referencia`) ;
+CREATE ALGORITHM=UNDEFINED VIEW `vw_horas_extras_resumo` AS SELECT `he`.`usuario_id` AS `usuario_id`, `u`.`nome` AS `nome`, year(`he`.`data_referencia`) AS `ano`, month(`he`.`data_referencia`) AS `mes`, count(0) AS `quantidade`, round(sum(`he`.`horas_extras`),2) AS `total_horas`, round(sum(case when `he`.`status` = 'aprovado' then `he`.`horas_extras` else 0 end),2) AS `horas_aprovadas`, round(sum(case when `he`.`status` = 'pago' then `he`.`horas_extras` else 0 end),2) AS `horas_pagas` FROM (`horas_extras` `he` join `usuarios` `u` on(`he`.`usuario_id` = `u`.`id`)) GROUP BY `he`.`usuario_id`, year(`he`.`data_referencia`), month(`he`.`data_referencia`) ;
 
 -- --------------------------------------------------------
 
@@ -931,14 +960,14 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `vw_saldo_horas_mensais`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vw_saldo_horas_mensais`  AS SELECT `u`.`id` AS `usuario_id`, `u`.`nome` AS `nome`, `u`.`departamento` AS `departamento`, year(`ap`.`data`) AS `ano`, month(`ap`.`data`) AS `mes`, count(distinct `ap`.`data`) AS `dias_trabalhados`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0),2) AS `total_horas`, round(cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `horas_esperadas`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0) - cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `saldo_horas` FROM (`usuarios` `u` left join `apontamentos_ponto` `ap` on(`u`.`id` = `ap`.`usuario_id` and year(`ap`.`data`) = year(current_timestamp()) and month(`ap`.`data`) = month(current_timestamp()))) GROUP BY `u`.`id`, year(`ap`.`data`), month(`ap`.`data`) ;
+CREATE ALGORITHM=UNDEFINED VIEW `vw_saldo_horas_mensais` AS SELECT `u`.`id` AS `usuario_id`, `u`.`nome` AS `nome`, `u`.`departamento` AS `departamento`, year(`ap`.`data`) AS `ano`, month(`ap`.`data`) AS `mes`, count(distinct `ap`.`data`) AS `dias_trabalhados`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0),2) AS `total_horas`, round(cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `horas_esperadas`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0) - cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `saldo_horas` FROM (`usuarios` `u` left join `apontamentos_ponto` `ap` on(`u`.`id` = `ap`.`usuario_id` and year(`ap`.`data`) = year(current_timestamp()) and month(`ap`.`data`) = month(current_timestamp()))) GROUP BY `u`.`id`, year(`ap`.`data`), month(`ap`.`data`) ;
 
 --
--- Índices para tabelas despejadas
+-- Ãndices para tabelas despejadas
 --
 
 --
--- Índices de tabela `apontamentos_ponto`
+-- Ãndices de tabela `apontamentos_ponto`
 --
 ALTER TABLE `apontamentos_ponto`
   ADD PRIMARY KEY (`id`),
@@ -948,7 +977,7 @@ ALTER TABLE `apontamentos_ponto`
   ADD KEY `idx_usuario_mes` (`usuario_id`,`data`);
 
 --
--- Índices de tabela `atestados`
+-- Ãndices de tabela `atestados`
 --
 ALTER TABLE `atestados`
   ADD PRIMARY KEY (`id`),
@@ -958,7 +987,7 @@ ALTER TABLE `atestados`
   ADD KEY `idx_data_inicio` (`data_inicio`);
 
 --
--- Índices de tabela `clientes`
+-- Ãndices de tabela `clientes`
 --
 ALTER TABLE `clientes`
   ADD PRIMARY KEY (`id`),
@@ -968,7 +997,7 @@ ALTER TABLE `clientes`
   ADD UNIQUE KEY `cpf_cnpj_2` (`cpf_cnpj`);
 
 --
--- Índices de tabela `compensacao_horas`
+-- Ãndices de tabela `compensacao_horas`
 --
 ALTER TABLE `compensacao_horas`
   ADD PRIMARY KEY (`id`),
@@ -977,26 +1006,26 @@ ALTER TABLE `compensacao_horas`
   ADD KEY `fk_ch_dsr` (`dsr_id`);
 
 --
--- Índices de tabela `compras`
+-- Ãndices de tabela `compras`
 --
 ALTER TABLE `compras`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `configuracao_ponto`
+-- Ãndices de tabela `configuracao_ponto`
 --
 ALTER TABLE `configuracao_ponto`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `configuracao_pontos_avancado`
+-- Ãndices de tabela `configuracao_pontos_avancado`
 --
 ALTER TABLE `configuracao_pontos_avancado`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_empresa` (`empresa_id`);
 
 --
--- Índices de tabela `dispositivos_autorizados`
+-- Ãndices de tabela `dispositivos_autorizados`
 --
 ALTER TABLE `dispositivos_autorizados`
   ADD PRIMARY KEY (`id`),
@@ -1005,7 +1034,7 @@ ALTER TABLE `dispositivos_autorizados`
   ADD KEY `idx_ativo` (`ativo`);
 
 --
--- Índices de tabela `dsr_descansos`
+-- Ãndices de tabela `dsr_descansos`
 --
 ALTER TABLE `dsr_descansos`
   ADD PRIMARY KEY (`id`),
@@ -1014,7 +1043,7 @@ ALTER TABLE `dsr_descansos`
   ADD KEY `idx_data_dsr` (`data_dsr`);
 
 --
--- Índices de tabela `empresas`
+-- Ãndices de tabela `empresas`
 --
 ALTER TABLE `empresas`
   ADD PRIMARY KEY (`id`),
@@ -1024,27 +1053,27 @@ ALTER TABLE `empresas`
   ADD UNIQUE KEY `cnpj_2` (`cnpj`);
 
 --
--- Índices de tabela `estoque_movimentacao`
+-- Ãndices de tabela `estoque_movimentacao`
 --
 ALTER TABLE `estoque_movimentacao`
   ADD PRIMARY KEY (`id`),
   ADD KEY `produto_id` (`produto_id`);
 
 --
--- Índices de tabela `estoque_movimentacoes`
+-- Ãndices de tabela `estoque_movimentacoes`
 --
 ALTER TABLE `estoque_movimentacoes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `estoque_saldo`
+-- Ãndices de tabela `estoque_saldo`
 --
 ALTER TABLE `estoque_saldo`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_produto` (`id_produto`);
 
 --
--- Índices de tabela `feriados`
+-- Ãndices de tabela `feriados`
 --
 ALTER TABLE `feriados`
   ADD PRIMARY KEY (`id`),
@@ -1054,7 +1083,7 @@ ALTER TABLE `feriados`
   ADD KEY `fk_feriado_empresa` (`empresa_id`);
 
 --
--- Índices de tabela `fornecedores`
+-- Ãndices de tabela `fornecedores`
 --
 ALTER TABLE `fornecedores`
   ADD PRIMARY KEY (`id`),
@@ -1063,13 +1092,13 @@ ALTER TABLE `fornecedores`
   ADD UNIQUE KEY `cnpj` (`cnpj`);
 
 --
--- Índices de tabela `gabaritos`
+-- Ãndices de tabela `gabaritos`
 --
 ALTER TABLE `gabaritos`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `geolocation_empresa`
+-- Ãndices de tabela `geolocation_empresa`
 --
 ALTER TABLE `geolocation_empresa`
   ADD PRIMARY KEY (`id`),
@@ -1077,7 +1106,7 @@ ALTER TABLE `geolocation_empresa`
   ADD KEY `idx_ativo` (`ativo`);
 
 --
--- Índices de tabela `historico_alteracoes_ponto`
+-- Ãndices de tabela `historico_alteracoes_ponto`
 --
 ALTER TABLE `historico_alteracoes_ponto`
   ADD PRIMARY KEY (`id`),
@@ -1086,13 +1115,13 @@ ALTER TABLE `historico_alteracoes_ponto`
   ADD KEY `idx_criado_em` (`criado_em`);
 
 --
--- Índices de tabela `historico_movimentacao`
+-- Ãndices de tabela `historico_movimentacao`
 --
 ALTER TABLE `historico_movimentacao`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `horas_extras`
+-- Ãndices de tabela `horas_extras`
 --
 ALTER TABLE `horas_extras`
   ADD PRIMARY KEY (`id`),
@@ -1103,45 +1132,45 @@ ALTER TABLE `horas_extras`
   ADD KEY `idx_data_referencia` (`data_referencia`);
 
 --
--- Índices de tabela `notificacoes_ponto`
+-- Ãndices de tabela `notificacoes_ponto`
 --
 ALTER TABLE `notificacoes_ponto`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_usuario_lida` (`usuario_id`,`lida`);
 
 --
--- Índices de tabela `pedidos_dtf`
+-- Ãndices de tabela `pedidos_dtf`
 --
 ALTER TABLE `pedidos_dtf`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `pedidos_producao`
+-- Ãndices de tabela `pedidos_producao`
 --
 ALTER TABLE `pedidos_producao`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `produtos`
+-- Ãndices de tabela `produtos`
 --
 ALTER TABLE `produtos`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `sku` (`sku`);
 
 --
--- Índices de tabela `servicos`
+-- Ãndices de tabela `servicos`
 --
 ALTER TABLE `servicos`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `servicos_os`
+-- Ãndices de tabela `servicos_os`
 --
 ALTER TABLE `servicos_os`
   ADD PRIMARY KEY (`id`);
 
 --
--- Índices de tabela `sincronizacoes_offline`
+-- Ãndices de tabela `sincronizacoes_offline`
 --
 ALTER TABLE `sincronizacoes_offline`
   ADD PRIMARY KEY (`id`),
@@ -1149,7 +1178,7 @@ ALTER TABLE `sincronizacoes_offline`
   ADD KEY `idx_sincronizado_em` (`sincronizado_em`);
 
 --
--- Índices de tabela `usuarios`
+-- Ãndices de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
@@ -1322,24 +1351,24 @@ ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- Restrições para tabelas despejadas
+-- RestriÃ§Ãµes para tabelas despejadas
 --
 
 --
--- Restrições para tabelas `apontamentos_ponto`
+-- RestriÃ§Ãµes para tabelas `apontamentos_ponto`
 --
 ALTER TABLE `apontamentos_ponto`
   ADD CONSTRAINT `apontamentos_ponto_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `atestados`
+-- RestriÃ§Ãµes para tabelas `atestados`
 --
 ALTER TABLE `atestados`
   ADD CONSTRAINT `atestados_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `atestados_ibfk_2` FOREIGN KEY (`aprovador_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
--- Restrições para tabelas `compensacao_horas`
+-- RestriÃ§Ãµes para tabelas `compensacao_horas`
 --
 ALTER TABLE `compensacao_horas`
   ADD CONSTRAINT `fk_ch_dsr` FOREIGN KEY (`dsr_id`) REFERENCES `dsr_descansos` (`id`) ON DELETE SET NULL,
@@ -1347,50 +1376,50 @@ ALTER TABLE `compensacao_horas`
   ADD CONSTRAINT `fk_ch_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `configuracao_pontos_avancado`
+-- RestriÃ§Ãµes para tabelas `configuracao_pontos_avancado`
 --
 ALTER TABLE `configuracao_pontos_avancado`
   ADD CONSTRAINT `fk_config_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
--- Restrições para tabelas `dispositivos_autorizados`
+-- RestriÃ§Ãµes para tabelas `dispositivos_autorizados`
 --
 ALTER TABLE `dispositivos_autorizados`
   ADD CONSTRAINT `dispositivos_autorizados_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `dsr_descansos`
+-- RestriÃ§Ãµes para tabelas `dsr_descansos`
 --
 ALTER TABLE `dsr_descansos`
   ADD CONSTRAINT `fk_dsr_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `estoque_movimentacao`
+-- RestriÃ§Ãµes para tabelas `estoque_movimentacao`
 --
 ALTER TABLE `estoque_movimentacao`
   ADD CONSTRAINT `estoque_movimentacao_ibfk_1` FOREIGN KEY (`produto_id`) REFERENCES `produtos` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `estoque_saldo`
+-- RestriÃ§Ãµes para tabelas `estoque_saldo`
 --
 ALTER TABLE `estoque_saldo`
   ADD CONSTRAINT `estoque_saldo_ibfk_1` FOREIGN KEY (`id_produto`) REFERENCES `produtos` (`id`);
 
 --
--- Restrições para tabelas `feriados`
+-- RestriÃ§Ãµes para tabelas `feriados`
 --
 ALTER TABLE `feriados`
   ADD CONSTRAINT `fk_feriado_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
--- Restrições para tabelas `historico_alteracoes_ponto`
+-- RestriÃ§Ãµes para tabelas `historico_alteracoes_ponto`
 --
 ALTER TABLE `historico_alteracoes_ponto`
   ADD CONSTRAINT `historico_alteracoes_ponto_ibfk_1` FOREIGN KEY (`apontamento_id`) REFERENCES `apontamentos_ponto` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `historico_alteracoes_ponto_ibfk_2` FOREIGN KEY (`usuario_alterador_id`) REFERENCES `usuarios` (`id`);
 
 --
--- Restrições para tabelas `horas_extras`
+-- RestriÃ§Ãµes para tabelas `horas_extras`
 --
 ALTER TABLE `horas_extras`
   ADD CONSTRAINT `fk_he_apontamento` FOREIGN KEY (`apontamento_id`) REFERENCES `apontamentos_ponto` (`id`) ON DELETE SET NULL,
@@ -1398,13 +1427,13 @@ ALTER TABLE `horas_extras`
   ADD CONSTRAINT `fk_he_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `notificacoes_ponto`
+-- RestriÃ§Ãµes para tabelas `notificacoes_ponto`
 --
 ALTER TABLE `notificacoes_ponto`
   ADD CONSTRAINT `fk_not_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `sincronizacoes_offline`
+-- RestriÃ§Ãµes para tabelas `sincronizacoes_offline`
 --
 ALTER TABLE `sincronizacoes_offline`
   ADD CONSTRAINT `sincronizacoes_offline_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
