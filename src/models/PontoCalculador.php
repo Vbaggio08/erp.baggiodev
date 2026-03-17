@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Models;
 
-use PDO;
-use DateTime;
+
 
 /**
  * Model: PontoCalculador  
@@ -11,12 +9,22 @@ use DateTime;
  * Implementa lógica CLT brasileira
  */
 class PontoCalculador {
-    private static PDO $db;
-    private static ConfiguracaoPontos $config;
+    private static ?PDO $db = null;
+    private static ?ConfiguracaoPontos $config = null;
     
-    public function __construct(PDO $database) {
-        self::$db = $database;
+    public function __construct(?PDO $database = null) {
+        if ($database) {
+            self::$db = $database;
+        }
         self::$config = new ConfiguracaoPontos($database);
+    }
+
+    private static function getDb(): PDO {
+        if (self::$db === null) {
+            require_once __DIR__ . '/../config/database.php';
+            self::$db = Database::getConnection();
+        }
+        return self::$db;
     }
     
     /**
@@ -29,7 +37,7 @@ class PontoCalculador {
         }
         
         // Obter usuário e sua carga horária
-        $stmt = self::$db->prepare("SELECT * FROM usuarios WHERE id = ?");
+        $stmt = self::getDb()->prepare("SELECT * FROM usuarios WHERE id = ?");
         $stmt->execute([$usuario_id]);
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -40,7 +48,7 @@ class PontoCalculador {
         $carga_horaria = floatval(str_replace(',', '.', $usuario['carga_horaria_diaria']));
         
         // Obter apontamentos do mês
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT ap.*, f.descricao as feriado_desc
             FROM apontamentos_ponto ap
             LEFT JOIN feriados f ON DATE(ap.data) = f.data
@@ -146,7 +154,7 @@ class PontoCalculador {
      * Lei 605/49 - pago mesmo sem trabalhar no domingo
      */
     public static function calcularDSRSemana(int $usuario_id, DateTime $data_semana): array {
-        $usuario_stmt = self::$db->prepare("SELECT * FROM usuarios WHERE id = ?");
+        $usuario_stmt = self::getDb()->prepare("SELECT * FROM usuarios WHERE id = ?");
         $usuario_stmt->execute([$usuario_id]);
         $usuario = $usuario_stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -161,7 +169,7 @@ class PontoCalculador {
         $segunda = clone $domingo_semana->modify('-6 days');
         
         // Contar dias trabalhados na semana
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT COUNT(DISTINCT DATE(data)) as dias
             FROM apontamentos_ponto
             WHERE usuario_id = ?
@@ -208,14 +216,14 @@ class PontoCalculador {
             $mes_ano = date('Y-m');
         }
         
-        $usuario_stmt = self::$db->prepare("SELECT * FROM usuarios WHERE id = ?");
+        $usuario_stmt = self::getDb()->prepare("SELECT * FROM usuarios WHERE id = ?");
         $usuario_stmt->execute([$usuario_id]);
         $usuario = $usuario_stmt->fetch(PDO::FETCH_ASSOC);
         
         $carga_diaria = floatval(str_replace(',', '.', $usuario['carga_horaria_diaria']));
         
         // Obter apontamentos do mês
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT * FROM apontamentos_ponto
             WHERE usuario_id = ?
             AND DATE_FORMAT(data, '%Y-%m') = ?

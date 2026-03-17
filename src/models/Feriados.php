@@ -1,25 +1,32 @@
 <?php
 
-namespace App\Models;
 
-use PDO;
 
 /**
  * Model: Feriados
  * Gerencia feriados nacionais, estaduais, municipais e pontes
  */
 class Feriados {
-    private static PDO $db;
+    private static ?PDO $db = null;
     
-    public function __construct(PDO $database) {
-        self::$db = $database;
+    public function __construct(?PDO $database = null) {
+        if ($database) {
+            self::$db = $database;
+        }
+    }
+    
+    private static function getDb(): PDO {
+        if (self::$db === null) {
+            self::$db = Database::getConnection();
+        }
+        return self::$db;
     }
     
     /**
      * Verificar se uma data é feriado
      */
     public static function ehFeriado(\DateTime $data): bool {
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT COUNT(*) as total FROM feriados
             WHERE data = ?
         ");
@@ -34,7 +41,7 @@ class Feriados {
      * Obter informações do feriado
      */
     public static function obterFeriado(\DateTime $data): ?array {
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT * FROM feriados WHERE data = ?
         ");
         
@@ -48,7 +55,7 @@ class Feriados {
      * Listar feriados de um período
      */
     public static function listarPeriodo(string $data_inicio, string $data_fim): array {
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT * FROM feriados
             WHERE data BETWEEN ? AND ?
             ORDER BY data ASC
@@ -62,7 +69,7 @@ class Feriados {
      * Listar feriados móveis de um ano (Páscoa, Carnaval, etc)
      */
     public static function listarFeriadosMoveisAno(int $ano): array {
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT * FROM feriados
             WHERE YEAR(data) = ?
             AND tipo IN ('ponte', 'móvel')
@@ -88,21 +95,21 @@ class Feriados {
             throw new \Exception("Data inválida: {$data}");
         }
         
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             INSERT INTO feriados (data, descricao, tipo, empresa_id)
             VALUES (?, ?, ?, ?)
         ");
         
         $stmt->execute([$data, $descricao, $tipo, $empresa_id]);
         
-        return (int)self::$db->lastInsertId();
+        return (int)self::getDb()->lastInsertId();
     }
     
     /**
      * Remover feriado
      */
     public static function remover(int $id): bool {
-        $stmt = self::$db->prepare("DELETE FROM feriados WHERE id = ?");
+        $stmt = self::getDb()->prepare("DELETE FROM feriados WHERE id = ?");
         return $stmt->execute([$id]);
     }
     

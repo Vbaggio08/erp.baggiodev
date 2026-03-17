@@ -1,19 +1,27 @@
 <?php
 
-namespace App\Models;
 
-use PDO;
 
 /**
  * Model: ConfiguracaoPontos
  * Gerencia configurações do sistema de ponto (horas extras, DSR, tolerâncias, etc)
  */
 class ConfiguracaoPontos {
-    private static PDO $db;
+    private static ?PDO $db = null;
     private static ?array $cache_config = null;
     
-    public function __construct(PDO $database) {
-        self::$db = $database;
+    public function __construct(?PDO $database = null) {
+        if ($database) {
+            self::$db = $database;
+        }
+    }
+
+    private static function getDb(): PDO {
+        if (self::$db === null) {
+            require_once __DIR__ . '/../config/database.php';
+            self::$db = Database::getConnection();
+        }
+        return self::$db;
     }
     
     /**
@@ -25,7 +33,7 @@ class ConfiguracaoPontos {
             return self::$cache_config;
         }
         
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT * FROM configuracao_pontos_avancado
             WHERE empresa_id = ? OR empresa_id IS NULL
             ORDER BY empresa_id DESC
@@ -87,7 +95,7 @@ class ConfiguracaoPontos {
      */
     public static function atualizar(array $dados, ?int $empresa_id = null): bool {
         // Verificar se existe
-        $stmt = self::$db->prepare("SELECT id FROM configuracao_pontos_avancado WHERE empresa_id = ? OR (empresa_id IS NULL AND ? IS NULL)");
+        $stmt = self::getDb()->prepare("SELECT id FROM configuracao_pontos_avancado WHERE empresa_id = ? OR (empresa_id IS NULL AND ? IS NULL)");
         $stmt->execute([$empresa_id, $empresa_id]);
         $existe = $stmt->fetch();
         
@@ -108,12 +116,12 @@ class ConfiguracaoPontos {
             return false;
         }
         
-        $valores[] = $empresa_id;
-        
         if ($existe) {
             // UPDATE
             $query = "UPDATE configuracao_pontos_avancado SET " . implode(", ", $colunas);
             $query .= " WHERE empresa_id = ? OR (empresa_id IS NULL AND ? IS NULL)";
+            $valores[] = $empresa_id;
+            $valores[] = $empresa_id;
         } else {
             // INSERT
             $dados['empresa_id'] = $empresa_id;
@@ -126,7 +134,7 @@ class ConfiguracaoPontos {
             $valores = array_values($dados);
         }
         
-        $stmt = self::$db->prepare($query);
+        $stmt = self::getDb()->prepare($query);
         $resultado = $stmt->execute($valores);
         
         if ($resultado) {
@@ -207,7 +215,7 @@ class ConfiguracaoPontos {
      * Listar todas as configurações
      */
     public static function listarTodas(): array {
-        $stmt = self::$db->query("SELECT * FROM configuracao_pontos_avancado ORDER BY empresa_id");
+        $stmt = self::getDb()->query("SELECT * FROM configuracao_pontos_avancado ORDER BY empresa_id");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     

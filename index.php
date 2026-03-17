@@ -43,7 +43,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $rota = $_GET['rota'] ?? 'dashboard'; // Se não tiver rota, vai pro dashboard
 
 // Rotas que NÃO precisam de login (Públicas)
-$rotasPublicas = ['login', 'autenticar'];
+$rotasPublicas = ['login', 'autenticar', 'bater_ponto_cpf_login'];
 
 // Se não estiver logado e tentar acessar página protegida, manda pro login
 if (!isset($_SESSION['user_id']) && !in_array($rota, $rotasPublicas)) {
@@ -196,6 +196,16 @@ switch ($rota) {
     case 'salvar_dtf':
         require_once 'src/controllers/PedidoController.php';
         (new PedidoController())->salvar_dtf();
+        break;
+
+    case 'ver_producao_dtf':
+        require_once 'src/controllers/PedidoController.php';
+        (new PedidoController())->listar_dtf();
+        break;
+
+    case 'excluir_dtf':
+        require_once 'src/controllers/PedidoController.php';
+        (new PedidoController())->excluir_dtf();
         break;
 
 
@@ -388,12 +398,17 @@ switch ($rota) {
     
     case 'bater_ponto_ajax':
         require_once 'src/controllers/PontoController.php';
-        (new PontoController())->baterPontoAjax();
+        echo (new PontoController())->baterPontoAjax();
+        break;
+
+    case 'bater_ponto_cpf_login':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->baterPontoCpfLogin();
         break;
     
     case 'confirmar_alteracao':
         require_once 'src/controllers/PontoController.php';
-        (new PontoController())->confirmarAlteracao();
+        echo (new PontoController())->confirmarAlteracao();
         break;
     
     case 'meu_ponto':
@@ -410,6 +425,11 @@ switch ($rota) {
         require_once 'src/controllers/PontoController.php';
         (new PontoController())->listarPontosTodos();
         break;
+
+    case 'espelho_ponto_funcionario':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->espelhoPontoFuncionario();
+        break;
     
     case 'editar_ponto':
         require_once 'src/controllers/PontoController.php';
@@ -420,6 +440,21 @@ switch ($rota) {
         require_once 'src/controllers/PontoController.php';
         (new PontoController())->salvarEdicaoPonto();
         break;
+
+    case 'solicitacoes_alteracao_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->listarSolicitacoesAlteracao();
+        break;
+
+    case 'aprovar_solicitacao_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->aprovarSolicitacaoAlteracao();
+        break;
+
+    case 'rejeitar_solicitacao_ponto':
+        require_once 'src/controllers/PontoController.php';
+        (new PontoController())->rejeitarSolicitacaoAlteracao();
+        break;
     
     case 'solicitar_alteracao_ponto':
         require_once 'src/controllers/PontoController.php';
@@ -428,12 +463,12 @@ switch ($rota) {
     
     case 'sincronizar_offline':
         require_once 'src/controllers/PontoController.php';
-        (new PontoController())->sincronizarOffline();
+        echo (new PontoController())->sincronizarOffline();
         break;
     
     case 'status_sincronizacao':
         require_once 'src/controllers/PontoController.php';
-        (new PontoController())->statusSincronizacao();
+        echo (new PontoController())->statusSincronizacao();
         break;
     
     case 'relatorio_ponto_mes':
@@ -592,10 +627,170 @@ switch ($rota) {
     case 'testar_email':
         require_once 'src/models/NotificadorEmail.php';
         $email_teste = $_GET['email'] ?? $_SESSION['user_email'] ?? '';
-        \Src\Models\NotificadorEmail::testar($email_teste);
+        NotificadorEmail::testar($email_teste);
         echo '<pre>Email de teste enviado para: ' . $email_teste . '</pre>';
         break;
 
+    // --- ⏳ HORAS EXTRAS ---
+    case 'horas_extras_pendentes':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/HorasExtrasController.php';
+        echo (new HorasExtrasController())->listarPendentes();
+        break;
+
+    case 'horas_extras_aprovar':
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            require_once_exists('src/views/geral/header.php');
+            require_once_exists('src/views/admin/horas_extras_aprovar.php');
+            require_once_exists('src/views/geral/footer.php');
+        } else {
+            header('Content-Type: application/json');
+            require_once 'src/controllers/HorasExtrasController.php';
+            echo (new HorasExtrasController())->aprovar();
+        }
+        break;
+
+    case 'horas_extras_rejeitar':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/HorasExtrasController.php';
+        echo (new HorasExtrasController())->rejeitar();
+        break;
+
+    case 'horas_extras_historico':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/HorasExtrasController.php';
+        echo (new HorasExtrasController())->historico();
+        break;
+
+    case 'horas_extras_relatorio':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/HorasExtrasController.php';
+        echo (new HorasExtrasController())->relatorio();
+        break;
+
+    case 'horas_extras_detectar':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/HorasExtrasController.php';
+        echo (new HorasExtrasController())->detectarPotenciais();
+        break;
+
+    case 'horas_extras_pagar':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/HorasExtrasController.php';
+        echo (new HorasExtrasController())->marcarComoPago();
+        break;
+
+    case 'horas_extras_registrar':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/HorasExtrasController.php';
+        echo (new HorasExtrasController())->registrar();
+        break;
+
+    // --- 📊 PONTO FASE 3: Endpoints Avançados ---
+    case 'calcular_saldo_mensal':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->calcularSaldoMensal();
+        break;
+
+    case 'relatorio_avancado':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->relatorioMensalAvancado();
+        break;
+
+    case 'detectar_horas_extras':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->detectarHorasExtrasAutomaticamente();
+        break;
+
+    case 'configuracao_ponto_json':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->obterConfiguracaoPonto();
+        break;
+
+    case 'salvar_configuracao_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->salvarConfiguracaoPonto();
+        break;
+
+    case 'autorizar_maquina_global_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->autorizarMaquinaGlobalPonto();
+        break;
+
+    case 'status_maquina_global_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->statusMaquinaGlobalPonto();
+        break;
+
+    case 'configuracao_ponto_usuario_json':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->obterConfiguracaoPontoUsuario();
+        break;
+
+    case 'salvar_configuracao_ponto_usuario':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->salvarConfiguracaoPontoUsuario();
+        break;
+
+    case 'resetar_configuracao_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->resetarConfiguracaoPonto();
+        break;
+
+    case 'listar_feriados_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->listarFeriadosConfiguracao();
+        break;
+
+    case 'adicionar_feriado_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->adicionarFeriadoConfiguracao();
+        break;
+
+    case 'remover_feriado_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->removerFeriadoConfiguracao();
+        break;
+
+    case 'usuarios_teste_json':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->listarUsuariosTeste();
+        break;
+
+    case 'dsr_semana':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->visualizarDSRSemana();
+        break;
+
+    case 'meu_ponto_json':
+        header('Content-Type: application/json');
+        require_once 'src/controllers/PontoController.php';
+        require_once 'src/models/Ponto.php';
+        $usuario_id = $_SESSION['user_id'] ?? 0;
+        $mes = $_GET['mes'] ?? date('Y-m');
+        $parts = explode('-', $mes);
+        $db = Database::getConnection();
+        $sql = "SELECT * FROM apontamentos_ponto WHERE usuario_id = ? AND YEAR(data) = ? AND MONTH(data) = ? ORDER BY data DESC LIMIT 30";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$usuario_id, $parts[0], $parts[1]]);
+        $apontamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($apontamentos as &$apt) {
+            $apt['total_horas'] = Ponto::calcularHorasTrabalhadas($apt);
+            $apt['data'] = date('d/m/Y', strtotime($apt['data']));
+        }
+        echo json_encode($apontamentos);
+        break;
+
+    case 'configuracao_ponto':
+        if (isset($_SESSION['usuario_admin']) && $_SESSION['usuario_admin'] == 1) {
+            require_once_exists('src/views/geral/header.php');
+            require_once_exists('src/views/admin/configuracao_ponto.php');
+            require_once_exists('src/views/geral/footer.php');
+        } else {
+            header('HTTP/1.1 403 Forbidden');
+            echo 'Acesso negado. Apenas administradores.';
+        }
+        break;
 
     // --- �🚫 ROTA PADRÃO (404) ---
     default:

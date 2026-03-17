@@ -21,7 +21,7 @@
                         <?php for ($m = 1; $m <= 12; $m++): ?>
                             <option value="<?php echo str_pad($m, 2, '0', STR_PAD_LEFT); ?>" 
                                     <?php echo ($_GET['mes'] ?? date('m')) === str_pad($m, 2, '0', STR_PAD_LEFT) ? 'selected' : ''; ?>>
-                                <?php echo strftime('%B', mktime(0, 0, 0, $m, 1)); ?>
+                                <?php $meses_br = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; echo $meses_br[(int)$m]; ?>
                             </option>
                         <?php endfor; ?>
                     </select>
@@ -141,7 +141,7 @@
                         <tr>
                             <td><?php echo $atestado['nome']; ?></td>
                             <td><span class="badge bg-secondary"><?php echo $atestado['departamento']; ?></span></td>
-                            <td><?php echo $atestado['tipo_afastamento']; ?></td>
+                            <td><?php echo ucfirst(str_replace('_', ' ', $atestado['tipo'])); ?></td>
                             <td><?php echo date('d/m/Y', strtotime($atestado['data_inicio'])); ?></td>
                             <td><?php echo date('d/m/Y', strtotime($atestado['data_fim'])); ?></td>
                             <td>
@@ -160,9 +160,9 @@
                                     <?php echo strtoupper($atestado['status']); ?>
                                 </span>
                             </td>
-                            <td><?php echo date('d/m/Y', strtotime($atestado['data_processamento'])); ?></td>
+                            <td><?php echo $atestado['aprovado_em'] ? date('d/m/Y', strtotime($atestado['aprovado_em'])) : '-'; ?></td>
                             <td>
-                                <a href="assets/uploads/atestados/<?php echo $atestado['arquivo_comprovante']; ?>" 
+                                <a href="assets/uploads/atestados/<?php echo $atestado['comprovante_url']; ?>" 
                                    target="_blank" 
                                    class="btn btn-sm btn-info"
                                    title="Visualizar arquivo">
@@ -194,12 +194,12 @@
                     </thead>
                     <tbody>
                         <?php 
-                            $tipos = array_values(array_unique(array_column($atestados, 'tipo_afastamento')));
+                            $tipos = array_values(array_unique(array_column($atestados, 'tipo')));
                             $total_atestados = count($atestados);
                             
                             foreach ($tipos as $tipo):
                                 $atestados_tipo = array_filter($atestados, function($a) use ($tipo) {
-                                    return $a['tipo_afastamento'] === $tipo;
+                                    return $a['tipo'] === $tipo;
                                 });
                                 $qtd = count($atestados_tipo);
                                 $dias = 0;

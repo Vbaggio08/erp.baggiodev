@@ -1,7 +1,5 @@
 <?php
 
-namespace Src\Models;
-
 /**
  * GeradorRelatorioPDF/CSV - FASE 5
  * 
@@ -47,6 +45,15 @@ class GeradorRelatorioPDF
     ): string {
         $data_emissao = date('d/m/Y H:i');
         $mes_texto = $this->formatarMes($mes_ano);
+
+        // Extrair variáveis para uso no heredoc (PHP não suporta ?? em interpolação)
+        $dias_trabalhados = $dados_ponto['dias_trabalhados'] ?? 0;
+        $dias_uteis = $dados_ponto['dias_uteis'] ?? 0;
+        $faltas = $dados_ponto['faltas'] ?? 0;
+        $atestados = $dados_ponto['atestados'] ?? 0;
+        $horas_trabalhadas = $this->formatarHoras($dados_ponto['horas_trabalhadas'] ?? 0);
+        $horas_esperadas = $this->formatarHoras($dados_ponto['horas_esperadas'] ?? 0);
+        $saldo_final = $this->formatarHoras($dados_ponto['saldo_final'] ?? 0);
 
         $html = <<<HTML
 <!DOCTYPE html>
@@ -101,13 +108,13 @@ class GeradorRelatorioPDF
                     <th>Horas Trabalhadas</th><th>Horas Esperadas</th><th>Saldo Final</th>
                 </tr>
                 <tr>
-                    <td class="text-center">{$dados_ponto['dias_trabalhados'] ?? 0}</td>
-                    <td class="text-center">{$dados_ponto['dias_uteis'] ?? 0}</td>
-                    <td class="text-center">{$dados_ponto['faltas'] ?? 0}</td>
-                    <td class="text-center">{$dados_ponto['atestados'] ?? 0}</td>
-                    <td class="text-right">{$this->formatarHoras($dados_ponto['horas_trabalhadas'] ?? 0)}</td>
-                    <td class="text-right">{$this->formatarHoras($dados_ponto['horas_esperadas'] ?? 0)}</td>
-                    <td class="text-right" style="font-weight:bold;background:#e7f3ff;">{$this->formatarHoras($dados_ponto['saldo_final'] ?? 0)}</td>
+                    <td class="text-center">{$dias_trabalhados}</td>
+                    <td class="text-center">{$dias_uteis}</td>
+                    <td class="text-center">{$faltas}</td>
+                    <td class="text-center">{$atestados}</td>
+                    <td class="text-right">{$horas_trabalhadas}</td>
+                    <td class="text-right">{$horas_esperadas}</td>
+                    <td class="text-right" style="font-weight:bold;background:#e7f3ff;">{$saldo_final}</td>
                 </tr>
             </table>
         </div>
@@ -123,11 +130,15 @@ HTML;
                 $data = date('d/m/Y', strtotime($apt['data'] ?? $apt['data_apontamento'] ?? ''));
                 $total = $this->formatarHoras($apt['total_horas'] ?? 0);
                 $status = $apt['status'] ?? 'Normal';
+                $e1 = $apt['hora_entrada_1'] ?? '-';
+                $s1 = $apt['hora_saida_1'] ?? '-';
+                $e2 = $apt['hora_entrada_2'] ?? '-';
+                $s2 = $apt['hora_saida_2'] ?? '-';
                 $html .= "<tr><td><strong>$data</strong></td>";
-                $html .= "<td class=\"text-center\">{$apt['hora_entrada_1'] ?? '-'}</td>";
-                $html .= "<td class=\"text-center\">{$apt['hora_saida_1'] ?? '-'}</td>";
-                $html .= "<td class=\"text-center\">{$apt['hora_entrada_2'] ?? '-'}</td>";
-                $html .= "<td class=\"text-center\">{$apt['hora_saida_2'] ?? '-'}</td>";
+                $html .= "<td class=\"text-center\">{$e1}</td>";
+                $html .= "<td class=\"text-center\">{$s1}</td>";
+                $html .= "<td class=\"text-center\">{$e2}</td>";
+                $html .= "<td class=\"text-center\">{$s2}</td>";
                 $html .= "<td class=\"text-right\"><strong>$total</strong></td>";
                 $html .= "<td class=\"text-center\"><span style=\"background:#e7f3ff;padding:3px 8px;border-radius:3px;font-size:11px;\">$status</span></td></tr>";
             }
@@ -167,9 +178,15 @@ HTML;
             $csv .= "Data,Entrada 1,Saída 1,Entrada 2,Saída 2,Total Horas,Status\n";
             foreach ($apontamentos as $apt) {
                 $data = date('d/m/Y', strtotime($apt['data'] ?? $apt['data_apontamento'] ?? ''));
-                $csv .= "\"{$data}\",\"{$apt['hora_entrada_1'] ?? '-'}\",\"{$apt['hora_saida_1'] ?? '-'}\",";
-                $csv .= "\"{$apt['hora_entrada_2'] ?? '-'}\",\"{$apt['hora_saida_2'] ?? '-'}\",";
-                $csv .= "{$apt['total_horas']},\"{$apt['status'] ?? 'Normal'}\"\n";
+                $e1 = $apt['hora_entrada_1'] ?? '-';
+                $s1 = $apt['hora_saida_1'] ?? '-';
+                $e2 = $apt['hora_entrada_2'] ?? '-';
+                $s2 = $apt['hora_saida_2'] ?? '-';
+                $total_h = $apt['total_horas'] ?? 0;
+                $status = $apt['status'] ?? 'Normal';
+                $csv .= "\"{$data}\",\"{$e1}\",\"{$s1}\",";
+                $csv .= "\"{$e2}\",\"{$s2}\",";
+                $csv .= "{$total_h},\"{$status}\"\n";
             }
         }
 

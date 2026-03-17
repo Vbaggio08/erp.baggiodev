@@ -20,7 +20,7 @@ class AuditoriaController {
                 ORDER BY h.criado_em DESC
                 LIMIT 50";
         
-        $alteracoes_recentes = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        $alteracoes = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
         
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/admin/auditoria_dashboard.php';
@@ -33,7 +33,27 @@ class AuditoriaController {
     public function historicoApontamento() {
         $this->verificarRH();
         
-        $apontamento_id = $_GET['id'];
+        $apontamento_id = (int)($_GET['id'] ?? 0);
+        if ($apontamento_id <= 0) {
+            header('Location: index.php?rota=auditoria_dashboard');
+            exit;
+        }
+
+        $pdo = Database::getConnection();
+
+        $sql = "SELECT ap.*, u.nome as usuario_nome
+                FROM apontamentos_ponto ap
+                INNER JOIN usuarios u ON ap.usuario_id = u.id
+                WHERE ap.id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$apontamento_id]);
+        $apontamento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$apontamento) {
+            header('Location: index.php?rota=auditoria_dashboard');
+            exit;
+        }
+
         $historico = AuditoriaAlteracao::obterHistoricoApontamento($apontamento_id);
         
         require __DIR__ . '/../views/geral/header.php';
@@ -108,14 +128,24 @@ class AuditoriaController {
         header('Content-Type: application/json');
         $this->verificarAdmin();
         
-        $auditoria_id = $_GET['id'];
+        $auditoria_id = (int)($_GET['id'] ?? 0);
+        if ($auditoria_id <= 0) {
+            echo json_encode([
+                'id' => 0,
+                'valido' => false,
+                'mensagem' => 'ID inválido'
+            ]);
+            return;
+        }
+
         $valido = AuditoriaAlteracao::validarIntegridade($auditoria_id);
         
-        return json_encode([
+        echo json_encode([
             'id' => $auditoria_id,
             'valido' => $valido,
             'mensagem' => $valido ? 'Hash válido' : 'Hash inválido - registro foi alterado!'
         ]);
+        return;
     }
     
     private function verificarAdmin() {

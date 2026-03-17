@@ -55,7 +55,7 @@ class AtestadoController {
         $this->verificarLogin();
         
         $usuario_id = $_SESSION['user_id'];
-        $atestados = Atestado::listarPorUsuario($usuario_id);
+        $meus_atestados = Atestado::listarPorUsuario($usuario_id);
         
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/meus_atestados.php';

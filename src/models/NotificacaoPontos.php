@@ -1,10 +1,5 @@
 <?php
 
-namespace Src\Models;
-
-use Src\Config\Database;
-use PDO;
-
 /**
  * NotificacaoPontos Model
  * 
@@ -254,7 +249,7 @@ class NotificacaoPontos
         try {
             $db = Database::getConnection();
 
-            $sql = "UPDATE notificacoes_ponto SET lida = TRUE, lida_em = NOW() WHERE id = :id";
+            $sql = "UPDATE notificacoes_ponto SET lida = TRUE, data_leitura = NOW() WHERE id = :id";
             $stmt = $db->prepare($sql);
 
             return $stmt->execute(['id' => $id]);
@@ -274,7 +269,7 @@ class NotificacaoPontos
         try {
             $db = Database::getConnection();
 
-            $sql = "UPDATE notificacoes_ponto SET lida = TRUE, lida_em = NOW() 
+            $sql = "UPDATE notificacoes_ponto SET lida = TRUE, data_leitura = NOW() 
                    WHERE usuario_id = :usuario_id AND lida = FALSE";
             $stmt = $db->prepare($sql);
             $stmt->execute(['usuario_id' => $usuario_id]);
@@ -391,7 +386,7 @@ class NotificacaoPontos
             mensagem: "Sua solicitação de $horas horas extras foi aprovada por $aprovado_por",
             topico: self::TOPICO_HORAS_EXTRAS,
             link: '/dashboard/horas-extras',
-            ['horas' => $horas, 'aprovado_por' => $aprovado_por]
+            dados_adicionais: ['horas' => $horas, 'aprovado_por' => $aprovado_por]
         );
     }
 
@@ -411,7 +406,7 @@ class NotificacaoPontos
             mensagem: "Sua solicitação de $horas horas extras foi rejeitada. Motivo: $motivo",
             topico: self::TOPICO_HORAS_EXTRAS,
             link: '/dashboard/horas-extras',
-            ['horas' => $horas, 'motivo' => $motivo]
+            dados_adicionais: ['horas' => $horas, 'motivo' => $motivo]
         );
     }
 
@@ -443,7 +438,7 @@ class NotificacaoPontos
             mensagem: "Você atingiu $atual de $limite_mes horas extras permitidas neste mês",
             topico: self::TOPICO_HORAS_EXTRAS,
             link: '/dashboard/horas-extras',
-            ['atual' => $atual, 'limite' => $limite_mes, 'percentual' => $percentual]
+            dados_adicionais: ['atual' => $atual, 'limite' => $limite_mes, 'percentual' => $percentual]
         );
     }
 
@@ -463,7 +458,7 @@ class NotificacaoPontos
             mensagem: "Você tem direito a DSR da semana $semana_numero com valor de $valor_dsr horas",
             topico: self::TOPICO_DSR,
             link: '/dashboard/dsr',
-            ['semana' => $semana_numero, 'valor' => $valor_dsr]
+            dados_adicionais: ['semana' => $semana_numero, 'valor' => $valor_dsr]
         );
     }
 

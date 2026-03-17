@@ -11,14 +11,14 @@
  * - Status visual offline/online
  */
 
-// Validar autenticação
-if (empty($_SESSION['usuario_id'])) {
+// Validar autenticação - usa user_id setado em LoginController
+if (empty($_SESSION['user_id'])) {
     header('Location: /login');
     exit;
 }
 
-$usuario_id = $_SESSION['usuario_id'];
-$usuario_nome = $_SESSION['usuario_nome'] ?? 'Usuário';
+$usuario_id = $_SESSION['user_id'];
+$usuario_nome = $_SESSION['user_name'] ?? 'Usuário';
 ?>
 
 <div class="container-fluid mt-4">

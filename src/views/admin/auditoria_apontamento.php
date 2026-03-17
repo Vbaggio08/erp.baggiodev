@@ -18,7 +18,7 @@
                             <p><strong>Funcionário:</strong> <?php echo $apontamento['usuario_nome']; ?></p>
                             <p><strong>Data:</strong> <?php echo date('d/m/Y', strtotime($apontamento['data'])); ?></p>
                             <p><strong>Status Atual:</strong> 
-                                <span class="badge badge-<?php 
+                                <span class="badge bg-<?php 
                                     echo $apontamento['status'] === 'presente' ? 'success' : 
                                          ($apontamento['status'] === 'falta' ? 'danger' : 'info');
                                 ?>">
@@ -46,6 +46,28 @@
                                     <td><?php echo $apontamento['hora_saida_2'] ?? '---'; ?></td>
                                 </tr>
                             </table>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <p><strong>Fotos do Apontamento:</strong></p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <?php
+                                $fotos = [
+                                    'Entrada 1' => $apontamento['foto_entrada_1'] ?? null,
+                                    'Saída 1' => $apontamento['foto_saida_1'] ?? null,
+                                    'Entrada 2' => $apontamento['foto_entrada_2'] ?? null,
+                                    'Saída 2' => $apontamento['foto_saida_2'] ?? null,
+                                ];
+                                foreach ($fotos as $rotulo => $fotoPath):
+                                    if (empty($fotoPath)) continue;
+                                    $urlFoto = (strpos($fotoPath, 'data:image') === 0)
+                                        ? $fotoPath
+                                        : (defined('BASE_URL') ? BASE_URL : '') . ltrim($fotoPath, '/');
+                                ?>
+                                    <a href="<?php echo htmlspecialchars($urlFoto); ?>" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <?php echo $rotulo; ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -88,45 +110,19 @@
                                                 ?>
                                             </strong>
                                             <span class="float-end text-muted">
-                                                <?php echo date('d/m/Y H:i:s', strtotime($evento['data_alteracao'])); ?>
+                                                <?php echo date('d/m/Y H:i:s', strtotime($evento['criado_em'])); ?>
                                             </span>
                                         </div>
                                         <div class="card-body">
                                             <p class="small mb-2">
                                                 <strong>Responsável:</strong> 
-                                                <?php 
-                                                    if ($evento['usuario_alterador_id'] === $evento['usuario_id']) {
-                                                        echo $evento['usuario_nome'] . ' (próprio usuário)';
-                                                    } else {
-                                                        echo $evento['usuario_alterador_nome'] . ' (RH/Admin) ⚠️';
-                                                    }
-                                                ?>
-                                            </p>
-                                            <p class="small mb-2">
-                                                <strong>IP de Origem:</strong> <code><?php echo $evento['ip_origem']; ?></code>
-                                            </p>
-                                            <p class="small mb-2">
-                                                <strong>Geolocalização:</strong> 📍 <?php echo $evento['latitude'] ?? 'Não capturada'; ?>, <?php echo $evento['longitude'] ?? ''; ?>
+                                                <?php echo !empty($evento['usuario_nome']) ? $evento['usuario_nome'] : 'Sistema'; ?>
                                             </p>
                                             
                                             <!-- Detalhes da Alteração -->
-                                            <?php if ($evento['tipo_alteracao'] === 'ponto_editado'): ?>
-                                                <div class="alert alert-info small">
-                                                    <p class="mb-1"><strong>Alterações Realizadas:</strong></p>
-                                                    <code><?php echo nl2br($evento['detalhes']); ?></code>
-                                                </div>
-                                            <?php else: ?>
-                                                <p class="small text-muted"><?php echo $evento['detalhes']; ?></p>
-                                            <?php endif; ?>
-                                            
-                                            <!-- Foto Capturada (se existir) -->
-                                            <?php if ($evento['tipo_alteracao'] === 'foto_capturada' && isset($evento['foto_path'])): ?>
-                                                <p class="small">
-                                                    <a href="<?php echo $evento['foto_path']; ?>" target="_blank" class="btn btn-sm btn-info">
-                                                        👁️ Ver Foto
-                                                    </a>
-                                                </p>
-                                            <?php endif; ?>
+                                            <p class="small mb-2"><strong>Motivo:</strong> <?php echo !empty($evento['motivo_alteracao']) ? htmlspecialchars($evento['motivo_alteracao']) : 'Não informado'; ?></p>
+                                            <div class="small text-muted mb-2"><strong>Valor anterior:</strong> <code><?php echo htmlspecialchars((string)($evento['valor_anterior'] ?? '')); ?></code></div>
+                                            <div class="small text-muted"><strong>Valor novo:</strong> <code><?php echo htmlspecialchars((string)($evento['valor_novo'] ?? '')); ?></code></div>
                                         </div>
                                         <div class="card-footer bg-light">
                                             <span class="badge bg-secondary"><?php echo $evento['tipo_alteracao']; ?></span>
@@ -179,8 +175,8 @@
         top: 0;
         width: 24px;
         height: 24px;
-        background: white;
-        border: 3px solid #007bff;
+        background: var(--surface-color);
+        border: 3px solid var(--primary-color);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -198,7 +194,7 @@
         top: 30px;
         bottom: 0;
         width: 3px;
-        background: #dee2e6;
+        background: #444;
     }
 </style>
 
@@ -213,7 +209,7 @@ function validarIntegridade(apontamentoId) {
                     <div class="alert alert-success">
                         ✅ <strong>Integridade Verificada!</strong>
                         <p>Este apontamento não foi alterado desde sua criação.</p>
-                        <code>${data.hash}</code>
+                        <code>ID auditoria: ${data.id}</code>
                     </div>
                 `;
             } else {

@@ -9,11 +9,11 @@
  * - Tolerâncias de entrada/saída
  * - Configurações de feriados
  * 
- * Requer: $_SESSION['role'] === 'admin' ou 'RH'
+ * Requer: $_SESSION['user_nivel'] === 'admin' ou 'rh'
  */
 
 // Garantir autenticação e autorização
-if (empty($_SESSION['usuario_id']) || !in_array($_SESSION['role'] ?? '', ['admin', 'RH'])) {
+if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_nivel'] ?? '', ['admin', 'rh'])) {
     header('Location: /login');
     exit;
 }
@@ -32,11 +32,25 @@ $configuracao = [
     'tolerancia_entrada_minutos' => 5,
     'tolerancia_saida_minutos' => 5,
     'considerar_lunch_automatico' => false,
-    'duracao_lunch_minutos' => 60
+    'duracao_lunch_minutos' => 60,
+    'regra_incompleto_fim_dia' => true,
+    'batidas_padrao_dia' => 4,
+    'dias_ativos' => ['seg' => true, 'ter' => true, 'qua' => true, 'qui' => true, 'sex' => true, 'sab' => false, 'dom' => false],
+    'batidas_por_dia' => ['seg' => 4, 'ter' => 4, 'qua' => 4, 'qui' => 4, 'sex' => 4, 'sab' => 2, 'dom' => 0]
 ];
 
 $mensagem = '';
 $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
+
+$dias = [
+    'seg' => 'Segunda-feira',
+    'ter' => 'Terça-feira',
+    'qua' => 'Quarta-feira',
+    'qui' => 'Quinta-feira',
+    'sex' => 'Sexta-feira',
+    'sab' => 'Sábado',
+    'dom' => 'Domingo'
+];
 ?>
 
 <div class="container-fluid mt-4">
@@ -57,9 +71,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
     <?php if (!empty($mensagem)): ?>
         <div class="alert alert-<?php echo $tipo_alerta; ?> alert-dismissible fade show" role="alert">
             <strong><?php echo ucfirst($tipo_alerta); ?>!</strong> <?php echo $mensagem; ?>
-            <button type="button" class="close" data-dismiss="alert">
-                <span>&times;</span>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
         </div>
     <?php endif; ?>
 
@@ -75,10 +87,10 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                 <div class="card-body">
                     <!-- Permitir Horas Extras -->
                     <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="permite_horas_extras"
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="permite_horas_extras"
                                    <?php echo $configuracao['permite_horas_extras'] ? 'checked' : ''; ?>>
-                            <label class="custom-control-label" for="permite_horas_extras">
+                            <label class="form-check-label" for="permite_horas_extras">
                                 Permitir Horas Extras
                             </label>
                         </div>
@@ -91,7 +103,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group mt-3">
                         <label for="limite_diario">
                             Limite Diário (horas)
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Máximo de horas extras permitidas por dia"></i>
                         </label>
                         <input type="number" class="form-control" id="limite_diario"
@@ -103,7 +115,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group">
                         <label for="limite_mensal">
                             Limite Mensal (horas)
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Máximo de horas extras permitidas por mês"></i>
                         </label>
                         <input type="number" class="form-control" id="limite_mensal"
@@ -115,16 +127,14 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group">
                         <label for="perc_50">
                             Percentual Hora Extra 50%
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Adicional de 50% quando extra até 2 horas/dia"></i>
                         </label>
                         <div class="input-group">
                             <input type="number" class="form-control" id="perc_50"
                                    value="<?php echo $configuracao['percentual_hora_extra_50']; ?>"
                                    min="0" max="100" step="5">
-                            <div class="input-group-append">
-                                <span class="input-group-text">%</span>
-                            </div>
+                            <span class="input-group-text">%</span>
                         </div>
                     </div>
 
@@ -132,16 +142,14 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group">
                         <label for="perc_100">
                             Percentual Hora Extra 100%
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Adicional de 100% quando extra acima de 2 horas/dia ou noturna"></i>
                         </label>
                         <div class="input-group">
                             <input type="number" class="form-control" id="perc_100"
-                                   value="<?php echo $configuracao['percentual_hora_extra_100']; ?}"
+                                   value="<?php echo $configuracao['percentual_hora_extra_100']; ?>"
                                    min="0" max="200" step="5">
-                            <div class="input-group-append">
-                                <span class="input-group-text">%</span>
-                            </div>
+                            <span class="input-group-text">%</span>
                         </div>
                     </div>
                 </div>
@@ -159,10 +167,10 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                 <div class="card-body">
                     <!-- Calcular DSR -->
                     <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="calcula_dsr"
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="calcula_dsr"
                                    <?php echo $configuracao['calcula_dsr'] ? 'checked' : ''; ?>>
-                            <label class="custom-control-label" for="calcula_dsr">
+                            <label class="form-check-label" for="calcula_dsr">
                                 Calcular DSR (Lei 605/49)
                             </label>
                         </div>
@@ -175,7 +183,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group mt-3">
                         <label for="dsr_dias">
                             Dias de Compensação DSR
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Quantos dias de descanso/folga o DSR vai gerar"></i>
                         </label>
                         <input type="number" class="form-control" id="dsr_dias"
@@ -185,10 +193,10 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
 
                     <!-- Desconta Feriado Não Trabalhado -->
                     <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="desconta_feriado"
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="desconta_feriado"
                                    <?php echo $configuracao['desconta_feriado_nao_trabalhado'] ? 'checked' : ''; ?>>
-                            <label class="custom-control-label" for="desconta_feriado">
+                            <label class="form-check-label" for="desconta_feriado">
                                 Descontar Feriado Não Trabalhado
                             </label>
                         </div>
@@ -199,10 +207,10 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
 
                     <!-- Aplicar DSR em Feriado Compensado -->
                     <div class="form-group mt-3">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="dsr_compensado"
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="dsr_compensado"
                                    <?php echo $configuracao['aplicar_dsr_compensado_feriado'] ? 'checked' : ''; ?>>
-                            <label class="custom-control-label" for="dsr_compensado">
+                            <label class="form-check-label" for="dsr_compensado">
                                 Aplicar DSR quando Feriado for Compensado
                             </label>
                         </div>
@@ -230,7 +238,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group">
                         <label for="toler_entrada">
                             Tolerância Entrada (minutos)
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Minutos de atraso tolerados para entrada"></i>
                         </label>
                         <input type="number" class="form-control" id="toler_entrada"
@@ -242,7 +250,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group">
                         <label for="toler_saida">
                             Tolerância Saída (minutos)
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Minutos de antecipação tolerados na saída"></i>
                         </label>
                         <input type="number" class="form-control" id="toler_saida"
@@ -264,10 +272,10 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                 <div class="card-body">
                     <!-- Considerar Almoço Automático -->
                     <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="lunch_auto"
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="lunch_auto"
                                    <?php echo $configuracao['considerar_lunch_automatico'] ? 'checked' : ''; ?>>
-                            <label class="custom-control-label" for="lunch_auto">
+                            <label class="form-check-label" for="lunch_auto">
                                 Considerar Almoço Automático
                             </label>
                         </div>
@@ -280,12 +288,177 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="form-group mt-3">
                         <label for="duracao_lunch">
                             Duração do Almoço (minutos)
-                            <i class="fas fa-info-circle" data-toggle="tooltip" 
+                                     <i class="fas fa-info-circle" data-bs-toggle="tooltip" 
                                title="Tempo padrão de almoço a descontar"></i>
                         </label>
                         <input type="number" class="form-control" id="duracao_lunch"
                                value="<?php echo $configuracao['duracao_lunch_minutos']; ?>"
                                min="30" max="180" step="15">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terceira Linha: Configuração Individual por Usuário -->
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-user-cog"></i> Configuração Individual de Usuário</h5>
+                    <button class="btn btn-light btn-sm" type="button" onclick="salvarConfiguracaoUsuario()">
+                        <i class="fas fa-save"></i> Salvar Usuário
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="usuario_config_id" class="form-label">Usuário</label>
+                            <select class="form-select" id="usuario_config_id" onchange="carregarConfiguracaoUsuarioSelecionado()">
+                                <option value="">-- Selecione um usuário --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="usr_batidas_padrao_dia" class="form-label">Batidas padrão/dia</label>
+                            <select class="form-select" id="usr_batidas_padrao_dia">
+                                <option value="2">2 batidas</option>
+                                <option value="4">4 batidas</option>
+                                <option value="6">6 batidas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5 mb-3 d-flex align-items-end">
+                            <div class="form-check form-switch mb-2">
+                                <input type="checkbox" class="form-check-input" id="usr_permite_horas_extras" checked>
+                                <label class="form-check-label" for="usr_permite_horas_extras">Permitir horas extras para este usuário</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="usr_horario_entrada_1">Entrada 1</label>
+                            <input type="time" class="form-control" id="usr_horario_entrada_1" value="08:00">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="usr_horario_saida_1">Saída 1</label>
+                            <input type="time" class="form-control" id="usr_horario_saida_1" value="12:00">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="usr_horario_entrada_2">Entrada 2</label>
+                            <input type="time" class="form-control" id="usr_horario_entrada_2" value="13:00">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label" for="usr_horario_saida_2">Saída 2</label>
+                            <input type="time" class="form-control" id="usr_horario_saida_2" value="18:00">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Dia</th>
+                                    <th>Ativo</th>
+                                    <th>Batidas esperadas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($dias as $chave => $nome): ?>
+                                <tr>
+                                    <td><?php echo $nome; ?></td>
+                                    <td>
+                                        <div class="form-check form-switch mb-0">
+                                            <input type="checkbox" class="form-check-input usr-dia-ativo" data-dia="<?php echo $chave; ?>" id="usr_dia_<?php echo $chave; ?>" checked>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm usr-batidas-dia" data-dia="<?php echo $chave; ?>" id="usr_batidas_<?php echo $chave; ?>">
+                                            <option value="0">0</option>
+                                            <option value="2">2</option>
+                                            <option value="4">4</option>
+                                            <option value="6">6</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quarta Linha: Escalas e Batidas Globais -->
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-desktop"></i> Máquina Global para Bater Ponto por CPF</h5>
+                    <button class="btn btn-light btn-sm" type="button" onclick="autorizarMaquinaGlobalAtual()">
+                        <i class="fas fa-shield-alt"></i> Autorizar Esta Máquina
+                    </button>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">Somente esta máquina poderá bater ponto de todos os usuários via CPF na tela de login.</p>
+                    <div id="status_maquina_global" class="alert alert-secondary mb-0">Carregando status da máquina autorizada...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-week"></i> Escalas e Batidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="batidas_padrao_dia" class="form-label">Batidas padrão por dia</label>
+                            <select class="form-select" id="batidas_padrao_dia">
+                                <option value="2" <?php echo ((int)$configuracao['batidas_padrao_dia'] === 2) ? 'selected' : ''; ?>>2 batidas (entrada/saída)</option>
+                                <option value="4" <?php echo ((int)$configuracao['batidas_padrao_dia'] === 4) ? 'selected' : ''; ?>>4 batidas (entrada/saída + entrada/saída)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="regra_incompleto_fim_dia" <?php echo !empty($configuracao['regra_incompleto_fim_dia']) ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="regra_incompleto_fim_dia">Marcar como incompleto após 23:59:59</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Dia</th>
+                                    <th>Ativo</th>
+                                    <th>Batidas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($dias as $chave => $nome): ?>
+                                <tr>
+                                    <td><?php echo $nome; ?></td>
+                                    <td>
+                                        <div class="form-check form-switch mb-0">
+                                            <input type="checkbox" class="form-check-input dia-ativo" data-dia="<?php echo $chave; ?>" id="dia_<?php echo $chave; ?>" <?php echo !empty($configuracao['dias_ativos'][$chave]) ? 'checked' : ''; ?>>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm batidas-dia" data-dia="<?php echo $chave; ?>" id="batidas_<?php echo $chave; ?>">
+                                            <option value="0" <?php echo ((int)$configuracao['batidas_por_dia'][$chave] === 0) ? 'selected' : ''; ?>>0</option>
+                                            <option value="2" <?php echo ((int)$configuracao['batidas_por_dia'][$chave] === 2) ? 'selected' : ''; ?>>2</option>
+                                            <option value="4" <?php echo ((int)$configuracao['batidas_por_dia'][$chave] === 4) ? 'selected' : ''; ?>>4</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -321,9 +494,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Gerenciar Feriados</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -331,11 +502,9 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
                     <div class="input-group">
                         <input type="date" class="form-control" id="data_feriado">
                         <input type="text" class="form-control" placeholder="Descrição" id="descr_feriado">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-primary" onclick="adicionarFeriado()">
-                                <i class="fas fa-plus"></i> Adicionar
-                            </button>
-                        </div>
+                        <button class="btn btn-outline-primary" type="button" onclick="adicionarFeriado()">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
                     </div>
                 </div>
                 <div id="lista_feriados" class="mt-3">
@@ -352,9 +521,7 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Testar Cálculos de Ponto</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -381,10 +548,280 @@ $tipo_alerta = ''; // 'sucesso', 'erro', 'aviso'
 </div>
 
 <script>
+const ROTAS_PONTO = {
+    config: 'index.php?rota=configuracao_ponto_json',
+    salvarConfig: 'index.php?rota=salvar_configuracao_ponto',
+    configUsuario: 'index.php?rota=configuracao_ponto_usuario_json',
+    salvarConfigUsuario: 'index.php?rota=salvar_configuracao_ponto_usuario',
+    autorizarMaquinaGlobal: 'index.php?rota=autorizar_maquina_global_ponto',
+    statusMaquinaGlobal: 'index.php?rota=status_maquina_global_ponto',
+    resetarConfig: 'index.php?rota=resetar_configuracao_ponto',
+    listarFeriados: 'index.php?rota=listar_feriados_ponto',
+    adicionarFeriado: 'index.php?rota=adicionar_feriado_ponto',
+    removerFeriado: 'index.php?rota=remover_feriado_ponto',
+    usuariosTeste: 'index.php?rota=usuarios_teste_json',
+    calcularSaldoMensal: 'index.php?rota=calcular_saldo_mensal'
+};
+
+let DEVICE_ID_ATUAL = '';
+
+function abrirModal(id) {
+    const el = document.getElementById(id);
+    if (!el || !window.bootstrap || !window.bootstrap.Modal) {
+        return;
+    }
+    const modal = window.bootstrap.Modal.getOrCreateInstance(el);
+    modal.show();
+}
+
 // Ativar tooltips Bootstrap
-$(document).ready(function() {
-    $('[data-toggle="tooltip"]').tooltip();
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        if (window.bootstrap && window.bootstrap.Tooltip) {
+            new window.bootstrap.Tooltip(el);
+        }
+    });
+
+    carregarConfiguracaoAtual();
+    carregarUsuariosConfiguracao();
+    DEVICE_ID_ATUAL = gerarDeviceIdAtual();
+    carregarStatusMaquinaGlobal();
 });
+
+function gerarDeviceIdAtual() {
+    try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText(navigator.userAgent, 2, 2);
+        return canvas.toDataURL().slice(-32);
+    } catch (e) {
+        return 'fallback-' + navigator.userAgent.slice(0, 20);
+    }
+}
+
+function carregarStatusMaquinaGlobal() {
+    $.ajax({
+        url: ROTAS_PONTO.statusMaquinaGlobal,
+        type: 'GET',
+        success: function(response) {
+            const box = $('#status_maquina_global');
+            if (!response || !response.sucesso || !response.dados) {
+                box.removeClass('alert-secondary alert-success').addClass('alert-warning');
+                box.text('Não foi possível consultar máquina autorizada.');
+                return;
+            }
+
+            const d = response.dados;
+            if (!d.device_id) {
+                box.removeClass('alert-secondary alert-success').addClass('alert-warning');
+                box.text('Nenhuma máquina global autorizada no momento.');
+                return;
+            }
+
+            const fim = d.device_id.slice(-8);
+            const atualizado = d.atualizado_em ? (' | Atualizado em: ' + d.atualizado_em) : '';
+            box.removeClass('alert-secondary alert-warning').addClass('alert-success');
+            box.text('Máquina autorizada (ID final: ' + fim + ')' + atualizado);
+        },
+        error: function() {
+            const box = $('#status_maquina_global');
+            box.removeClass('alert-secondary alert-success').addClass('alert-warning');
+            box.text('Falha ao consultar máquina autorizada.');
+        }
+    });
+}
+
+function autorizarMaquinaGlobalAtual() {
+    if (!DEVICE_ID_ATUAL) {
+        Swal.fire('Erro', 'Não foi possível identificar este dispositivo', 'error');
+        return;
+    }
+
+    $.ajax({
+        url: ROTAS_PONTO.autorizarMaquinaGlobal,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ device_id: DEVICE_ID_ATUAL }),
+        success: function(response) {
+            if (response && response.sucesso) {
+                Swal.fire('Sucesso', 'Máquina global autorizada com sucesso', 'success');
+                carregarStatusMaquinaGlobal();
+                return;
+            }
+            Swal.fire('Erro', (response && response.erro) || 'Não foi possível autorizar a máquina', 'error');
+        },
+        error: function() {
+            Swal.fire('Erro', 'Não foi possível autorizar a máquina', 'error');
+        }
+    });
+}
+
+function estadoDiaPadraoUsuario() {
+    return {
+        dias_ativos: { seg: true, ter: true, qua: true, qui: true, sex: true, sab: false, dom: false },
+        batidas_por_dia: { seg: 4, ter: 4, qua: 4, qui: 4, sex: 4, sab: 0, dom: 0 }
+    };
+}
+
+function carregarUsuariosConfiguracao() {
+    $.ajax({
+        url: ROTAS_PONTO.usuariosTeste,
+        type: 'GET',
+        success: function(response) {
+            let html = '<option value="">-- Selecione um usuário --</option>';
+            const lista = (response && Array.isArray(response.data)) ? response.data : [];
+            lista.forEach(function(u) {
+                html += `<option value="${u.id}">${u.nome}</option>`;
+            });
+            $('#usuario_config_id').html(html);
+
+            if (lista.length > 0) {
+                $('#usuario_config_id').val(lista[0].id);
+                carregarConfiguracaoUsuarioSelecionado();
+            }
+        },
+        error: function() {
+            Swal.fire('Erro', 'Não foi possível carregar usuários para configuração individual', 'error');
+        }
+    });
+}
+
+function carregarConfiguracaoUsuarioSelecionado() {
+    const usuarioId = parseInt($('#usuario_config_id').val(), 10);
+    if (!usuarioId) {
+        return;
+    }
+
+    $.ajax({
+        url: `${ROTAS_PONTO.configUsuario}&usuario_id=${usuarioId}`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (!response || !response.sucesso || !response.configuracao) {
+                return;
+            }
+            popularFormularioUsuario(response.configuracao);
+        },
+        error: function() {
+            Swal.fire('Erro', 'Não foi possível carregar configuração do usuário', 'error');
+        }
+    });
+}
+
+function popularFormularioUsuario(cfg) {
+    const padrao = estadoDiaPadraoUsuario();
+
+    $('#usr_permite_horas_extras').prop('checked', !!cfg.permite_horas_extras);
+    $('#usr_batidas_padrao_dia').val(parseInt(cfg.batidas_padrao_dia ?? 4, 10));
+
+    $('#usr_horario_entrada_1').val((cfg.horario_entrada_1 || '08:00').slice(0, 5));
+    $('#usr_horario_saida_1').val((cfg.horario_saida_1 || '12:00').slice(0, 5));
+    $('#usr_horario_entrada_2').val((cfg.horario_entrada_2 || '13:00').slice(0, 5));
+    $('#usr_horario_saida_2').val((cfg.horario_saida_2 || '18:00').slice(0, 5));
+
+    const diasAtivos = (cfg.dias_ativos && typeof cfg.dias_ativos === 'object') ? cfg.dias_ativos : padrao.dias_ativos;
+    Object.keys(padrao.dias_ativos).forEach(function(dia) {
+        $('#usr_dia_' + dia).prop('checked', !!diasAtivos[dia]);
+    });
+
+    const batidasPorDia = (cfg.batidas_por_dia && typeof cfg.batidas_por_dia === 'object') ? cfg.batidas_por_dia : padrao.batidas_por_dia;
+    Object.keys(padrao.batidas_por_dia).forEach(function(dia) {
+        const valor = parseInt((batidasPorDia[dia] ?? padrao.batidas_por_dia[dia]), 10);
+        $('#usr_batidas_' + dia).val(valor);
+    });
+}
+
+function salvarConfiguracaoUsuario() {
+    const usuarioId = parseInt($('#usuario_config_id').val(), 10);
+    if (!usuarioId) {
+        Swal.fire('Aviso', 'Selecione um usuário para salvar', 'warning');
+        return;
+    }
+
+    const dados = {
+        usuario_id: usuarioId,
+        permite_horas_extras: $('#usr_permite_horas_extras').is(':checked'),
+        batidas_padrao_dia: parseInt($('#usr_batidas_padrao_dia').val(), 10),
+        horario_entrada_1: ($('#usr_horario_entrada_1').val() || '08:00'),
+        horario_saida_1: ($('#usr_horario_saida_1').val() || '12:00'),
+        horario_entrada_2: ($('#usr_horario_entrada_2').val() || '13:00'),
+        horario_saida_2: ($('#usr_horario_saida_2').val() || '18:00'),
+        dias_ativos: {},
+        batidas_por_dia: {}
+    };
+
+    $('.usr-dia-ativo').each(function() {
+        dados.dias_ativos[$(this).data('dia')] = $(this).is(':checked');
+    });
+
+    $('.usr-batidas-dia').each(function() {
+        dados.batidas_por_dia[$(this).data('dia')] = parseInt($(this).val(), 10);
+    });
+
+    $.ajax({
+        url: ROTAS_PONTO.salvarConfigUsuario,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(dados),
+        success: function(response) {
+            if (response && response.sucesso) {
+                Swal.fire('Sucesso!', 'Configuração individual salva com sucesso', 'success');
+                return;
+            }
+            Swal.fire('Erro!', (response && response.erro) || 'Não foi possível salvar configuração individual', 'error');
+        },
+        error: function() {
+            Swal.fire('Erro!', 'Não foi possível salvar configuração individual', 'error');
+        }
+    });
+}
+
+function carregarConfiguracaoAtual() {
+    $.ajax({
+        url: ROTAS_PONTO.config,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (!response || !response.sucesso || !response.configuracao) {
+                return;
+            }
+            popularFormularioConfiguracao(response.configuracao);
+        }
+    });
+}
+
+function popularFormularioConfiguracao(cfg) {
+    $('#permite_horas_extras').prop('checked', !!cfg.permite_horas_extras);
+    $('#limite_diario').val(cfg.limite_horas_extras_diarias ?? 2);
+    $('#limite_mensal').val(cfg.limite_horas_extras_mensais ?? 20);
+    $('#perc_50').val(cfg.percentual_hora_extra_50 ?? 50);
+    $('#perc_100').val(cfg.percentual_hora_extra_100 ?? 100);
+    $('#calcula_dsr').prop('checked', !!cfg.calcula_dsr);
+    $('#dsr_dias').val(cfg.dsr_dias_compensacao ?? 1);
+    $('#desconta_feriado').prop('checked', !!cfg.desconta_feriado_nao_trabalhado);
+    $('#dsr_compensado').prop('checked', !!cfg.aplicar_dsr_compensado_feriado);
+    $('#toler_entrada').val(cfg.tolerancia_entrada_minutos ?? 5);
+    $('#toler_saida').val(cfg.tolerancia_saida_minutos ?? 5);
+    $('#lunch_auto').prop('checked', !!cfg.considerar_lunch_automatico);
+    $('#duracao_lunch').val(cfg.duracao_lunch_minutos ?? 60);
+
+    $('#regra_incompleto_fim_dia').prop('checked', !!cfg.regra_incompleto_fim_dia);
+    $('#batidas_padrao_dia').val(parseInt(cfg.batidas_padrao_dia ?? 4, 10));
+
+    if (cfg.dias_ativos && typeof cfg.dias_ativos === 'object') {
+        Object.keys(cfg.dias_ativos).forEach(function(dia) {
+            $('#dia_' + dia).prop('checked', !!cfg.dias_ativos[dia]);
+        });
+    }
+
+    if (cfg.batidas_por_dia && typeof cfg.batidas_por_dia === 'object') {
+        Object.keys(cfg.batidas_por_dia).forEach(function(dia) {
+            $('#batidas_' + dia).val(parseInt(cfg.batidas_por_dia[dia], 10));
+        });
+    }
+}
 
 /**
  * Salvar configuração de ponto
@@ -403,19 +840,33 @@ function salvarConfiguracao() {
         tolerancia_entrada_minutos: parseInt($('#toler_entrada').val()),
         tolerancia_saida_minutos: parseInt($('#toler_saida').val()),
         considerar_lunch_automatico: $('#lunch_auto').is(':checked'),
-        duracao_lunch_minutos: parseInt($('#duracao_lunch').val())
+        duracao_lunch_minutos: parseInt($('#duracao_lunch').val()),
+        regra_incompleto_fim_dia: $('#regra_incompleto_fim_dia').is(':checked'),
+        batidas_padrao_dia: parseInt($('#batidas_padrao_dia').val()),
+        dias_ativos: {},
+        batidas_por_dia: {}
     };
 
+    $('.dia-ativo').each(function() {
+        dados.dias_ativos[$(this).data('dia')] = $(this).is(':checked');
+    });
+    $('.batidas-dia').each(function() {
+        dados.batidas_por_dia[$(this).data('dia')] = parseInt($(this).val());
+    });
+
     $.ajax({
-        url: '/api/configuracao-ponto/atualizar',
+        url: ROTAS_PONTO.salvarConfig,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(dados),
         success: function(response) {
-            // Mostrar sucesso
-            Swal.fire('Sucesso!', 'Configurações salvas com sucesso', 'success');
+            if (response && response.sucesso) {
+                Swal.fire('Sucesso!', 'Configurações salvas com sucesso', 'success');
+                return;
+            }
+            Swal.fire('Erro!', response.erro || 'Não foi possível salvar configurações', 'error');
         },
-        error: function(xhr) {
+        error: function() {
             Swal.fire('Erro!', 'Não foi possível salvar configurações', 'error');
         }
     });
@@ -434,7 +885,7 @@ function restaurarPadrao() {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: '/api/configuracao-ponto/resetar',
+                url: ROTAS_PONTO.resetarConfig,
                 type: 'POST',
                 success: function() {
                     window.location.reload();
@@ -448,7 +899,7 @@ function restaurarPadrao() {
  * Abrir modal de feriados
  */
 function visualizarFeriados() {
-    $('#modalFeriados').modal('show');
+    abrirModal('modalFeriados');
     carregarFeriados();
 }
 
@@ -457,14 +908,19 @@ function visualizarFeriados() {
  */
 function carregarFeriados() {
     $.ajax({
-        url: '/api/feriados/listar',
+        url: ROTAS_PONTO.listarFeriados,
         type: 'GET',
         success: function(response) {
+            if (!response || !response.sucesso || !Array.isArray(response.dados)) {
+                $('#lista_feriados').html('<p class="text-muted">Nenhum feriado encontrado.</p>');
+                return;
+            }
+
             let html = '<table class="table table-sm">';
             response.dados.forEach(f => {
                 html += `<tr>
                     <td>${new Date(f.data).toLocaleDateString('pt-BR')}</td>
-                    <td>${f.descricao}</td>
+                    <td>${f.descricao || '-'}</td>
                     <td><button class="btn btn-sm btn-danger" onclick="removerFeriado(${f.id})">
                         <i class="fas fa-trash"></i>
                     </button></td>
@@ -476,11 +932,63 @@ function carregarFeriados() {
     });
 }
 
+function adicionarFeriado() {
+    const data = ($('#data_feriado').val() || '').trim();
+    const descricao = ($('#descr_feriado').val() || '').trim();
+
+    if (!data) {
+        Swal.fire('Aviso', 'Informe a data do feriado', 'warning');
+        return;
+    }
+
+    $.ajax({
+        url: ROTAS_PONTO.adicionarFeriado,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            data: data,
+            descricao: descricao || 'Feriado',
+            tipo: 'personalizado'
+        }),
+        success: function(response) {
+            if (response && response.sucesso) {
+                $('#data_feriado').val('');
+                $('#descr_feriado').val('');
+                carregarFeriados();
+                return;
+            }
+            Swal.fire('Erro', (response && response.erro) || 'Não foi possível adicionar', 'error');
+        },
+        error: function() {
+            Swal.fire('Erro', 'Não foi possível adicionar', 'error');
+        }
+    });
+}
+
+function removerFeriado(id) {
+    $.ajax({
+        url: ROTAS_PONTO.removerFeriado,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ id: id }),
+        success: function(response) {
+            if (response && response.sucesso) {
+                carregarFeriados();
+                return;
+            }
+            Swal.fire('Erro', (response && response.erro) || 'Não foi possível remover', 'error');
+        },
+        error: function() {
+            Swal.fire('Erro', 'Não foi possível remover', 'error');
+        }
+    });
+}
+
 /**
  * Abrir modal de testes
  */
 function testarCalculos() {
-    $('#modalTeste').modal('show');
+    abrirModal('modalTeste');
     carregarUsuariosTeste();
     document.getElementById('teste_mes').valueAsDate = new Date();
 }
@@ -490,10 +998,11 @@ function testarCalculos() {
  */
 function carregarUsuariosTeste() {
     $.ajax({
-        url: '/api/usuarios/listar',
+        url: ROTAS_PONTO.usuariosTeste,
         success: function(response) {
             let html = '<option value="">-- Selecione --</option>';
-            response.data.forEach(u => {
+            const lista = (response && Array.isArray(response.data)) ? response.data : [];
+            lista.forEach(u => {
                 html += `<option value="${u.id}">${u.nome}</option>`;
             });
             $('#teste_usuario').html(html);
@@ -514,7 +1023,7 @@ function executarTeste() {
     }
 
     $.ajax({
-        url: `/api/ponto/teste-calculo?usuario_id=${usuario_id}&mes=${mes}`,
+        url: `${ROTAS_PONTO.calcularSaldoMensal}&usuario_id=${usuario_id}&mes=${mes}`,
         success: function(response) {
             $('#resultado_teste').show();
             $('#teste_output').text(JSON.stringify(response, null, 2));

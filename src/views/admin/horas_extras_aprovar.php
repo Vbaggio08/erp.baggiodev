@@ -10,11 +10,11 @@
  * - Visualizar histórico de aprovações
  * - Gerar relatório mensal
  * 
- * Requer: $_SESSION['role'] em ['RH', 'gerente', 'admin']
+ * Requer: $_SESSION['user_nivel'] em ['rh', 'gerente', 'admin']
  */
 
 // Validar autenticação e autorização
-if (empty($_SESSION['usuario_id']) || !in_array($_SESSION['role'] ?? '', ['RH', 'gerente', 'admin'])) {
+if (empty($_SESSION['user_id']) || !in_array($_SESSION['user_nivel'] ?? '', ['rh', 'gerente', 'admin'])) {
     header('Location: /login');
     exit;
 }
@@ -23,36 +23,7 @@ if (empty($_SESSION['usuario_id']) || !in_array($_SESSION['role'] ?? '', ['RH', 
 $pendentes = [];
 $filtro_usuario = $_GET['usuario_id'] ?? '';
 $filtro_mes = $_GET['mes'] ?? date('Y-m');
-
-// Exemplo de dados para demonstração
-if (empty($pendentes)) {
-    $pendentes = [
-        [
-            'id' => 1,
-            'usuario_id' => 1,
-            'nome_usuario' => 'João Silva',
-            'email' => 'joao@empresa.com',
-            'data_referencia' => '2026-03-15',
-            'horas_extras' => 2.5,
-            'tipo' => '50',
-            'motivo' => 'Projeto crítico de produção',
-            'status' => 'pendente',
-            'criado_em' => '2026-03-15 18:30:00'
-        ],
-        [
-            'id' => 2,
-            'usuario_id' => 2,
-            'nome_usuario' => 'Maria Santos',
-            'email' => 'maria@empresa.com',
-            'data_referencia' => '2026-03-18',
-            'horas_extras' => 1.0,
-            'tipo' => '100',
-            'motivo' => 'Atendimento de cliente urgente',
-            'status' => 'pendente',
-            'criado_em' => '2026-03-18 21:00:00'
-        ]
-    ];
-}
+$base_url = $base_url ?? '';
 ?>
 
 <div class="container-fluid mt-4">
@@ -273,9 +244,7 @@ if (empty($pendentes)) {
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">Aprovar Hora Extra</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p><strong>Usuário:</strong> <span id="modal_usuario_nome"></span></p>
@@ -287,7 +256,7 @@ if (empty($pendentes)) {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-success" onclick="confirmarAprovar()">
                     <i class="fas fa-check"></i> Aprovar
                 </button>
@@ -302,9 +271,7 @@ if (empty($pendentes)) {
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title">Rejeitar Hora Extra</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p><strong>Usuário:</strong> <span id="modal_usuario_rejeicao"></span></p>
@@ -316,7 +283,7 @@ if (empty($pendentes)) {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-danger" onclick="confirmarRejeitar()">
                     <i class="fas fa-times"></i> Rejeitar
                 </button>
@@ -326,14 +293,12 @@ if (empty($pendentes)) {
 </div>
 
 <!-- Modal: Relatório -->
-<div class="modal fade" id="modalRelatorio" tabindex="-1" style="max-width: 90%;">
+<div class="modal fade" id="modalRelatorio" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Relatório Mensal de Horas Extras</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -397,20 +362,21 @@ if (empty($pendentes)) {
 
 .timeline-content {
     padding: 10px;
-    background: #f8f9fa;
+    background: #252525;
     border-radius: 4px;
     flex: 1;
 }
 </style>
 
 <script>
+const baseUrl = '<?php echo $base_url; ?>';
 let ID_APROVACAO = null;
 let ID_REJEICAO = null;
 
-/**
- * Aplicar filtros e recarregar lista
- */
-function aplicarFiltros() {
+// Carregar dados reais via AJAX ao abrir a página
+document.addEventListener('DOMContentLoaded', carregarPendentes);
+
+function carregarPendentes() {
     const usuario_id = document.getElementById('filtro_usuario').value;
     const mes = document.getElementById('filtro_mes').value;
     const status = document.getElementById('filtro_status').value;
@@ -418,145 +384,174 @@ function aplicarFiltros() {
     const params = new URLSearchParams();
     if (usuario_id) params.append('usuario_id', usuario_id);
     if (mes) params.append('mes', mes);
-    if (status) params.append('status', status);
 
-    window.location.search = params.toString();
+    fetch(baseUrl + 'index.php?rota=horas_extras_pendentes&' + params.toString())
+        .then(r => r.json())
+        .then(data => {
+            if (data.sucesso && data.dados) {
+                renderizarTabela(data.dados);
+                document.getElementById('qtd_pendentes').innerHTML = '<i class="fas fa-hourglass-half"></i> ' + data.total;
+                document.getElementById('badge_pendentes').textContent = data.total;
+            }
+        })
+        .catch(err => console.error('Erro ao carregar pendentes:', err));
 }
 
-/**
- * Limpar filtros
- */
+function renderizarTabela(pendentes) {
+    const tbody = document.querySelector('.table-hover tbody');
+    if (!tbody) return;
+    if (pendentes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted p-4">Nenhuma hora extra pendente</td></tr>';
+        return;
+    }
+    let html = '';
+    pendentes.forEach(p => {
+        const data = p.data_referencia ? new Date(p.data_referencia + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+        const tipoBadge = p.tipo === '100' ? 'badge-danger' : 'badge-warning';
+        html += `<tr id="row_${p.id}">
+            <td><strong>${data}</strong></td>
+            <td><strong>${p.nome_usuario || 'N/A'}</strong><br><small class="text-muted">${p.email || ''}</small></td>
+            <td><span class="badge badge-info">${parseFloat(p.horas_extras).toFixed(1)}h</span></td>
+            <td><span class="badge ${tipoBadge}">+${p.tipo}%</span></td>
+            <td><small>${(p.motivo || '').substring(0, 50)}</small></td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-success" onclick="abrirAprovar(${p.id}, '${(p.nome_usuario || '').replace(/'/g, "\\'")}', ${p.horas_extras})" title="Aprovar"><i class="fas fa-check"></i></button>
+                    <button class="btn btn-outline-danger" onclick="abrirRejeitar(${p.id}, '${(p.nome_usuario || '').replace(/'/g, "\\'")}' )" title="Rejeitar"><i class="fas fa-times"></i></button>
+                </div>
+            </td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+function aplicarFiltros() {
+    carregarPendentes();
+}
+
 function limparFiltros() {
     document.getElementById('filtro_usuario').value = '';
-    document.getElementById('filtro_mes').valueAsDate = new Date();
+    document.getElementById('filtro_mes').value = new Date().toISOString().slice(0, 7);
     document.getElementById('filtro_status').value = 'pendente';
-    aplicarFiltros();
+    carregarPendentes();
 }
 
-/**
- * Abrir modal de aprovação
- */
 function abrirAprovar(id, nome, horas) {
     ID_APROVACAO = id;
     document.getElementById('modal_usuario_nome').innerText = nome;
     document.getElementById('modal_horas').innerText = horas;
     document.getElementById('obs_aprovar').value = '';
-    $('#modalAprovar').modal('show');
+    new bootstrap.Modal(document.getElementById('modalAprovar')).show();
 }
 
-/**
- * Confirmar aprovação
- */
 function confirmarAprovar() {
     const obs = document.getElementById('obs_aprovar').value;
-
-    $.ajax({
-        url: '/api/horas-extras/aprovar',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            id: ID_APROVACAO,
-            observacao: obs
-        }),
-        success: function(response) {
-            Swal.fire('Aprovado!', 'Hora extra aprovada com sucesso', 'success');
-            $('#modalAprovar').modal('hide');
-            setTimeout(() => location.reload(), 1500);
-        },
-        error: function(xhr) {
-            Swal.fire('Erro!', 'Não foi possível aprovar', 'error');
+    fetch(baseUrl + 'index.php?rota=horas_extras_aprovar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: ID_APROVACAO, observacao: obs })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert('✅ Hora extra aprovada com sucesso!');
+            bootstrap.Modal.getInstance(document.getElementById('modalAprovar')).hide();
+            carregarPendentes();
+        } else {
+            alert('❌ Erro: ' + (data.erro || 'Falha ao aprovar'));
         }
-    });
+    })
+    .catch(() => alert('Erro de conexão'));
 }
 
-/**
- * Abrir modal de rejeição
- */
 function abrirRejeitar(id, nome) {
     ID_REJEICAO = id;
     document.getElementById('modal_usuario_rejeicao').innerText = nome;
     document.getElementById('motivo_rejeicao').value = '';
-    $('#modalRejeitar').modal('show');
+    new bootstrap.Modal(document.getElementById('modalRejeitar')).show();
 }
 
-/**
- * Confirmar rejeição
- */
 function confirmarRejeitar() {
     const motivo = document.getElementById('motivo_rejeicao').value;
-
     if (motivo.length < 10) {
-        Swal.fire('Aviso', 'Motivo deve ter pelo menos 10 caracteres', 'warning');
+        alert('⚠️ Motivo deve ter pelo menos 10 caracteres');
+        return;
+    }
+    fetch(baseUrl + 'index.php?rota=horas_extras_rejeitar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: ID_REJEICAO, motivo: motivo })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert('✅ Hora extra rejeitada.');
+            bootstrap.Modal.getInstance(document.getElementById('modalRejeitar')).hide();
+            carregarPendentes();
+        } else {
+            alert('❌ Erro: ' + (data.erro || 'Falha ao rejeitar'));
+        }
+    })
+    .catch(() => alert('Erro de conexão'));
+}
+
+function abrirRelatorio() {
+    document.getElementById('relatorio_mes').value = new Date().toISOString().slice(0, 7);
+    new bootstrap.Modal(document.getElementById('modalRelatorio')).show();
+}
+
+function gerarRelatorio() {
+    const mes = document.getElementById('relatorio_mes').value;
+    fetch(baseUrl + 'index.php?rota=horas_extras_relatorio&mes=' + mes)
+        .then(r => r.json())
+        .then(data => {
+            if (data.sucesso && data.por_usuario) {
+                let html = '';
+                data.por_usuario.forEach(u => {
+                    html += `<tr>
+                        <td>${u.nome}</td>
+                        <td><small>${u.email || ''}</small></td>
+                        <td class="text-right">${(u.pendente || 0).toFixed(1)}</td>
+                        <td class="text-right"><strong>${(u.aprovado || 0).toFixed(1)}</strong></td>
+                        <td class="text-right">${(u.rejeitado || 0).toFixed(1)}</td>
+                        <td class="text-right">${(u.pago || 0).toFixed(1)}</td>
+                        <td class="text-right"><strong>${(u.total_horas || 0).toFixed(1)}</strong></td>
+                    </tr>`;
+                });
+                document.getElementById('tbody_relatorio').innerHTML = html;
+                document.getElementById('conteudo_relatorio').style.display = 'block';
+            }
+        });
+}
+
+function exportarRelatorioExcel() {
+    const linhas = Array.from(document.querySelectorAll('#tbody_relatorio tr'));
+    if (linhas.length === 0) {
+        alert('Gere o relatório antes de exportar.');
         return;
     }
 
-    $.ajax({
-        url: '/api/horas-extras/rejeitar',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            id: ID_REJEICAO,
-            motivo: motivo
-        }),
-        success: function(response) {
-            Swal.fire('Rejeitado!', 'Hora extra rejeitada e usuário notificado', 'success');
-            $('#modalRejeitar').modal('hide');
-            setTimeout(() => location.reload(), 1500);
-        },
-        error: function(xhr) {
-            Swal.fire('Erro!', 'Não foi possível rejeitar', 'error');
-        }
+    let csv = 'Usuario,Email,Pendente,Aprovado,Rejeitado,Pago,Total\n';
+    linhas.forEach((tr) => {
+        const cols = Array.from(tr.querySelectorAll('td')).map((td) => {
+            const txt = (td.innerText || '').replace(/\s+/g, ' ').trim();
+            return '"' + txt.replace(/"/g, '""') + '"';
+        });
+        csv += cols.join(',') + '\n';
     });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'relatorio_horas_extras.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
-/**
- * Abrir relatório
- */
-function abrirRelatorio() {
-    document.getElementById('relatorio_mes').valueAsDate = new Date();
-    $('#modalRelatorio').modal('show');
-}
-
-/**
- * Gerar relatório
- */
-function gerarRelatorio() {
-    const mes = document.getElementById('relatorio_mes').value;
-    
-    $.ajax({
-        url: `/api/horas-extras/relatorio?mes=${mes}`,
-        success: function(response) {
-            let html = '';
-            response.por_usuario.forEach(u => {
-                html += `<tr>
-                    <td>${u.nome}</td>
-                    <td><small>${u.email}</small></td>
-                    <td class="text-right">${u.pendente.toFixed(1)}</td>
-                    <td class="text-right"><strong>${u.aprovado.toFixed(1)}</strong></td>
-                    <td class="text-right">${u.rejeitado.toFixed(1)}</td>
-                    <td class="text-right">${u.pago.toFixed(1)}</td>
-                    <td class="text-right"><strong>${u.total_horas.toFixed(1)}</strong></td>
-                </tr>`;
-            });
-            document.getElementById('tbody_relatorio').innerHTML = html;
-            document.getElementById('conteudo_relatorio').style.display = 'block';
-        }
-    });
-}
-
-/**
- * Exportar para Excel
- */
-function exportarRelatorioExcel() {
-    const mes = document.getElementById('relatorio_mes').value;
-    window.location.href = `/api/horas-extras/relatorio/exportar?mes=${mes}&formato=xlsx`;
-}
-
-/**
- * Ver motivo completo
- */
 function verMotivoCompleto(id) {
-    // Implementar modal com motivo completo
-    Swal.fire('Motivo Completo', 'Projeto crítico de produção que necessitou de horas adicionais', 'info');
+    alert('Detalhes do motivo serão carregados via API');
 }
 </script>

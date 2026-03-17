@@ -1,12 +1,12 @@
 <?php
 
-namespace Src\Controllers;
-
-use Src\Models\HorasExtras;
-use Src\Models\PontoCalculador;
-use Src\Models\ConfiguracaoPontos;
-use Src\Models\Usuario;
-use Src\Models\NotificadorEmail;
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../models/HorasExtras.php';
+require_once __DIR__ . '/../models/PontoCalculador.php';
+require_once __DIR__ . '/../models/ConfiguracaoPontos.php';
+require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../models/NotificadorEmail.php';
+require_once __DIR__ . '/../models/Ponto.php';
 
 /**
  * HorasExtrasController
@@ -31,14 +31,14 @@ class HorasExtrasController
 
     public function __construct()
     {
-        // Validar autenticação (deve vir de SessionController ou middleware)
-        if (!isset($_SESSION['usuario_id'])) {
+        // Validar autenticação - usa user_id setado em LoginController
+        if (!isset($_SESSION['user_id'])) {
             http_response_code(401);
             echo json_encode(['erro' => 'Não autenticado']);
             exit;
         }
 
-        $this->usuario_id = $_SESSION['usuario_id'];
+        $this->usuario_id = $_SESSION['user_id'];
         $this->empresa_id = $_SESSION['empresa_id'] ?? 1;
         $this->model = new HorasExtras();
         $this->calculador = new PontoCalculador();
@@ -90,6 +90,12 @@ class HorasExtrasController
                 return json_encode(['erro' => 'Horas extras não permitidas nesta empresa']);
             }
 
+            $configUsuario = Ponto::obterConfiguracaoUsuarioPonto((int)$this->usuario_id);
+            if (array_key_exists('permite_horas_extras', $configUsuario) && !$configUsuario['permite_horas_extras']) {
+                http_response_code(403);
+                return json_encode(['erro' => 'Horas extras não permitidas para este usuário']);
+            }
+
             // Validar limite mensal
             $mes_ano = date('Y-m');
             $total_mes = HorasExtras::calcularTotalAprovado($this->usuario_id, $mes_ano);
@@ -108,6 +114,7 @@ class HorasExtrasController
             // Registrar hora extra
             $id = $this->model->registrarHoraExtra(
                 usuario_id: $this->usuario_id,
+                data_referencia: $dados['data_referencia'] ?? date('Y-m-d'),
                 apontamento_id: $apontamento_id,
                 horas_extras: $horas_extras,
                 tipo: $tipo,
@@ -154,9 +161,9 @@ class HorasExtrasController
             );
 
             // Enriquecer com dados do usuário
-            $usuario_model = new Usuario();
+            $usuario_model = 'Usuario'; // use static methods
             foreach ($pendentes as &$pend) {
-                $usuario = $usuario_model->buscarPorId($pend['usuario_id']);
+                $usuario = Usuario::buscarPorId($pend['usuario_id']);
                 $pend['nome_usuario'] = $usuario['nome'] ?? 'Desconhecido';
                 $pend['email'] = $usuario['email'] ?? '';
             }
@@ -212,7 +219,7 @@ class HorasExtrasController
 
             // ✅ ENVIAR EMAIL DE APROVAÇÃO - FASE 5
             try {
-                $hora_extra = HorasExtras::buscarPorId($id);
+                $hora_extra = HorasExtras::obterPorId($id);
                 $usuario = Usuario::buscarPorId($hora_extra['usuario_id']);
                 
                 if ($usuario && $usuario['email']) {
@@ -283,7 +290,7 @@ class HorasExtrasController
 
             // ✅ ENVIAR EMAIL DE REJEIÇÃO - FASE 5
             try {
-                $hora_extra = HorasExtras::buscarPorId($id);
+                $hora_extra = HorasExtras::obterPorId($id);
                 $usuario = Usuario::buscarPorId($hora_extra['usuario_id']);
                 
                 if ($usuario && $usuario['email']) {
@@ -374,18 +381,17 @@ class HorasExtrasController
             $empresa_id = intval($_GET['empresa_id'] ?? $this->empresa_id);
 
             // Buscar todas as horas extras do mês
-            $db = \Src\Config\Database::getConnection();
+            $db = Database::getConnection();
             $sql = "
                 SELECT he.*, u.nome, u.email
                 FROM horas_extras he
                 JOIN usuarios u ON he.usuario_id = u.id
                 WHERE DATE_FORMAT(he.data_referencia, '%Y-%m') = :mes
-                AND u.empresa_id = :empresa_id
                 ORDER BY u.nome, he.data_referencia
             ";
 
             $stmt = $db->prepare($sql);
-            $stmt->execute(['mes' => $mes, 'empresa_id' => $empresa_id]);
+            $stmt->execute(['mes' => $mes]);
             $registros = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             // Consolidar por usuário
@@ -535,8 +541,7 @@ class HorasExtrasController
      */
     private function ehRH(): bool
     {
-        // Implementar conforme sua lógica de roles
-        // Exemplo: verificar $_SESSION['role'] === 'RH' ou similar
-        return isset($_SESSION['role']) && in_array($_SESSION['role'], ['RH', 'gerente', 'admin']);
+        // Verifica se user_nivel setado em LoginController está entre admins/rh
+        return isset($_SESSION['user_nivel']) && in_array($_SESSION['user_nivel'], ['rh', 'gerente', 'admin']);
     }
 }

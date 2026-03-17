@@ -20,7 +20,7 @@
                         <!-- Tipo de Afastamento -->
                         <div class="mb-4">
                             <label class="form-label"><strong>🏥 Tipo de Afastamento</strong></label>
-                            <select name="tipo_afastamento" class="form-select" required>
+                            <select name="tipo" class="form-select" required>
                                 <option value="">Selecione uma opção</option>
                                 <option value="enfermidade">Enfermidade</option>
                                 <option value="consulta_medica">Consulta Médica</option>

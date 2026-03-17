@@ -12,9 +12,9 @@
 <div class="box-relatorio">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 class="login-title">
-            <?= isset($ficha['id']) ? "✏️ Editando Pedido DTF #$num" : '✨ Novo Pedido DTF' ?>
+            <?= isset($ficha['id']) ? "✏️ Editando Produção DTF #$num" : '✨ Produção DTF' ?>
         </h1>
-        <a href="index.php?rota=fila_producao" class="btn-red" style="text-decoration:none;">Cancelar</a>
+        <a href="index.php?rota=ver_producao_dtf" class="btn-red" style="text-decoration:none;">Cancelar</a>
     </div>
 
     <div style="display: flex; justify-content: center;">
@@ -24,10 +24,11 @@
                 <?php if(isset($ficha['id'])): ?>
                     <input type="hidden" name="id" value="<?= $ficha['id'] ?>">
                     <input type="hidden" name="comprovante_atual" value="<?= $ficha['caminho_comprovante'] ?? '' ?>">
+                    <input type="hidden" name="arquivo_impressao_atual" value="<?= $ficha['arquivo_impressao'] ?? '' ?>">
                 <?php endif; ?>
 
                 <!-- Informações do Cliente e Pedido -->
-                <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:20px; margin-bottom:20px;">
+                <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:20px; margin-bottom:20px;">
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Cliente</label>
                         <input type="text" name="cliente" required value="<?= htmlspecialchars($cli) ?>" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
@@ -42,13 +43,23 @@
                             <option value="WhatsApp" <?= $plat == 'WhatsApp' ? 'selected' : '' ?>>WhatsApp</option>
                             <option value="Balcão" <?= $plat == 'Balcão' ? 'selected' : '' ?>>Balcão / Loja</option>
                             <option value="Instagram" <?= $plat == 'Instagram' ? 'selected' : '' ?>>Instagram</option>
+                            <option value="Mercado Livre" <?= $plat == 'Mercado Livre' ? 'selected' : '' ?>>Mercado Livre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; color:#aaa; margin-bottom:5px;">Vendedor</label>
+                        <select name="vendedor_id" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                            <option value="">-- Selecione --</option>
+                            <?php foreach(($usuarios ?? []) as $user): ?>
+                                <option value="<?= $user['id'] ?>" <?= (isset($ficha['vendedor_id']) && (int) $ficha['vendedor_id'] === (int) $user['id']) ? 'selected' : '' ?>><?= htmlspecialchars($user['nome']) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-bottom:20px;">
                     <div>
                         <label style="display:block; color:#e6b800; margin-bottom:5px;">Nº Pedido</label>
-                        <input type="text" name="numero_pedido" value="<?= htmlspecialchars($num) ?>" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                        <input type="text" name="numero_pedido" value="<?= htmlspecialchars($num) ?>" style="width:100%; padding:10px; background:#1a1a1a; border:1px solid #e6b800; color:#e6b800; font-weight:bold;">
                     </div>
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Data Pedido</label>
@@ -56,7 +67,7 @@
                     </div>
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Previsão Entrega</label>
-                        <input type="date" name="data_entrega" value="<?= $dtEnt ?>" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                        <input type="date" name="data_entrega" required value="<?= $dtEnt ?>" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
                     </div>
                 </div>
 
@@ -86,6 +97,17 @@
                 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px; padding: 20px; background: #222; border: 1px solid #555; border-radius: 6px;">
                     <div>
+                        <label style="display:block; color:#aaa; margin-bottom:5px;">Meio de Pagamento</label>
+                        <select name="meio_pagamento" style="width:100%; padding:10px; background:#111; border:1px solid #555; color:#fff;">
+                            <option value="">-- Selecione --</option>
+                            <option value="Pix" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Pix') ? 'selected' : '' ?>>Pix</option>
+                            <option value="Débito" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Débito') ? 'selected' : '' ?>>Cartão de Débito</option>
+                            <option value="Crédito" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Crédito') ? 'selected' : '' ?>>Cartão de Crédito</option>
+                            <option value="Dinheiro" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Dinheiro') ? 'selected' : '' ?>>Dinheiro</option>
+                            <option value="Pago em Loja" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Pago em Loja') ? 'selected' : '' ?>>Pago em Loja</option>
+                        </select>
+                    </div>
+                    <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Arquivo para Impressão</label>
                         <input type="file" name="arquivo_impressao" style="color:#aaa;">
                         <?php if (!empty($ficha['arquivo_impressao'])): ?>
@@ -106,7 +128,7 @@
                 </div>
 
                 <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:30px;">
-                    <button type="submit" class="btn-green" style="padding: 12px 25px; font-weight:bold;">💾 Salvar Pedido DTF</button>
+                    <button type="submit" class="btn-green" style="padding: 12px 25px; font-weight:bold;"><?= isset($ficha['id']) ? '💾 Atualizar Produção DTF' : '💾 Salvar Produção DTF' ?></button>
                 </div>
             </form>
         </div>

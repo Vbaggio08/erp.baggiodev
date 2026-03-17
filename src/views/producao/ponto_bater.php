@@ -2,17 +2,28 @@
 // Dados disponíveis:
 // $apontamento - apontamento de hoje (ou null)
 // $config - configuração global
+// $horario_usuario - horário individual do funcionário
 ?>
 
-<div class="container-fluid py-5">
+<div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-lg-6">
-            <div class="card shadow-lg border-0">
-                <div class="card-body p-5 text-center">
+            <div class="card" style="border:1px solid #333;">
+                <div class="card-body p-4 p-md-5 text-center">
                     
                     <!-- Cabeçalho -->
-                    <h1 class="mb-1">⏱️ Bater Ponto</h1>
+                    <h1 class="mb-1" style="color:var(--primary-color);">⏱️ Bater Ponto</h1>
                     <p class="text-muted mb-4">Registre sua entrada/saída</p>
+
+                    <!-- Horário de trabalho do funcionário -->
+                    <?php if (!empty($horario_usuario)): ?>
+                    <div class="p-2 rounded mb-3" style="font-size:13px; background:#252525; border:1px solid #444;">
+                        <strong style="color:var(--primary-color);">📅 Seu horário:</strong>
+                        <?= substr($horario_usuario['horario_entrada_1'], 0, 5) ?>–<?= substr($horario_usuario['horario_saida_1'], 0, 5) ?>
+                        /
+                        <?= substr($horario_usuario['horario_entrada_2'], 0, 5) ?>–<?= substr($horario_usuario['horario_saida_2'], 0, 5) ?>
+                    </div>
+                    <?php endif; ?>
                     
                     <!-- Status Online/Offline -->
                     <div class="alert alert-info mb-4" id="status-box">
@@ -22,31 +33,30 @@
                     
                     <!-- Informações de hoje -->
                     <?php if ($apontamento): ?>
-                        <div class="bg-light p-3 rounded mb-4">
-                            <h5 class="card-title">Hoje (<?php echo date('d/m/Y'); ?>)</h5>
+                        <div class="p-3 rounded mb-4" style="background:#252525; border:1px solid #444;">
+                            <h5 style="color:var(--primary-color);">Hoje (<?php echo date('d/m/Y'); ?>)</h5>
                             <div class="row text-center">
                                 <div class="col-6">
                                     <small class="text-muted">Entrada 1</small>
-                                    <p class="fw-bold"><?php echo $apontamento['hora_entrada_1'] ?? '---'; ?></p>
+                                    <p class="fw-bold mb-0"><?php echo $apontamento['hora_entrada_1'] ?? '---'; ?></p>
                                 </div>
                                 <div class="col-6">
                                     <small class="text-muted">Saída 1</small>
-                                    <p class="fw-bold"><?php echo $apontamento['hora_saida_1'] ?? '---'; ?></p>
+                                    <p class="fw-bold mb-0"><?php echo $apontamento['hora_saida_1'] ?? '---'; ?></p>
                                 </div>
                             </div>
                             
-                            <?php if ($config['quantidade_batidas'] >= 4): ?>
-                                <div class="row text-center mt-3">
-                                    <div class="col-6">
-                                        <small class="text-muted">Entrada 2</small>
-                                        <p class="fw-bold"><?php echo $apontamento['hora_entrada_2'] ?? '---'; ?></p>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="text-muted">Saída 2</small>
-                                        <p class="fw-bold"><?php echo $apontamento['hora_saida_2'] ?? '---'; ?></p>
-                                    </div>
+                            <hr style="border-color:#444; margin:10px 0;">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <small class="text-muted">Entrada 2</small>
+                                    <p class="fw-bold mb-0"><?php echo $apontamento['hora_entrada_2'] ?? '---'; ?></p>
                                 </div>
-                            <?php endif; ?>
+                                <div class="col-6">
+                                    <small class="text-muted">Saída 2</small>
+                                    <p class="fw-bold mb-0"><?php echo $apontamento['hora_saida_2'] ?? '---'; ?></p>
+                                </div>
+                            </div>
                         </div>
                     <?php else: ?>
                         <div class="alert alert-warning">
@@ -55,23 +65,49 @@
                     <?php endif; ?>
                     
                     <!-- Botão Principal -->
-                    <button id="btn-bater-ponto" class="btn btn-success btn-lg w-100 mb-3" style="font-size: 24px; padding: 20px;">
+                    <button id="btn-bater-ponto" class="btn btn-success btn-lg w-100 mb-3" style="font-size: 22px; padding: 18px; border-radius:10px; font-weight:bold;">
                         ✅ BATER PONTO
                     </button>
                     
                     <!-- Indicador de Sincronização -->
                     <div id="sync-indicator" class="text-muted small d-none">
-                        <spinner></spinner> <span id="sync-text">Sincronizando...</span>
+                        <span class="spinner-border spinner-border-sm"></span> <span id="sync-text">Sincronizando...</span>
+                    </div>
+
+                    <!-- Preview da Câmera -->
+                    <div id="camera-container" class="mt-3 d-none">
+                        <video id="video-preview" class="rounded" width="320" height="240" autoplay playsinline muted style="border:1px solid #444;"></video>
+                        <p class="text-muted small mt-1">Câmera ativa para registro de ponto</p>
                     </div>
                     
                 </div>
             </div>
             
             <!-- Links rápidos -->
-            <div class="mt-4 text-center">
+            <div class="mt-4 text-center d-flex justify-content-center gap-2 flex-wrap">
                 <a href="index.php?rota=meu_ponto" class="btn btn-outline-primary btn-sm">📋 Meu Ponto</a>
                 <a href="index.php?rota=saldo_horas" class="btn btn-outline-info btn-sm">⏳ Saldo de Horas</a>
                 <a href="index.php?rota=solicitar_alteracao_ponto" class="btn btn-outline-warning btn-sm">✏️ Solicitar Alteração</a>
+            </div>
+
+            <!-- Tabela de Últimos Pontos (aparece após bater) -->
+            <div id="tabela-pontos" class="mt-4 d-none">
+                <h5 class="text-center mb-3" style="color:var(--primary-color);">📋 Últimos Registros</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered text-center" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Entrada 1</th>
+                                <th>Saída 1</th>
+                                <th>Entrada 2</th>
+                                <th>Saída 2</th>
+                                <th>Horas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-pontos"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -81,8 +117,8 @@
 <div class="modal fade" id="modal-validacao" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title">⚠️ Batida Muito Próxima</h5>
+            <div class="modal-header" style="background:rgba(230,184,0,0.15); border-bottom:1px solid #444;">
+                <h5 class="modal-title" style="color:var(--primary-color);">⚠️ Batida Muito Próxima</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -99,12 +135,288 @@
 </div>
 
 <script>
-document.getElementById('btn-bater-ponto').addEventListener('click', function() {
-    baterPonto();
+// ===== Estado do ponto =====
+const apontamento = <?php echo json_encode($apontamento ?: null); ?>;
+const config = <?php echo json_encode($config ?: ['quantidade_batidas' => 2, 'usar_geolocalizacao' => 0]); ?>;
+const baseUrl = '<?php echo $base_url ?? ''; ?>';
+
+let geoData = { lat: null, lng: null, precisao: null };
+let fotoBase64 = null;
+let deviceId = null;
+let streamVideo = null;
+
+// ===== Determinar próxima batida =====
+function determinarProximaBatida() {
+    if (!apontamento) return { tipo: 'entrada', numero: 1 };
+    
+    for (let i = 1; i <= 3; i++) {
+        const ent = apontamento['hora_entrada_' + i];
+        const sai = apontamento['hora_saida_' + i];
+        if (!ent) return { tipo: 'entrada', numero: i };
+        if (!sai) return { tipo: 'saida', numero: i };
+    }
+    return { tipo: 'completo', numero: 0 }; // Todas as batidas feitas
+}
+
+function atualizarBotao() {
+    const prox = determinarProximaBatida();
+    const btn = document.getElementById('btn-bater-ponto');
+    if (prox.tipo === 'completo') {
+        btn.textContent = '✅ Todas as batidas registradas';
+        btn.disabled = true;
+        btn.classList.replace('btn-success', 'btn-secondary');
+    } else if (prox.tipo === 'entrada') {
+        btn.textContent = '🟢 Registrar Entrada ' + prox.numero;
+        btn.classList.replace('btn-danger', 'btn-success');
+    } else {
+        btn.textContent = '🔴 Registrar Saída ' + prox.numero;
+        btn.classList.replace('btn-success', 'btn-danger');
+    }
+}
+
+// ===== Device Fingerprint =====
+function gerarDeviceId() {
+    try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText(navigator.userAgent, 2, 2);
+        deviceId = canvas.toDataURL().slice(-32);
+    } catch (e) {
+        deviceId = 'fallback-' + navigator.userAgent.slice(0, 20);
+    }
+}
+
+// ===== Geolocalização =====
+function obterGeolocalizacao() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) { resolve(false); return; }
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                geoData.lat = pos.coords.latitude;
+                geoData.lng = pos.coords.longitude;
+                geoData.precisao = Math.round(pos.coords.accuracy);
+                resolve(true);
+            },
+            () => resolve(false),
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    });
+}
+
+// ===== Câmera =====
+function iniciarCamera() {
+    return new Promise((resolve) => {
+        const videoEl = document.getElementById('video-preview');
+        if (!videoEl || !navigator.mediaDevices) { resolve(false); return; }
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } })
+            .then(stream => {
+                streamVideo = stream;
+                videoEl.srcObject = stream;
+                videoEl.play();
+                document.getElementById('camera-container').classList.remove('d-none');
+                resolve(true);
+            })
+            .catch(() => resolve(false));
+    });
+}
+
+function capturarFoto() {
+    const videoEl = document.getElementById('video-preview');
+    if (!videoEl || !videoEl.srcObject) return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 320;
+    canvas.height = 240;
+    canvas.getContext('2d').drawImage(videoEl, 0, 0, 320, 240);
+    return canvas.toDataURL('image/jpeg', 0.6);
+}
+
+function pararCamera() {
+    if (streamVideo) {
+        streamVideo.getTracks().forEach(t => t.stop());
+        streamVideo = null;
+    }
+    const container = document.getElementById('camera-container');
+    if (container) container.classList.add('d-none');
+}
+
+// ===== Bater Ponto =====
+async function baterPonto(forcarConfirmacao = false) {
+    const btn = document.getElementById('btn-bater-ponto');
+    const prox = determinarProximaBatida();
+    
+    if (prox.tipo === 'completo') return;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+    document.getElementById('sync-indicator').classList.remove('d-none');
+    
+    try {
+        // Capturar geo se configurado
+        if (config.usar_geolocalizacao) {
+            document.getElementById('sync-text').textContent = 'Obtendo localização...';
+            await obterGeolocalizacao();
+        }
+        
+        // Capturar foto se câmera ativa
+        fotoBase64 = capturarFoto();
+        
+        document.getElementById('sync-text').textContent = 'Registrando batida...';
+        
+        const formData = new FormData();
+        formData.append('tipo', prox.tipo);
+        formData.append('numero_batida', prox.numero);
+        if (geoData.lat) formData.append('geo_lat', geoData.lat);
+        if (geoData.lng) formData.append('geo_lng', geoData.lng);
+        if (geoData.precisao) formData.append('geo_precisao', geoData.precisao);
+        if (fotoBase64) formData.append('foto', fotoBase64);
+        if (deviceId) formData.append('device_id', deviceId);
+        if (forcarConfirmacao) formData.append('forcar', '1');
+        
+        const response = await fetch(baseUrl + 'index.php?rota=bater_ponto_ajax', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'validacao_requerida') {
+            // Batida muito próxima — mostrar modal
+            document.getElementById('minutos-decorridos').textContent = Math.round(data.minutos_decorridos);
+            document.getElementById('ultima-batida').textContent = data.ultima_batida;
+            const modal = new bootstrap.Modal(document.getElementById('modal-validacao'));
+            modal.show();
+            resetarBotao();
+            return;
+        }
+        
+        if (data.status === 'sucesso') {
+            pararCamera();
+            mostrarSucesso('✅ Ponto batido com sucesso! ' + (data.mensagem || ''));
+            // Atualizar dados locais
+            if (apontamento) {
+                apontamento['hora_' + prox.tipo + '_' + prox.numero] = data.timestamp ? data.timestamp.split(' ')[1] : new Date().toTimeString().slice(0, 8);
+            }
+            document.getElementById('sync-indicator').classList.add('d-none');
+            atualizarBotao();
+            document.getElementById('btn-bater-ponto').disabled = false;
+            carregarUltimosPontos();
+        } else {
+            mostrarErro(data.mensagem || 'Erro ao registrar batida');
+            resetarBotao();
+        }
+    } catch (err) {
+        mostrarErro('Erro de conexão. Verifique sua internet.');
+        resetarBotao();
+    }
+}
+
+// ===== Confirmar saída (modal de batida próxima) =====
+document.getElementById('btn-confirmar-saida')?.addEventListener('click', async function() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modal-validacao'));
+    modal.hide();
+    
+    const formData = new FormData();
+    formData.append('tipo_acao', 'confirmar_saida');
+    if (geoData.lat) formData.append('geo_lat', geoData.lat);
+    if (geoData.lng) formData.append('geo_lng', geoData.lng);
+    if (geoData.precisao) formData.append('geo_precisao', geoData.precisao);
+    if (fotoBase64) formData.append('foto', fotoBase64);
+    if (deviceId) formData.append('device_id', deviceId);
+    
+    try {
+        const response = await fetch(baseUrl + 'index.php?rota=confirmar_alteracao', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        if (data.status === 'saida_registrada') {
+            mostrarSucesso('✅ Ponto batido com sucesso! ' + (data.mensagem || ''));
+            carregarUltimosPontos();
+        } else {
+            mostrarErro(data.mensagem || 'Erro ao confirmar');
+        }
+    } catch (e) {
+        mostrarErro('Erro de conexão');
+    }
 });
 
-function baterPonto() {
-    // TODO: Implementar lógica de batida
-    alert('Funcionalidade será implementada');
+// ===== UI Helpers =====
+function mostrarSucesso(msg) {
+    const box = document.getElementById('status-box');
+    box.className = 'alert alert-success mb-4';
+    box.innerHTML = '<span>✅</span> ' + msg;
 }
+
+function mostrarErro(msg) {
+    const box = document.getElementById('status-box');
+    box.className = 'alert alert-danger mb-4';
+    box.innerHTML = '<span>❌</span> ' + msg;
+}
+
+function resetarBotao() {
+    document.getElementById('sync-indicator').classList.add('d-none');
+    atualizarBotao();
+    document.getElementById('btn-bater-ponto').disabled = false;
+}
+
+// ===== Carregar Últimos Pontos =====
+async function carregarUltimosPontos() {
+    try {
+        const resp = await fetch(baseUrl + 'index.php?rota=meu_ponto_json');
+        const pontos = await resp.json();
+        const tbody = document.getElementById('tbody-pontos');
+        const container = document.getElementById('tabela-pontos');
+        if (!pontos || !pontos.length) return;
+
+        const ultimos = pontos.slice(0, 5);
+        tbody.innerHTML = '';
+        ultimos.forEach(p => {
+            const tr = document.createElement('tr');
+            // Destacar a linha de hoje
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            if (p.data === hoje) tr.classList.add('table-success');
+            tr.innerHTML = `
+                <td><strong>${p.data || '-'}</strong></td>
+                <td>${(p.hora_entrada_1 || '-').substring(0, 5)}</td>
+                <td>${(p.hora_saida_1 || '-').substring(0, 5)}</td>
+                <td>${(p.hora_entrada_2 || '-').substring(0, 5)}</td>
+                <td>${(p.hora_saida_2 || '-').substring(0, 5)}</td>
+                <td>${p.total_horas ? Number(p.total_horas).toFixed(2).replace('.', ',') + 'h' : '-'}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        container.classList.remove('d-none');
+    } catch(e) {
+        // silencioso — tabela é complementar
+    }
+}
+
+// ===== Inicialização =====
+document.addEventListener('DOMContentLoaded', function() {
+    gerarDeviceId();
+    atualizarBotao();
+    iniciarCamera();
+    
+    // Status online/offline
+    function atualizarStatusRede() {
+        const icon = document.getElementById('status-icon');
+        const text = document.getElementById('status-text');
+        if (navigator.onLine) {
+            icon.textContent = '🟢';
+            text.textContent = ' ONLINE';
+            document.getElementById('status-box').className = 'alert alert-info mb-4';
+        } else {
+            icon.textContent = '🔴';
+            text.textContent = ' OFFLINE';
+            document.getElementById('status-box').className = 'alert alert-danger mb-4';
+        }
+    }
+    window.addEventListener('online', atualizarStatusRede);
+    window.addEventListener('offline', atualizarStatusRede);
+    atualizarStatusRede();
+    
+    document.getElementById('btn-bater-ponto').addEventListener('click', () => baterPonto());
+});
 </script>

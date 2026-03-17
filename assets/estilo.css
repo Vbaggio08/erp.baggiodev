@@ -1,6 +1,7 @@
 :root {
     --bg-color: #121212;
     --surface-color: #1e1e1e;
+    --bg-surface-2: #252525;
     --primary-color: #e6b800;
     /* Amarelo Ripfire */
     --text-color: #e0e0e0;
@@ -145,6 +146,18 @@ ul {
     background-color: rgba(192, 57, 43, 0.15);
     border-color: var(--brand-red);
     color: var(--brand-red);
+}
+
+.alert-info {
+    background-color: rgba(52, 152, 219, 0.15);
+    border-color: #3498db;
+    color: #5dade2;
+}
+
+.alert-warning {
+    background-color: rgba(230, 184, 0, 0.15);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 /* Badges */
@@ -601,4 +614,194 @@ a:hover {
     .box-relatorio {
         border: 1px solid #000;
     }
+}
+
+/* --- OVERRIDES GLOBAIS PARA TEMA ESCURO --- */
+
+/* bg-light / bg-white → fundo escuro consistente */
+.bg-light {
+    background-color: #252525 !important;
+    color: var(--text-color) !important;
+}
+
+.bg-white {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* table-light → header de tabela escuro */
+.table-light,
+thead.table-light,
+thead.bg-light,
+tr.bg-light {
+    background-color: #252525 !important;
+    color: #aaa !important;
+}
+
+.table-light th,
+thead.table-light th,
+thead.bg-light th {
+    background-color: #252525 !important;
+    color: #aaa !important;
+    border-color: #333 !important;
+}
+
+/* table-success → verde sutil para destaque */
+.table-success {
+    background-color: rgba(39, 174, 96, 0.15) !important;
+    color: var(--text-color) !important;
+}
+
+.table-success td {
+    color: var(--text-color) !important;
+}
+
+/* table-warning  */
+.table-warning {
+    background-color: rgba(230, 184, 0, 0.15) !important;
+    color: var(--text-color) !important;
+}
+
+.table-warning td {
+    color: var(--text-color) !important;
+}
+
+/* table-danger  */
+.table-danger {
+    background-color: rgba(192, 57, 43, 0.15) !important;
+    color: var(--text-color) !important;
+}
+
+.table-danger td {
+    color: var(--text-color) !important;
+}
+
+/* text-dark → garantir legibilidade quando dentro de fundo escuro */
+.card .text-dark,
+.bg-light .text-dark,
+main .text-dark {
+    color: var(--text-color) !important;
+}
+
+/* bg-warning text-dark em cards/headers → manter amarelo mas ajustar texto */
+.card-header.bg-warning,
+.card.bg-warning {
+    background-color: rgba(230, 184, 0, 0.2) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.card-header.bg-warning .text-dark,
+.card.bg-warning .text-dark {
+    color: var(--primary-color) !important;
+}
+
+/* bg-info text-dark → azul sutil */
+.card-header.bg-info {
+    background-color: rgba(52, 152, 219, 0.2) !important;
+    color: #5dade2 !important;
+}
+
+.badge.bg-info.text-dark {
+    color: #000 !important;
+}
+
+/* card-footer bg-light */
+.card-footer.bg-light {
+    background-color: #252525 !important;
+    border-color: #333 !important;
+    color: var(--text-color) !important;
+}
+
+/* Badges Bootstrap 4 retrocompat → Bootstrap 5 com cores do tema */
+.badge-success {
+    background-color: var(--brand-green) !important;
+    color: #fff !important;
+}
+
+.badge-danger {
+    background-color: var(--brand-red) !important;
+    color: #fff !important;
+}
+
+.badge-warning {
+    background-color: #f39c12 !important;
+    color: #000 !important;
+}
+
+.badge-secondary {
+    background-color: #555 !important;
+    color: var(--text-color) !important;
+}
+
+.badge-info {
+    background-color: #3498db !important;
+    color: #fff !important;
+}
+
+.badge-primary {
+    background-color: var(--primary-color) !important;
+    color: #000 !important;
+}
+
+/* text-muted global → visível no tema escuro */
+.text-muted {
+    color: #999 !important;
+}
+
+/* List group dark override */
+.list-group-item {
+    background-color: var(--surface-color);
+    border-color: #333;
+    color: var(--text-color);
+}
+
+.list-group-item:hover {
+    background-color: #252525;
+}
+
+/* Accordion dark override */
+.accordion-item {
+    background-color: var(--surface-color);
+    border-color: #333;
+    color: var(--text-color);
+}
+
+.accordion-button {
+    background-color: #252525;
+    color: var(--text-color);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: rgba(230, 184, 0, 0.15);
+    color: var(--primary-color);
+}
+
+.accordion-button::after {
+    filter: invert(1);
+}
+
+/* btn-close em tema escuro */
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Inline form helpers para views legadas com inline styles */
+input[style*="background:#222"],
+input[style*="background: #222"],
+select[style*="background:#222"],
+select[style*="background: #222"],
+textarea[style*="background:#222"],
+textarea[style*="background: #222"] {
+    background-color: #252525 !important;
+    border-color: #444 !important;
+    color: var(--text-color) !important;
+}
+
+input[style*="background:#333"],
+select[style*="background:#333"],
+textarea[style*="background:#333"] {
+    background-color: #252525 !important;
+    border-color: #444 !important;
+    color: #888 !important;
 }

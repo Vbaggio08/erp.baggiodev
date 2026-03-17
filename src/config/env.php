@@ -73,8 +73,12 @@ if (file_exists($envFile)) {
 }
 
 // --- Define a URL base da aplicação ---
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-$host = $_SERVER['HTTP_HOST'];
+$httpsAtivo = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+$serverPort = $_SERVER['SERVER_PORT'] ?? null;
+$protocol = ($httpsAtivo || (string)$serverPort === '443') ? 'https://' : 'http://';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$scriptPath = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+
 // Garante que o caminho termine com /
-$script_name = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '/') . '/';
+$script_name = rtrim(str_replace(basename($scriptPath), '', $scriptPath), '/') . '/';
 define('BASE_URL', $protocol . $host . $script_name);

@@ -11,12 +11,18 @@
 
 <div class="box-relatorio">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h1 class="login-title">📋 Linha de Produção (Fichas)</h1>
+        <h1 class="login-title">� Ver Produção de Camiseta</h1>
         <a href="index.php?rota=novo_gabarito" class="btn-green" style="text-decoration:none;">+ Novo Pedido</a>
     </div>
 
+    <div style="margin-bottom:15px;">
+        <input type="text" id="filtroCamiseta" placeholder="🔍 Pesquisar por cliente, pedido, modelo ou status..."
+               oninput="filtrarTabelaCamiseta()"
+               style="width:100%; max-width:450px; padding:10px 14px; background:#222; border:1px solid #555; color:#fff; border-radius:6px; font-size:14px;">
+    </div>
+
     <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444;">
-        <table style="width:100%; border-collapse: collapse; color:#ddd; font-size:14px;">
+        <table id="tabelaCamiseta" style="width:100%; border-collapse: collapse; color:#ddd; font-size:14px;">
             <thead>
                 <tr style="background:#222; text-align:left; border-bottom:2px solid #444;">
                     <th style="padding:12px;">Pedido</th>
@@ -131,5 +137,14 @@ function mudarStatusFicha(select, id) {
     var novoStatus = select.value;
     select.className = 'status-select status-' + novoStatus.replace(/\s+/g, '');
     window.location.href = 'index.php?rota=mudar_status_gabarito&id=' + id + '&status=' + novoStatus;
+}
+
+function filtrarTabelaCamiseta() {
+    var termo = document.getElementById('filtroCamiseta').value.toLowerCase();
+    var linhas = document.querySelectorAll('#tabelaCamiseta tbody tr');
+    linhas.forEach(function(tr) {
+        var texto = tr.textContent.toLowerCase();
+        tr.style.display = texto.includes(termo) ? '' : 'none';
+    });
 }
 </script>

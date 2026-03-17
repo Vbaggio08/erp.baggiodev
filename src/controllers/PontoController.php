@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/Ponto.php';
 require_once __DIR__ . '/../models/AuditoriaAlteracao.php';
 require_once __DIR__ . '/../models/DispositivoAuto.php';
 require_once __DIR__ . '/../models/SyncOffline.php';
+require_once __DIR__ . '/../models/Usuario.php';
 
 class PontoController {
     
@@ -17,6 +18,12 @@ class PontoController {
         // Obtém apontamento de hoje
         $apontamento = Ponto::obterApontamentoDia($usuario_id);
         $config = Ponto::obterConfiguracaoPonto();
+        
+        // Horário individual do funcionário
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("SELECT horario_entrada_1, horario_saida_1, horario_entrada_2, horario_saida_2 FROM usuarios WHERE id = ?");
+        $stmt->execute([$usuario_id]);
+        $horario_usuario = $stmt->fetch(PDO::FETCH_ASSOC);
         
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/ponto_bater.php';
@@ -186,12 +193,204 @@ class PontoController {
             return json_encode(['status' => 'erro', 'mensagem' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Salva foto base64 capturada na câmera e retorna caminho relativo.
+     * A foto é salva em assets/uploads/comprovantes/fotos_ponto/YYYY-MM-DD/
+     */
+    private function salvarFotoBase64($fotoBase64, $usuario_id) {
+        if (empty($fotoBase64)) {
+            return null;
+        }
+
+        try {
+            // Remove o prefixo "data:image/jpeg;base64," se existir
+            if (strpos($fotoBase64, 'data:') === 0) {
+                $fotoBase64 = preg_replace('~^data:image/[^;]+;base64,~', '', $fotoBase64);
+            }
+
+            $decodificada = base64_decode($fotoBase64, true);
+            if ($decodificada === false) {
+                return null;
+            }
+
+            // Criar diretório de fotos de ponto se não existir
+            $data = date('Y-m-d');
+            $dirFotos = __DIR__ . '/../../assets/uploads/comprovantes/fotos_ponto/' . $data;
+            if (!is_dir($dirFotos)) {
+                mkdir($dirFotos, 0755, true);
+            }
+
+            // Gerar nome único da foto: user_ID_timestamp.jpg
+            $nomeArquivo = 'user_' . $usuario_id . '_' . time() . '.jpg';
+            $caminhoCompleto = $dirFotos . '/' . $nomeArquivo;
+            $caminhoRelativo = 'fotos_ponto/' . $data . '/' . $nomeArquivo;
+
+            // Salvar arquivo
+            file_put_contents($caminhoCompleto, $decodificada);
+
+            return $caminhoRelativo;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Bate ponto por CPF diretamente na tela de login.
+     * Fluxo sem sessão/autenticação tradicional.
+     */
+    public function baterPontoCpfLogin() {
+        header('Content-Type: application/json');
+
+        try {
+            $dados = $this->obterDadosRequisicao();
+            $cpf = trim((string)($dados['cpf'] ?? ''));
+            $device_id = trim((string)($dados['device_id'] ?? ''));
+            $fotoBase64 = $dados['foto'] ?? null;
+
+            $cpfNormalizado = Usuario::normalizarCpf($cpf);
+            if (strlen($cpfNormalizado) !== 11) {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'CPF inválido']);
+            }
+
+            if ($device_id === '') {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'Dispositivo não identificado']);
+            }
+
+            $maquina = Ponto::obterMaquinaGlobalAutorizada();
+            if (empty($maquina['device_id'])) {
+                http_response_code(403);
+                return json_encode(['sucesso' => false, 'erro' => 'Nenhuma máquina autorizada para bater ponto por CPF']);
+            }
+
+            if ((string)$maquina['device_id'] !== $device_id) {
+                http_response_code(403);
+                return json_encode(['sucesso' => false, 'erro' => 'Máquina não autorizada para bater ponto de todos']);
+            }
+
+            $usuario = Usuario::buscarPorCPF($cpfNormalizado);
+            if (!$usuario || empty($usuario['id'])) {
+                http_response_code(404);
+                return json_encode(['sucesso' => false, 'erro' => 'Usuário não encontrado para o CPF informado']);
+            }
+
+            $usuario_id = (int)$usuario['id'];
+            $proxima = $this->resolverProximaBatidaUsuario($usuario_id);
+            if (!empty($proxima['completo'])) {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'Todas as batidas do dia já foram realizadas']);
+            }
+
+            $tipo = $proxima['tipo'];
+            $numero = (int)$proxima['numero_batida'];
+
+            // Salvar foto se fornecida
+            $caminhoFoto = $this->salvarFotoBase64($fotoBase64, $usuario_id);
+
+            if ($tipo === 'entrada') {
+                $ok = Ponto::registrarEntrada(
+                    $usuario_id,
+                    $numero,
+                    null,
+                    $caminhoFoto,
+                    null,
+                    null,
+                    null,
+                    $_SERVER['REMOTE_ADDR'] ?? null,
+                    $device_id,
+                    $_SERVER['HTTP_USER_AGENT'] ?? null
+                );
+            } else {
+                $ok = Ponto::registrarSaida(
+                    $usuario_id,
+                    $numero,
+                    null,
+                    $caminhoFoto,
+                    null,
+                    null,
+                    null,
+                    $_SERVER['REMOTE_ADDR'] ?? null,
+                    $device_id,
+                    $_SERVER['HTTP_USER_AGENT'] ?? null
+                );
+            }
+
+            if (!$ok) {
+                http_response_code(500);
+                return json_encode(['sucesso' => false, 'erro' => 'Não foi possível registrar a batida']);
+            }
+
+            return json_encode([
+                'sucesso' => true,
+                'tipo_batida' => $tipo,
+                'mensagem' => 'Ponto batido com sucesso',
+                'usuario' => $usuario['nome'] ?? 'Usuário',
+                'timestamp' => date('Y-m-d H:i:s'),
+                'foto_salva' => !empty($caminhoFoto)
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Admin/RH define máquina global autorizada para batida por CPF.
+     */
+    public function autorizarMaquinaGlobalPonto() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            $dados = $this->obterDadosRequisicao();
+            $device_id = trim((string)($dados['device_id'] ?? ''));
+
+            if ($device_id === '') {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'Device ID obrigatório']);
+            }
+
+            $ok = Ponto::salvarMaquinaGlobalAutorizada(
+                $device_id,
+                (int)($_SESSION['user_id'] ?? 0),
+                $_SERVER['REMOTE_ADDR'] ?? null,
+                $_SERVER['HTTP_USER_AGENT'] ?? null
+            );
+
+            return json_encode([
+                'sucesso' => $ok,
+                'mensagem' => $ok ? 'Máquina global autorizada com sucesso' : 'Falha ao autorizar máquina global'
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Retorna status da máquina global autorizada para batida por CPF.
+     */
+    public function statusMaquinaGlobalPonto() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            $dados = Ponto::obterMaquinaGlobalAutorizada();
+            return json_encode(['sucesso' => true, 'dados' => $dados]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
     
     /**
      * Meu Ponto: últimos 30 dias
      */
     public function meuPonto() {
         $this->verificarLogin();
+        $this->atualizarApontamentosIncompletosSeNecessario();
         $usuario_id = $_SESSION['user_id'];
         
         // Últimos 30 dias
@@ -228,6 +427,7 @@ class PontoController {
      */
     public function listarPontosTodos() {
         $this->verificarRH();
+        $this->atualizarApontamentosIncompletosSeNecessario();
         
         $pdo = Database::getConnection();
         $departamento = $_GET['departamento'] ?? null;
@@ -253,6 +453,53 @@ class PontoController {
         
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/admin/ponto_todos.php';
+        require __DIR__ . '/../views/geral/footer.php';
+    }
+
+    /**
+     * Espelho de ponto por funcionario (RH/Admin)
+     */
+    public function espelhoPontoFuncionario() {
+        $this->verificarRH();
+        $this->atualizarApontamentosIncompletosSeNecessario();
+
+        $pdo = Database::getConnection();
+        $funcionarioId = (int)($_GET['usuario_id'] ?? 0);
+        $mesAno = trim((string)($_GET['mes_ano'] ?? date('Y-m')));
+
+        if (!preg_match('/^\d{4}-\d{2}$/', $mesAno)) {
+            $mesAno = date('Y-m');
+        }
+
+        $funcionariosStmt = $pdo->query("SELECT id, nome, departamento FROM usuarios ORDER BY nome ASC");
+        $funcionarios = $funcionariosStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $apontamentos = [];
+        $funcionarioSelecionado = null;
+
+        if ($funcionarioId > 0) {
+            $funcionarioStmt = $pdo->prepare("SELECT id, nome, departamento FROM usuarios WHERE id = ? LIMIT 1");
+            $funcionarioStmt->execute([$funcionarioId]);
+            $funcionarioSelecionado = $funcionarioStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($funcionarioSelecionado) {
+                $sql = "SELECT ap.*,
+                               u.nome,
+                               u.departamento
+                        FROM apontamentos_ponto ap
+                        INNER JOIN usuarios u ON u.id = ap.usuario_id
+                        WHERE ap.usuario_id = ?
+                          AND DATE_FORMAT(ap.data, '%Y-%m') = ?
+                        ORDER BY ap.data DESC";
+
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$funcionarioId, $mesAno]);
+                $apontamentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+
+        require __DIR__ . '/../views/geral/header.php';
+        require __DIR__ . '/../views/admin/espelho_ponto_funcionario.php';
         require __DIR__ . '/../views/geral/footer.php';
     }
     
@@ -284,6 +531,8 @@ class PontoController {
         $apontamento_id = $_POST['apontamento_id'];
         $hora_entrada_1 = $_POST['hora_entrada_1'] ?? null;
         $hora_saida_1 = $_POST['hora_saida_1'] ?? null;
+        $hora_entrada_2 = $_POST['hora_entrada_2'] ?? null;
+        $hora_saida_2 = $_POST['hora_saida_2'] ?? null;
         $motivo = $_POST['motivo_alteracao'];
         
         $pdo = Database::getConnection();
@@ -293,26 +542,172 @@ class PontoController {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$apontamento_id]);
         $anterior = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$anterior) {
+            header('Location: index.php?rota=ponto_todos&msg=apontamento_nao_encontrado');
+            exit;
+        }
+
+        // Regra de governança: quem edita o próprio ponto precisa aprovação de outro admin/RH.
+        if ((int)($_SESSION['user_id'] ?? 0) === (int)$anterior['usuario_id']) {
+            $sql = "INSERT INTO solicitacoes_alteracao_ponto
+                    (usuario_id, data_apontamento, tipo_alteracao, entrada_1_corrigida, saida_1_corrigida, entrada_2_corrigida, saida_2_corrigida, motivo, status, criado_em)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendente', NOW())";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $anterior['usuario_id'],
+                $anterior['data'],
+                'ambas_incorretas',
+                $hora_entrada_1,
+                $hora_saida_1,
+                $hora_entrada_2,
+                $hora_saida_2,
+                $motivo
+            ]);
+
+            AuditoriaAlteracao::registrarAlteracao(
+                $apontamento_id,
+                $_SESSION['user_id'],
+                'edicao_pendente_aprovacao',
+                json_encode(['entrada_1' => $anterior['hora_entrada_1'], 'saida_1' => $anterior['hora_saida_1'], 'entrada_2' => $anterior['hora_entrada_2'], 'saida_2' => $anterior['hora_saida_2']]),
+                json_encode(['entrada_1' => $hora_entrada_1, 'saida_1' => $hora_saida_1, 'entrada_2' => $hora_entrada_2, 'saida_2' => $hora_saida_2]),
+                'Autorização pendente: edição no próprio ponto'
+            );
+
+            header('Location: index.php?rota=ponto_todos&msg=autorizacao_pendente');
+            exit;
+        }
         
         // Atualiza
-        $sql = "UPDATE apontamentos_ponto SET hora_entrada_1 = ?, hora_saida_1 = ? WHERE id = ?";
+        $sql = "UPDATE apontamentos_ponto SET hora_entrada_1 = ?, hora_saida_1 = ?, hora_entrada_2 = ?, hora_saida_2 = ? WHERE id = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$hora_entrada_1, $hora_saida_1, $apontamento_id]);
+        $stmt->execute([$hora_entrada_1, $hora_saida_1, $hora_entrada_2, $hora_saida_2, $apontamento_id]);
         
         // Registra na auditoria
         AuditoriaAlteracao::registrarAlteracao(
             $apontamento_id,
             $_SESSION['user_id'],
             'entrada_saida_editada',
-            json_encode(['entrada' => $anterior['hora_entrada_1'], 'saida' => $anterior['hora_saida_1']]),
-            json_encode(['entrada' => $hora_entrada_1, 'saida' => $hora_saida_1]),
+            json_encode(['entrada_1' => $anterior['hora_entrada_1'], 'saida_1' => $anterior['hora_saida_1'], 'entrada_2' => $anterior['hora_entrada_2'], 'saida_2' => $anterior['hora_saida_2']]),
+            json_encode(['entrada_1' => $hora_entrada_1, 'saida_1' => $hora_saida_1, 'entrada_2' => $hora_entrada_2, 'saida_2' => $hora_saida_2]),
             $motivo
         );
         
-        // Envia notificação ao usuário (simples)
-        // TODO: Implementar sistema de notificações
-        
         header('Location: index.php?rota=ponto_todos');
+    }
+
+    /**
+     * Lista solicitações pendentes de alteração de ponto (RH/Admin)
+     */
+    public function listarSolicitacoesAlteracao() {
+        $this->verificarRH();
+
+        $pdo = Database::getConnection();
+        $sql = "SELECT s.*, u.nome as usuario_nome
+                FROM solicitacoes_alteracao_ponto s
+                INNER JOIN usuarios u ON u.id = s.usuario_id
+                WHERE s.status = 'pendente'
+                ORDER BY s.criado_em DESC";
+        $solicitacoes = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+
+        require __DIR__ . '/../views/geral/header.php';
+        require __DIR__ . '/../views/admin/solicitacoes_alteracao_ponto.php';
+        require __DIR__ . '/../views/geral/footer.php';
+    }
+
+    /**
+     * Aprova uma solicitação pendente e aplica alteração no apontamento.
+     */
+    public function aprovarSolicitacaoAlteracao() {
+        $this->verificarRH();
+
+        $solicitacao_id = (int)($_POST['solicitacao_id'] ?? 0);
+        $observacao = trim($_POST['observacao'] ?? '');
+        if ($solicitacao_id <= 0) {
+            header('Location: index.php?rota=solicitacoes_alteracao_ponto&msg=id_invalido');
+            exit;
+        }
+
+        $pdo = Database::getConnection();
+        $sql = "SELECT * FROM solicitacoes_alteracao_ponto WHERE id = ? AND status = 'pendente'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$solicitacao_id]);
+        $sol = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$sol) {
+            header('Location: index.php?rota=solicitacoes_alteracao_ponto&msg=solicitacao_invalida');
+            exit;
+        }
+
+        // Impede autoaprovação.
+        if ((int)$sol['usuario_id'] === (int)($_SESSION['user_id'] ?? 0)) {
+            header('Location: index.php?rota=solicitacoes_alteracao_ponto&msg=autoaprovacao_bloqueada');
+            exit;
+        }
+
+        $sql = "SELECT * FROM apontamentos_ponto WHERE usuario_id = ? AND data = ? LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$sol['usuario_id'], $sol['data_apontamento']]);
+        $apontamento = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$apontamento) {
+            header('Location: index.php?rota=solicitacoes_alteracao_ponto&msg=apontamento_nao_encontrado');
+            exit;
+        }
+
+        $sql = "UPDATE apontamentos_ponto
+                SET hora_entrada_1 = ?, hora_saida_1 = ?, hora_entrada_2 = ?, hora_saida_2 = ?
+                WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            $sol['entrada_1_corrigida'] ?: $apontamento['hora_entrada_1'],
+            $sol['saida_1_corrigida'] ?: $apontamento['hora_saida_1'],
+            $sol['entrada_2_corrigida'] ?: $apontamento['hora_entrada_2'],
+            $sol['saida_2_corrigida'] ?: $apontamento['hora_saida_2'],
+            $apontamento['id']
+        ]);
+
+        $sql = "UPDATE solicitacoes_alteracao_ponto
+                SET status = 'aprovado', aprovador_id = ?, observacao_aprovador = ?, atualizado_em = NOW()
+                WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$_SESSION['user_id'], $observacao, $solicitacao_id]);
+
+        AuditoriaAlteracao::registrarAlteracao(
+            $apontamento['id'],
+            $_SESSION['user_id'],
+            'edicao_aprovada',
+            json_encode(['entrada_1' => $apontamento['hora_entrada_1'], 'saida_1' => $apontamento['hora_saida_1'], 'entrada_2' => $apontamento['hora_entrada_2'], 'saida_2' => $apontamento['hora_saida_2']]),
+            json_encode(['entrada_1' => $sol['entrada_1_corrigida'], 'saida_1' => $sol['saida_1_corrigida'], 'entrada_2' => $sol['entrada_2_corrigida'], 'saida_2' => $sol['saida_2_corrigida']]),
+            'Aprovação de solicitação pendente'
+        );
+
+        header('Location: index.php?rota=solicitacoes_alteracao_ponto&msg=aprovada');
+        exit;
+    }
+
+    /**
+     * Rejeita uma solicitação pendente de alteração.
+     */
+    public function rejeitarSolicitacaoAlteracao() {
+        $this->verificarRH();
+
+        $solicitacao_id = (int)($_POST['solicitacao_id'] ?? 0);
+        $observacao = trim($_POST['observacao'] ?? '');
+        if ($solicitacao_id <= 0) {
+            header('Location: index.php?rota=solicitacoes_alteracao_ponto&msg=id_invalido');
+            exit;
+        }
+
+        $pdo = Database::getConnection();
+        $sql = "UPDATE solicitacoes_alteracao_ponto
+                SET status = 'rejeitado', aprovador_id = ?, observacao_aprovador = ?, atualizado_em = NOW()
+                WHERE id = ? AND status = 'pendente'";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$_SESSION['user_id'], $observacao, $solicitacao_id]);
+
+        header('Location: index.php?rota=solicitacoes_alteracao_ponto&msg=rejeitada');
+        exit;
     }
     
     /**
@@ -320,6 +715,28 @@ class PontoController {
      */
     public function solicitarAlteracao() {
         $this->verificarLogin();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $usuario_id = $_SESSION['user_id'];
+            $data_apontamento = $_POST['data_apontamento'] ?? null;
+            $tipo_alteracao = $_POST['tipo_alteracao'] ?? null;
+            $motivo = $_POST['motivo'] ?? '';
+            $entrada_1 = $_POST['entrada_1_corrigida'] ?? null;
+            $saida_1 = $_POST['saida_1_corrigida'] ?? null;
+            $entrada_2 = $_POST['entrada_2_corrigida'] ?? null;
+            $saida_2 = $_POST['saida_2_corrigida'] ?? null;
+            
+            $pdo = Database::getConnection();
+            
+            $sql = "INSERT INTO solicitacoes_alteracao_ponto 
+                    (usuario_id, data_apontamento, tipo_alteracao, entrada_1_corrigida, saida_1_corrigida, entrada_2_corrigida, saida_2_corrigida, motivo, status, criado_em)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendente', NOW())";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$usuario_id, $data_apontamento, $tipo_alteracao, $entrada_1, $saida_1, $entrada_2, $saida_2, $motivo]);
+            
+            header('Location: index.php?rota=meu_ponto&msg=solicitacao_enviada');
+            exit;
+        }
         
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/solicitar_alteracao_ponto.php';
@@ -364,6 +781,7 @@ class PontoController {
      */
     public function relatorioPonto() {
         $this->verificarLogin();
+        $this->atualizarApontamentosIncompletosSeNecessario();
         $usuario_id = $_SESSION['user_id'];
         
         $mes = date('m');
@@ -410,7 +828,7 @@ class PontoController {
             require_once __DIR__ . '/../models/HorasExtras.php';
             require_once __DIR__ . '/../models/Feriados.php';
             
-            $calculador = new \Src\Models\PontoCalculador();
+            $calculador = new PontoCalculador();
             $saldo = $calculador->calcularSaldoMensalUsuario($usuario_id, $mes_ano);
             
             http_response_code(200);
@@ -454,7 +872,7 @@ class PontoController {
             
             require_once __DIR__ . '/../models/PontoCalculador.php';
             
-            $calculador = new \Src\Models\PontoCalculador();
+            $calculador = new PontoCalculador();
             $relatorio = $calculador->gerarRelatorioMensal($usuario_id, $mes_ano);
             
             http_response_code(200);
@@ -491,7 +909,7 @@ class PontoController {
             
             require_once __DIR__ . '/../models/PontoCalculador.php';
             
-            $calculador = new \Src\Models\PontoCalculador();
+            $calculador = new PontoCalculador();
             $potenciais = $calculador->detectarHorasExtras($usuario_id, $mes_ano);
             
             $total_horas = array_sum(array_map(function($p) { return $p['horas_poten']; }, $potenciais));
@@ -523,14 +941,17 @@ class PontoController {
      * - Percentuais
      */
     public function obterConfiguracaoPonto() {
+        $this->verificarRH();
         header('Content-Type: application/json');
         
         try {
-            $empresa_id = intval($_GET['empresa_id'] ?? $_SESSION['empresa_id'] ?? 1);
+            $empresa_id = $this->resolverEmpresaConfiguracao($_GET['empresa_id'] ?? null);
             
             require_once __DIR__ . '/../models/ConfiguracaoPontos.php';
             
-            $configuracao = \Src\Models\ConfiguracaoPontos::obterConfiguracao($empresa_id);
+            $configuracao = ConfiguracaoPontos::obterConfiguracao($empresa_id);
+            $config_escala = Ponto::obterConfiguracaoEscalasBatidas();
+            $configuracao = array_merge($configuracao, $config_escala);
             
             http_response_code(200);
             return json_encode([
@@ -541,6 +962,284 @@ class PontoController {
         } catch (\Exception $e) {
             http_response_code(500);
             return json_encode(['erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Salva configuração do sistema de ponto (FASE 3 + escala/batidas).
+     */
+    public function salvarConfiguracaoPonto() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            require_once __DIR__ . '/../models/ConfiguracaoPontos.php';
+
+            $dados = $this->obterDadosRequisicao();
+            $empresa_id = $this->resolverEmpresaConfiguracao();
+
+            $dados_avancados = [
+                'permite_horas_extras' => !empty($dados['permite_horas_extras']) ? 1 : 0,
+                'limite_horas_extras_diarias' => (float)($dados['limite_horas_extras_diarias'] ?? 2.0),
+                'limite_horas_extras_mensais' => (float)($dados['limite_horas_extras_mensais'] ?? 20.0),
+                'percentual_hora_extra_50' => (float)($dados['percentual_hora_extra_50'] ?? 50.0),
+                'percentual_hora_extra_100' => (float)($dados['percentual_hora_extra_100'] ?? 100.0),
+                'calcula_dsr' => !empty($dados['calcula_dsr']) ? 1 : 0,
+                'dsr_dias_compensacao' => (int)($dados['dsr_dias_compensacao'] ?? 1),
+                'desconta_feriado_nao_trabalhado' => !empty($dados['desconta_feriado_nao_trabalhado']) ? 1 : 0,
+                'aplicar_dsr_compensado_feriado' => !empty($dados['aplicar_dsr_compensado_feriado']) ? 1 : 0,
+                'tolerancia_entrada_minutos' => (int)($dados['tolerancia_entrada_minutos'] ?? 5),
+                'tolerancia_saida_minutos' => (int)($dados['tolerancia_saida_minutos'] ?? 5),
+                'considerar_lunch_automatico' => !empty($dados['considerar_lunch_automatico']) ? 1 : 0,
+                'duracao_lunch_minutos' => (int)($dados['duracao_lunch_minutos'] ?? 60),
+            ];
+
+            $ok_avancado = ConfiguracaoPontos::atualizar($dados_avancados, $empresa_id);
+
+            $ok_escala = Ponto::salvarConfiguracaoEscalasBatidas([
+                'regra_incompleto_fim_dia' => !empty($dados['regra_incompleto_fim_dia']),
+                'batidas_padrao_dia' => (int)($dados['batidas_padrao_dia'] ?? 4),
+                'dias_ativos' => is_array($dados['dias_ativos'] ?? null) ? $dados['dias_ativos'] : [],
+                'batidas_por_dia' => is_array($dados['batidas_por_dia'] ?? null) ? $dados['batidas_por_dia'] : [],
+            ]);
+
+            // Compatibilidade com configuração base existente do ponto.
+            $pdo = Database::getConnection();
+            $sql = "INSERT INTO configuracao_ponto (id, quantidade_batidas, tolerancia_atraso_minutos, usar_dsr)
+                    VALUES (1, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE
+                        quantidade_batidas = VALUES(quantidade_batidas),
+                        tolerancia_atraso_minutos = VALUES(tolerancia_atraso_minutos),
+                        usar_dsr = VALUES(usar_dsr)";
+            $stmt = $pdo->prepare($sql);
+            $ok_base = $stmt->execute([
+                max(0, (int)($dados['batidas_padrao_dia'] ?? 4)),
+                max(0, (int)($dados['tolerancia_entrada_minutos'] ?? 5)),
+                !empty($dados['calcula_dsr']) ? 1 : 0,
+            ]);
+
+            if ($ok_avancado || $ok_escala || $ok_base) {
+                return json_encode([
+                    'sucesso' => true,
+                    'mensagem' => 'Configurações salvas com sucesso'
+                ]);
+            }
+
+            http_response_code(400);
+            return json_encode(['sucesso' => false, 'erro' => 'Nenhuma configuração válida foi salva']);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Retorna configuração individual de ponto para um usuário.
+     */
+    public function obterConfiguracaoPontoUsuario() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            $usuario_id = (int)($_GET['usuario_id'] ?? 0);
+            if ($usuario_id <= 0) {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'Usuário inválido']);
+            }
+
+            $configuracao = Ponto::obterConfiguracaoUsuarioPonto($usuario_id);
+
+            return json_encode([
+                'sucesso' => true,
+                'usuario_id' => $usuario_id,
+                'configuracao' => $configuracao,
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Salva configuração individual de ponto para um usuário.
+     */
+    public function salvarConfiguracaoPontoUsuario() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            $dados = $this->obterDadosRequisicao();
+            $usuario_id = (int)($dados['usuario_id'] ?? 0);
+            if ($usuario_id <= 0) {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'Usuário inválido']);
+            }
+
+            $ok = Ponto::salvarConfiguracaoUsuarioPonto($usuario_id, [
+                'permite_horas_extras' => !empty($dados['permite_horas_extras']),
+                'batidas_padrao_dia' => (int)($dados['batidas_padrao_dia'] ?? 4),
+                'dias_ativos' => is_array($dados['dias_ativos'] ?? null) ? $dados['dias_ativos'] : [],
+                'batidas_por_dia' => is_array($dados['batidas_por_dia'] ?? null) ? $dados['batidas_por_dia'] : [],
+                'horario_entrada_1' => trim((string)($dados['horario_entrada_1'] ?? '08:00')),
+                'horario_saida_1' => trim((string)($dados['horario_saida_1'] ?? '12:00')),
+                'horario_entrada_2' => trim((string)($dados['horario_entrada_2'] ?? '13:00')),
+                'horario_saida_2' => trim((string)($dados['horario_saida_2'] ?? '18:00')),
+            ]);
+
+            if (!$ok) {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'Não foi possível salvar configuração do usuário']);
+            }
+
+            return json_encode([
+                'sucesso' => true,
+                'mensagem' => 'Configuração do usuário salva com sucesso',
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Restaura configurações padrão do ponto.
+     */
+    public function resetarConfiguracaoPonto() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            require_once __DIR__ . '/../models/ConfiguracaoPontos.php';
+
+            $empresa_id = $this->resolverEmpresaConfiguracao();
+            $padrao = [
+                'permite_horas_extras' => 1,
+                'limite_horas_extras_diarias' => 2.0,
+                'limite_horas_extras_mensais' => 20.0,
+                'percentual_hora_extra_50' => 50.0,
+                'percentual_hora_extra_100' => 100.0,
+                'calcula_dsr' => 1,
+                'dsr_dias_compensacao' => 1,
+                'desconta_feriado_nao_trabalhado' => 0,
+                'aplicar_dsr_compensado_feriado' => 1,
+                'tolerancia_entrada_minutos' => 5,
+                'tolerancia_saida_minutos' => 5,
+                'considerar_lunch_automatico' => 0,
+                'duracao_lunch_minutos' => 60,
+            ];
+
+            ConfiguracaoPontos::atualizar($padrao, $empresa_id);
+            Ponto::resetarConfiguracaoEscalasBatidas();
+
+            $pdo = Database::getConnection();
+            $sql = "INSERT INTO configuracao_ponto (id, quantidade_batidas, tolerancia_atraso_minutos, usar_dsr)
+                    VALUES (1, 4, 5, 1)
+                    ON DUPLICATE KEY UPDATE
+                        quantidade_batidas = 4,
+                        tolerancia_atraso_minutos = 5,
+                        usar_dsr = 1";
+            $pdo->exec($sql);
+
+            return json_encode([
+                'sucesso' => true,
+                'mensagem' => 'Configurações restauradas para o padrão'
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Lista feriados para tela de configuração.
+     */
+    public function listarFeriadosConfiguracao() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            require_once __DIR__ . '/../models/Feriados.php';
+
+            $data_inicio = $_GET['data_inicio'] ?? date('Y-01-01', strtotime('-1 year'));
+            $data_fim = $_GET['data_fim'] ?? date('Y-12-31', strtotime('+2 years'));
+
+            $dados = Feriados::listarPeriodo($data_inicio, $data_fim);
+            return json_encode(['sucesso' => true, 'dados' => $dados]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Adiciona feriado via tela de configuração.
+     */
+    public function adicionarFeriadoConfiguracao() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            require_once __DIR__ . '/../models/Feriados.php';
+
+            $dados = $this->obterDadosRequisicao();
+            $data = trim($dados['data'] ?? '');
+            $descricao = trim($dados['descricao'] ?? 'Feriado');
+            $tipo = trim($dados['tipo'] ?? 'personalizado');
+
+            if ($data === '') {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'Data do feriado é obrigatória']);
+            }
+
+            $id = Feriados::adicionar($data, $descricao, $tipo, null);
+            return json_encode(['sucesso' => true, 'id' => $id]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Remove feriado via tela de configuração.
+     */
+    public function removerFeriadoConfiguracao() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            require_once __DIR__ . '/../models/Feriados.php';
+
+            $dados = $this->obterDadosRequisicao();
+            $id = (int)($dados['id'] ?? ($_GET['id'] ?? 0));
+            if ($id <= 0) {
+                http_response_code(400);
+                return json_encode(['sucesso' => false, 'erro' => 'ID inválido']);
+            }
+
+            $ok = Feriados::remover($id);
+            return json_encode(['sucesso' => $ok]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Lista usuários para teste de cálculos na tela de configuração.
+     */
+    public function listarUsuariosTeste() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            $pdo = Database::getConnection();
+            $sql = "SELECT id, nome FROM usuarios ORDER BY nome ASC";
+            $dados = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+
+            return json_encode(['sucesso' => true, 'data' => $dados]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
         }
     }
 
@@ -573,7 +1272,7 @@ class PontoController {
                 $data_obj->modify('-1 day'); // Se domingo, volta para sábado noturno, então para segunda anterior
             }
             
-            $calculador = new \Src\Models\PontoCalculador();
+            $calculador = new PontoCalculador();
             $dsr = $calculador->calcularDSRSemana($usuario_id, $data_obj);
             
             http_response_code(200);
@@ -638,6 +1337,7 @@ class PontoController {
      */
     public function gerenciarMeuPonto() {
         $this->verificarLogin();
+        $this->atualizarApontamentosIncompletosSeNecessario();
         $usuario_id = $_SESSION['user_id'];
 
         require __DIR__ . '/../views/geral/header.php';
@@ -900,11 +1600,11 @@ class PontoController {
             // Mapear dos formatos antigos para novos
             if ($formato === 'pdf') $formato = 'html';
             
-            $gerador = new \Src\Models\GeradorRelatorioPDF($formato);
+            $gerador = new GeradorRelatorioPDF($formato);
             
             // Obter dados do usuário
             $sql = "SELECT nome, email FROM usuarios WHERE id = ?";
-            $stmt = $GLOBALS['db']->prepare($sql);
+            $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$usuario_id]);
             $usuario = $stmt->fetch(\PDO::FETCH_ASSOC);
             
@@ -919,9 +1619,12 @@ class PontoController {
                 throw new \Exception('Formato de mês inválido. Use YYYY-MM');
             }
             
-            $stmt = $GLOBALS['db']->prepare($sql);
+            $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$usuario_id, $parts[0], $parts[1]]);
             $apontamentos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Consolidar linhas duplicadas da mesma data para evitar repetição no espelho/exportação.
+            $apontamentos = $this->consolidarApontamentosPorData($apontamentos);
             
             // Calcular total_horas para cada apontamento
             foreach ($apontamentos as &$apt) {
@@ -995,6 +1698,56 @@ class PontoController {
     }
 
     /**
+     * Consolida apontamentos com a mesma data em um único registro.
+     * Preserva dados não vazios de batidas e mantém o registro de maior ID como base final.
+     */
+    private function consolidarApontamentosPorData(array $apontamentos): array {
+        if (count($apontamentos) <= 1) {
+            return $apontamentos;
+        }
+
+        $porData = [];
+
+        foreach ($apontamentos as $registro) {
+            $data = (string)($registro['data'] ?? '');
+            if ($data === '') {
+                continue;
+            }
+
+            if (!isset($porData[$data])) {
+                $porData[$data] = $registro;
+                continue;
+            }
+
+            $base = $porData[$data];
+
+            // Completa campos vazios com dados não vazios encontrados em outro registro do mesmo dia.
+            foreach ($registro as $campo => $valor) {
+                if ((empty($base[$campo]) || $base[$campo] === '00:00:00') && !empty($valor)) {
+                    $base[$campo] = $valor;
+                }
+            }
+
+            // Se o registro atual for mais novo, ele vira a base e recebe os complementos do anterior.
+            $idBase = (int)($base['id'] ?? 0);
+            $idRegistro = (int)($registro['id'] ?? 0);
+            if ($idRegistro > $idBase) {
+                foreach ($base as $campo => $valor) {
+                    if ((empty($registro[$campo]) || $registro[$campo] === '00:00:00') && !empty($valor)) {
+                        $registro[$campo] = $valor;
+                    }
+                }
+                $base = $registro;
+            }
+
+            $porData[$data] = $base;
+        }
+
+        ksort($porData);
+        return array_values($porData);
+    }
+
+    /**
      * Exporta recibo de ponto em PDF - FASE 5
      * GET /index.php?rota=exportar_recibo&batida_id=ID
      */
@@ -1006,11 +1759,11 @@ class PontoController {
         
         try {
             require_once __DIR__ . '/../models/GeradorRelatorioPDF.php';
-            $gerador = new \Src\Models\GeradorRelatorioPDF();
+            $gerador = new GeradorRelatorioPDF();
             
             // Obter dados da batida
             $sql = "SELECT a.*, u.nome FROM apontamentos_ponto a JOIN usuarios u ON a.usuario_id = u.id WHERE a.id = ? AND a.usuario_id = ?";
-            $stmt = $GLOBALS['db']->prepare($sql);
+            $stmt = Database::getConnection()->prepare($sql);
             $stmt->execute([$batida_id, $usuario_id]);
             $batida = $stmt->fetch(\PDO::FETCH_ASSOC);
             
@@ -1055,6 +1808,83 @@ class PontoController {
             echo "<meta http-equiv='refresh' content='3;url=$url'>";
             exit;
         }
+    }
+
+    /**
+     * Obtém dados de entrada aceitando JSON e form-data.
+     */
+    private function obterDadosRequisicao(): array {
+        if (!empty($_POST)) {
+            return $_POST;
+        }
+
+        $raw = file_get_contents('php://input');
+        if (!$raw) {
+            return [];
+        }
+
+        $json = json_decode($raw, true);
+        return is_array($json) ? $json : [];
+    }
+
+    /**
+     * Atualiza status de apontamentos antigos para incompleta quando aplicável.
+     */
+    private function atualizarApontamentosIncompletosSeNecessario(): void {
+        try {
+            Ponto::aplicarRegraIncompletoFimDia();
+        } catch (\Exception $e) {
+            error_log('Falha ao atualizar apontamentos incompletos: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Resolve o identificador aceito pelo schema atual de configuracao_pontos_avancado.
+     * Se o empresa_id da sessão não existir em usuarios.id, usa configuração global (NULL).
+     */
+    private function resolverEmpresaConfiguracao($empresaIdInformado = null): ?int {
+        $empresaId = $empresaIdInformado;
+
+        if ($empresaId === null || $empresaId === '') {
+            $empresaId = $_SESSION['empresa_id'] ?? null;
+        }
+
+        if ($empresaId === null || $empresaId === '') {
+            return null;
+        }
+
+        $empresaId = (int)$empresaId;
+        if ($empresaId <= 0) {
+            return null;
+        }
+
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('SELECT id FROM usuarios WHERE id = ? LIMIT 1');
+        $stmt->execute([$empresaId]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ? $empresaId : null;
+    }
+
+    /**
+     * Descobre qual é a próxima batida esperada para o dia (entrada/saída).
+     */
+    private function resolverProximaBatidaUsuario(int $usuario_id): array {
+        $apontamento = Ponto::obterApontamentoDia($usuario_id);
+
+        if (!$apontamento) {
+            return ['tipo' => 'entrada', 'numero_batida' => 1];
+        }
+
+        for ($i = 1; $i <= 3; $i++) {
+            if (empty($apontamento["hora_entrada_$i"])) {
+                return ['tipo' => 'entrada', 'numero_batida' => $i];
+            }
+            if (empty($apontamento["hora_saida_$i"])) {
+                return ['tipo' => 'saida', 'numero_batida' => $i];
+            }
+        }
+
+        return ['completo' => true, 'tipo' => null, 'numero_batida' => 0];
     }
 }
 ?>

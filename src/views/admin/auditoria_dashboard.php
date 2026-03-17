@@ -19,7 +19,7 @@
                     <p class="fs-4 fw-bold">
                         <?php 
                             echo count(array_filter($alteracoes, function($a) {
-                                return date('Y-m-d', strtotime($a['data_alteracao'])) === date('Y-m-d');
+                                return date('Y-m-d', strtotime($a['criado_em'])) === date('Y-m-d');
                             }));
                         ?>
                     </p>
@@ -34,7 +34,7 @@
                         <?php 
                             $semana_passada = date('Y-m-d', strtotime('-7 days'));
                             echo count(array_filter($alteracoes, function($a) use ($semana_passada) {
-                                return strtotime($a['data_alteracao']) >= strtotime($semana_passada);
+                                return strtotime($a['criado_em']) >= strtotime($semana_passada);
                             }));
                         ?>
                     </p>
@@ -110,21 +110,14 @@
                                         <strong>Usuário:</strong> <?php echo $alt['usuario_nome']; ?>
                                     </p>
                                     <p class="small mb-0">
-                                        <code><?php echo $alt['detalhes']; ?></code>
+                                        <code><?php echo htmlspecialchars((string)($alt['motivo_alteracao'] ?? 'Sem motivo informado')); ?></code>
                                     </p>
                                 </div>
                                 <div class="col-md-4 text-end">
                                     <p class="small text-muted">
-                                        🕒 <?php echo date('d/m/Y H:i:s', strtotime($alt['data_alteracao'])); ?>
+                                        🕒 <?php echo date('d/m/Y H:i:s', strtotime($alt['criado_em'])); ?>
                                     </p>
-                                    <p class="small">
-                                        📍 IP: <?php echo $alt['ip_origem']; ?>
-                                    </p>
-                                    <?php if ($alt['usuario_alterador_id'] !== $alt['usuario_id']): ?>
-                                        <p class="small text-warning">
-                                            ⚠️ <strong>Alterado por RH:</strong> <?php echo $alt['usuario_alterador_nome']; ?>
-                                        </p>
-                                    <?php endif; ?>
+                                    <p class="small">👤 <?php echo !empty($alt['usuario_nome']) ? htmlspecialchars($alt['usuario_nome']) : 'Sistema'; ?></p>
                                 </div>
                             </div>
                         </div>
@@ -137,9 +130,10 @@
     <!-- Ações Suspeitas -->
     <?php 
         $suspeitas = array_filter($alteracoes, function($a) {
-            // Flagear: mesma pessoa editando seus próprios pontos múltiplas vezes em curto tempo, etc
-            return $a['usuario_alterador_id'] !== $a['usuario_id'] || 
-                   ($a['tipo_alteracao'] === 'ponto_editado' && strtotime($a['data_alteracao']) > strtotime('-1 hour'));
+            return (
+                stripos((string)$a['tipo_alteracao'], 'edit') !== false ||
+                stripos((string)$a['tipo_alteracao'], 'pendente') !== false
+            ) && strtotime($a['criado_em']) > strtotime('-1 hour');
         });
     ?>
     <?php if (!empty($suspeitas)): ?>
@@ -150,7 +144,7 @@
             <div class="list-group list-group-flush">
                 <?php foreach ($suspeitas as $s): ?>
                     <a href="index.php?rota=auditoria_apontamento&id=<?php echo $s['apontamento_id']; ?>" class="list-group-item list-group-item-action">
-                        🚨 <?php echo $s['usuario_nome']; ?> - <?php echo $s['tipo_alteracao']; ?> em <?php echo strtotime($s['data_alteracao']); ?>
+                        🚨 <?php echo htmlspecialchars((string)$s['usuario_nome']); ?> - <?php echo htmlspecialchars((string)$s['tipo_alteracao']); ?> em <?php echo date('d/m/Y H:i:s', strtotime($s['criado_em'])); ?>
                     </a>
                 <?php endforeach; ?>
             </div>

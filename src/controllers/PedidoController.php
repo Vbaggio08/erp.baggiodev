@@ -2,6 +2,23 @@
 require_once __DIR__ . '/../config/database.php';
 
 class PedidoController {
+    private function colunaExiste(string $tabela, string $coluna): bool {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->query("SHOW COLUMNS FROM {$tabela} LIKE '" . addslashes($coluna) . "'");
+        return (bool) ($stmt && $stmt->fetch(PDO::FETCH_ASSOC));
+    }
+
+    private function garantirEstruturaPedidosDtf(): void {
+        $pdo = Database::getConnection();
+
+        if (!$this->colunaExiste('pedidos_dtf', 'vendedor_id')) {
+            $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN vendedor_id INT NULL AFTER caminho_comprovante");
+        }
+
+        if (!$this->colunaExiste('pedidos_dtf', 'meio_pagamento')) {
+            $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN meio_pagamento VARCHAR(50) NULL AFTER observacoes");
+        }
+    }
     
     // Lista a Fila de Produção
     public function index() {
@@ -76,8 +93,28 @@ class PedidoController {
     public function novo_dtf() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (!isset($_SESSION['user_id'])) header('Location: index.php?rota=login');
-        
-        // A view não precisa de dados extras por enquanto
+
+        $this->garantirEstruturaPedidosDtf();
+
+        $pdo = Database::getConnection();
+        $usuarios = $pdo->query("SELECT id, nome FROM usuarios ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+        $ficha = [];
+        if (!empty($_GET['id'])) {
+            $stmt = $pdo->prepare("SELECT * FROM pedidos_dtf WHERE id = ?");
+            $stmt->execute([$_GET['id']]);
+            $ficha = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        }
+
+        if (!isset($_GET['numero_pedido']) && empty($ficha['numero_pedido'])) {
+            $stmt = $pdo->query("SELECT MAX(CAST(numero_pedido AS UNSIGNED)) FROM pedidos_dtf");
+            $ultimo = $stmt->fetchColumn();
+            $proximo = $ultimo ? (int) $ultimo + 1 : 1;
+            $num = str_pad($proximo, 2, '0', STR_PAD_LEFT);
+        } else {
+            $num = $_GET['numero_pedido'] ?? ($ficha['numero_pedido'] ?? '01');
+        }
+
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/nova_dtf.php';
         require __DIR__ . '/../views/geral/footer.php';
@@ -91,10 +128,13 @@ class PedidoController {
             exit;
         }
 
+        $this->garantirEstruturaPedidosDtf();
+
         $pdo = Database::getConnection();
+        $id = $_POST['id'] ?? null;
 
         // 1. Tratar Upload de Arquivos
-        $nomeArquivoImpressao = null;
+        $nomeArquivoImpressao = $_POST['arquivo_impressao_atual'] ?? null;
         if (isset($_FILES['arquivo_impressao']) && $_FILES['arquivo_impressao']['error'] == 0) {
             $uploadDir = __DIR__ . '/../../assets/uploads/';
             $ext = pathinfo($_FILES['arquivo_impressao']['name'], PATHINFO_EXTENSION);
@@ -105,7 +145,7 @@ class PedidoController {
             }
         }
 
-        $nomeArquivoComprovante = null;
+        $nomeArquivoComprovante = $_POST['comprovante_atual'] ?? null;
         if (isset($_FILES['arquivo_comprovante']) && $_FILES['arquivo_comprovante']['error'] == 0) {
             $uploadDirComprovante = __DIR__ . '/../../assets/uploads/comprovantes/';
             if (!is_dir($uploadDirComprovante)) {
@@ -132,16 +172,12 @@ class PedidoController {
         $valor_final = isset($_POST['valor_final']) ? floatval(str_replace(',', '.', $_POST['valor_final'])) : 0;
         
         $observacoes = $_POST['obs'] ?? null;
+        $meioPagamento = $_POST['meio_pagamento'] ?? null;
+        $vendedorId = !empty($_POST['vendedor_id']) ? (int) $_POST['vendedor_id'] : null;
 
         // 3. Inserir no Banco de Dados
         try {
-            $sql = "INSERT INTO pedidos_dtf 
-                        (cliente, contato, plataforma, numero_pedido, data_pedido, data_entrega, metros, valor_metro, valor_final, observacoes, arquivo_impressao, caminho_comprovante) 
-                    VALUES 
-                        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
+            $dados = [
                 $cliente, 
                 $contato, 
                 $plataforma, 
@@ -152,15 +188,85 @@ class PedidoController {
                 $valor_metro, 
                 $valor_final, 
                 $observacoes, 
+                $meioPagamento,
                 $nomeArquivoImpressao,
-                $nomeArquivoComprovante
-            ]);
+                $nomeArquivoComprovante,
+                $vendedorId
+            ];
+
+            if ($id) {
+                $sql = "UPDATE pedidos_dtf
+                           SET cliente = ?, contato = ?, plataforma = ?, numero_pedido = ?, data_pedido = ?,
+                               data_entrega = ?, metros = ?, valor_metro = ?, valor_final = ?, observacoes = ?,
+                               meio_pagamento = ?, arquivo_impressao = ?, caminho_comprovante = ?, vendedor_id = ?
+                         WHERE id = ?";
+                $dados[] = $id;
+            } else {
+                $sql = "INSERT INTO pedidos_dtf
+                            (cliente, contato, plataforma, numero_pedido, data_pedido, data_entrega, metros, valor_metro, valor_final, observacoes, meio_pagamento, arquivo_impressao, caminho_comprovante, vendedor_id)
+                        VALUES
+                            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            }
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($dados);
             
-            header('Location: index.php?rota=novo_dtf&status=success');
+            header('Location: index.php?rota=ver_producao_dtf');
+            exit;
 
         } catch (Exception $e) {
             echo "Erro ao salvar pedido DTF: " . $e->getMessage();
             echo "<br><a href='index.php?rota=novo_dtf'>Voltar</a>";
         }
+    }
+
+    // Lista os pedidos DTF
+    public function listar_dtf() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        $this->garantirEstruturaPedidosDtf();
+
+        $pdo = Database::getConnection();
+        try {
+            $pedidosDtf = $pdo->query(
+                "SELECT d.*, u.nome AS vendedor_nome
+                   FROM pedidos_dtf d
+              LEFT JOIN usuarios u ON d.vendedor_id = u.id
+               ORDER BY d.data_pedido DESC, d.id DESC"
+            )->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $pedidosDtf = [];
+        }
+
+        require __DIR__ . '/../views/geral/header.php';
+        require __DIR__ . '/../views/producao/lista_dtf.php';
+        require __DIR__ . '/../views/geral/footer.php';
+    }
+
+    public function excluir_dtf() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        if (($_SESSION['user_nivel'] ?? '') !== 'admin') {
+            header('Location: index.php?rota=ver_producao_dtf');
+            exit;
+        }
+
+        $id = $_GET['id'] ?? null;
+        if (!empty($id)) {
+            $stmt = Database::getConnection()->prepare("DELETE FROM pedidos_dtf WHERE id = ?");
+            $stmt->execute([$id]);
+        }
+
+        header('Location: index.php?rota=ver_producao_dtf');
+        exit;
     }
 }

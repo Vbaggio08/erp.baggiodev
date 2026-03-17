@@ -16,7 +16,7 @@
                         Sua solicitação será revisada pelo RH.
                     </p>
                     
-                    <form method="POST" id="form-solicitar-alteracao">
+                    <form method="POST" action="index.php?rota=solicitar_alteracao_ponto" id="form-solicitar-alteracao" enctype="multipart/form-data">
                         <!-- Data do Apontamento -->
                         <div class="mb-4">
                             <label class="form-label"><strong>📅 Data do Apontamento</strong></label>

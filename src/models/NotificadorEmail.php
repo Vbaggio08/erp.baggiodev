@@ -1,7 +1,5 @@
 <?php
 
-namespace Src\Models;
-
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
 
@@ -337,6 +335,7 @@ class NotificadorEmail
      */
     private static function template(string $nome, array $dados = []): string
     {
+        $obs_html = !empty($dados['observacao']) ? "<p><strong>Observação:</strong> {$dados['observacao']}</p>" : '';
         $templates = [
             'hora_extra_aprovada' => <<<HTML
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -346,7 +345,7 @@ class NotificadorEmail
                 <div style="padding: 20px;">
                     <p>Olá <strong>{$dados['nome']}</strong>,</p>
                     <p>Sua solicitação de <strong>{$dados['horas']}h</strong> de hora extra foi <strong>aprovada</strong>!</p>
-                    {$dados['observacao'] ? "<p><strong>Observação:</strong> {$dados['observacao']}</p>" : ""}
+                    {$obs_html}
                     <p>Este valor será considerado no seu próximo cálculo de saldo de horas.</p>
                     <hr>
                     <small style="color: #999;">Ripfire ERP - Sistema de Ponto Eletrônico</small>

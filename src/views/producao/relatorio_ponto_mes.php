@@ -26,7 +26,7 @@
         <!-- Cabeçalho -->
         <div class="header">
             <h2>RELATÓRIO MENSAL DE APONTAMENTO DE PONTO</h2>
-            <p>Período: <?php echo strftime('%B de %Y', strtotime($ano . '-' . $mes . '-01')); ?></p>
+            <p>Período: <?php $meses_br = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; echo $meses_br[(int)$mes] . ' de ' . $ano; ?></p>
         </div>
         
         <!-- Info Funcionário -->
@@ -66,16 +66,21 @@
                         if ($apt['hora_entrada_1'] && $apt['hora_saida_1']) {
                             $entrada = strtotime($apt['hora_entrada_1']);
                             $saida = strtotime($apt['hora_saida_1']);
-                            $horas = ($saida - $entrada) / 3600;
+                            $horas += ($saida - $entrada) / 3600;
+                        }
+                        if ($apt['hora_entrada_2'] && $apt['hora_saida_2']) {
+                            $entrada = strtotime($apt['hora_entrada_2']);
+                            $saida = strtotime($apt['hora_saida_2']);
+                            $horas += ($saida - $entrada) / 3600;
                         }
                         $total_horas += $horas;
                 ?>
                 <tr>
                     <td><?php echo date('d/m/Y (D)', strtotime($apt['data'])); ?></td>
-                    <td><?php echo substr($apt['hora_entrada_1'], 0, 5) ?? '---'; ?></td>
-                    <td><?php echo substr($apt['hora_saida_1'], 0, 5) ?? '---'; ?></td>
-                    <td><?php echo substr($apt['hora_entrada_2'], 0, 5) ?? '---'; ?></td>
-                    <td><?php echo substr($apt['hora_saida_2'], 0, 5) ?? '---'; ?></td>
+                    <td><?php echo !empty($apt['hora_entrada_1']) ? substr($apt['hora_entrada_1'], 0, 5) : 'Aguardando batida'; ?></td>
+                    <td><?php echo !empty($apt['hora_saida_1']) ? substr($apt['hora_saida_1'], 0, 5) : 'Aguardando batida'; ?></td>
+                    <td><?php echo !empty($apt['hora_entrada_2']) ? substr($apt['hora_entrada_2'], 0, 5) : 'Aguardando batida'; ?></td>
+                    <td><?php echo !empty($apt['hora_saida_2']) ? substr($apt['hora_saida_2'], 0, 5) : 'Aguardando batida'; ?></td>
                     <td><?php echo number_format($horas, 2, ',', '.'); ?></td>
                     <td>
                         <?php 

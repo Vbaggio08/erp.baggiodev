@@ -9,11 +9,11 @@ if (session_status() === PHP_SESSION_NONE) {
 ?>
 <?php require_once __DIR__ . '/../geral/header.php'; ?>
 
-<div class="container-fluid p-4" style="background-color: #2d3748; min-height: 100vh;">
+<div class="container-fluid p-4">
     <!-- Header do Dashboard -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <h2 style="color: #fff;">
+            <h2>
                 <i class="fas fa-chart-line"></i> Meu Dashboard de Ponto
             </h2>
         </div>
@@ -209,9 +209,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Exportar Relatório</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -224,13 +222,12 @@ if (session_status() === PHP_SESSION_NONE) {
                     <label>Formato</label>
                     <select id="exportacao-formato" class="form-control">
                         <option value="pdf">PDF</option>
-                        <option value="excel">Excel</option>
-                        <option value="json">JSON</option>
+                        <option value="csv">CSV (Excel)</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-primary" onclick="realizarExportacao()">
                     Exportar
                 </button>
@@ -240,276 +237,12 @@ if (session_status() === PHP_SESSION_NONE) {
 </div>
 
 <style>
-    .card {
-        border: 0;
-        border-radius: 8px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        background-color: #4a5568;
-        color: #fff;
-    }
-
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.25) !important;
-    }
-
-    .card-header {
-        background-color: #2d3748 !important;
-        border-bottom: 1px solid #1a202c;
-        font-weight: 600;
-        color: #fff;
-    }
-
-    .card-body {
-        background-color: #4a5568;
-        color: #fff;
-    }
-
-    .card-footer {
-        background-color: #2d3748 !important;
-        border-top: 1px solid #1a202c;
-        color: #fff;
-    }
-
-    /* Cores harmoniosas e sólidas - Padrão Bootstrap consistente */
-    .border-left-primary {
-        border-left: 4px solid #1e90ff !important;
-    }
-
-    .border-left-success {
-        border-left: 4px solid #2ecc71 !important;
-    }
-
-    .border-left-warning {
-        border-left: 4px solid #f39c12 !important;
-    }
-
-    .border-left-info {
-        border-left: 4px solid #3498db !important;
-    }
-
-    .border-left-danger {
-        border-left: 4px solid #e74c3c !important;
-    }
-
-    .text-primary { color: #1e90ff !important; }
-    .text-success { color: #2ecc71 !important; }
-    .text-warning { color: #f39c12 !important; }
-    .text-info { color: #3498db !important; }
-    .text-danger { color: #e74c3c !important; }
-    .text-muted { color: #a0aec0 !important; }
-
-    .badge {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .badge-primary { background-color: #1e90ff !important; }
-    .badge-success { background-color: #2ecc71 !important; }
-    .badge-warning { background-color: #f39c12 !important; color: #000 !important; }
-    .badge-info { background-color: #3498db !important; }
-    .badge-danger { background-color: #e74c3c !important; }
-
-    .table-hover tbody tr:hover {
-        background-color: #36465a;
-    }
-
-    .list-group-item {
-        border: none;
-        border-bottom: 1px solid #2d3748;
-        background-color: #4a5568;
-        color: #fff;
-    }
-
-    .list-group-item:last-child {
-        border-bottom: none;
-    }
-
-    .list-group {
-        background-color: #4a5568;
-    }
-
-    /* Alert styles para tema escuro */
-    .alert {
-        border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .alert-info {
-        background-color: #2b5a8a !important;
-        border-color: #1e4676 !important;
-        color: #fff !important;
-    }
-
-    .alert-danger {
-        background-color: #742c2c !important;
-        border-color: #5a1f1f !important;
-        color: #fff !important;
-    }
-
-    .alert-warning {
-        background-color: #7a6a2a !important;
-        border-color: #5a4a1a !important;
-        color: #fff !important;
-    }
-
-    /* Table styles */
-    .table {
-        background-color: #4a5568;
-        color: #fff;
-        border-color: #2d3748;
-    }
-
-    .table thead th {
-        background-color: #2d3748 !important;
-        border-color: #1a202c !important;
-        color: #fff !important;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-    }
-
-    .table tbody td {
-        border-color: #2d3748;
-        color: #fff;
-    }
-
-    .table tbody tr:hover {
-        background-color: #36465a !important;
-    }
-
-    /* Modal adjustments */
-    .modal-content {
-        background-color: #4a5568;
-        border-color: #2d3748;
-        color: #fff;
-        border-radius: 8px;
-    }
-
-    .modal-header {
-        background-color: #2d3748;
-        border-color: #1a202c;
-        color: #fff;
-        border-radius: 8px 8px 0 0;
-    }
-
-    .modal-header .modal-title {
-        color: #fff;
-        font-weight: 600;
-    }
-
-    /* Botão de fechar (X) do modal */
-    .modal-header .close {
-        color: #fff !important;
-        opacity: 0.8;
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-
-    .modal-header .close:hover {
-        opacity: 1;
-        color: #1e90ff !important;
-    }
-
-    .modal-footer {
-        background-color: #2d3748;
-        border-color: #1a202c;
-        border-radius: 0 0 8px 8px;
-    }
-
-    .modal-footer .btn {
-        font-weight: 600;
-    }
-
-    .modal-footer .btn-secondary {
-        background-color: #36465a;
-        border-color: #2d3748;
-        color: #fff;
-    }
-
-    .modal-footer .btn-secondary:hover {
-        background-color: #2d3748;
-        border-color: #1a202c;
-        color: #fff;
-    }
-
-    .modal-footer .btn-primary {
-        background-color: #1e90ff;
-        border-color: #1e90ff;
-    }
-
-    .modal-footer .btn-primary:hover {
-        background-color: #1873cc;
-        border-color: #1873cc;
-    }
-
-    /* Modal body specific */
-    .modal-body {
-        background-color: #4a5568;
-        color: #fff;
-    }
-
-    .modal-body label {
-        color: #fff;
-        font-weight: 500;
-    }
-
-    .modal-body .form-group {
-        margin-bottom: 1rem;
-    }
-
-    /* Form elements */
-    .form-control,
-    .form-select {
-        background-color: #36465a;
-        border-color: #2d3748;
-        color: #fff;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        background-color: #36465a;
-        border-color: #1e90ff;
-        color: #fff;
-        box-shadow: 0 0 0 0.2rem rgba(30, 144, 255, 0.25);
-    }
-
-    .form-control::placeholder {
-        color: #8892a4;
-    }
-
-    /* Input label */
-    label {
-        color: #fff;
-    }
-
-    /* Buttons adjustments */
-    .btn {
-        font-weight: 600;
-    }
-
-    .btn-outline-primary {
-        color: #1e90ff;
-        border-color: #1e90ff;
-    }
-
-    .btn-outline-primary:hover {
-        background-color: #1e90ff;
-        color: #fff;
-        border-color: #1e90ff;
-    }
-
-    .btn-outline-secondary {
-        color: #a0aec0;
-        border-color: #a0aec0;
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: #a0aec0;
-        color: #2d3748;
-        border-color: #a0aec0;
-    }
+    /* Border-left decorações */
+    .border-left-primary { border-left: 4px solid var(--primary-color) !important; }
+    .border-left-success { border-left: 4px solid var(--brand-green) !important; }
+    .border-left-warning { border-left: 4px solid #f39c12 !important; }
+    .border-left-info { border-left: 4px solid #3498db !important; }
+    .border-left-danger { border-left: 4px solid var(--brand-red) !important; }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
@@ -685,7 +418,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     let html = '';
                     data.slice(0, 7).forEach(apt => {
                         const status = apt.conferida ? '<span class="badge badge-success">Conferido</span>' : 
-                                      aptincompleta ? '<span class="badge badge-warning">Incompleto</span>' : 
+                                      apt.incompleta ? '<span class="badge badge-warning">Incompleto</span>' : 
                                       '<span class="badge badge-secondary">Normal</span>';
                         
                         html += `<tr>
@@ -720,14 +453,10 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     function exportarPDF() {
-        // Abrir modal usando Bootstrap
-        const modal = new (window.bootstrap?.Modal || function() {})($('#modalExportacao')[0]);
-        if (window.bootstrap?.Modal) {
-            modal.show();
-        } else {
-            // Fallback se Bootstrap não estiver disponível
-            $('#modalExportacao').modal('show');
-        }
+        const el = document.getElementById('modalExportacao');
+        if (!el || !window.bootstrap || !window.bootstrap.Modal) return;
+        const modal = window.bootstrap.Modal.getOrCreateInstance(el);
+        modal.show();
     }
 
     function realizarExportacao() {
@@ -745,12 +474,9 @@ if (session_status() === PHP_SESSION_NONE) {
         window.open(url, '_blank');
         
         // Fechar modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('modalExportacao'));
+        const modal = window.bootstrap ? window.bootstrap.Modal.getInstance(document.getElementById('modalExportacao')) : null;
         if (modal) {
             modal.hide();
-        } else {
-            // Fallback
-            $('#modalExportacao').modal('hide');
         }
     }
 </script>

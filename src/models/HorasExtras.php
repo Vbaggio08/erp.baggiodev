@@ -1,18 +1,25 @@
 <?php
 
-namespace App\Models;
 
-use PDO;
 
 /**
  * Model: HorasExtras
  * Gerencia registro, aprovação e compensação de horas extras
  */
 class HorasExtras {
-    private static PDO $db;
+    private static ?PDO $db = null;
     
-    public function __construct(PDO $database) {
-        self::$db = $database;
+    public function __construct(?PDO $database = null) {
+        if ($database) {
+            self::$db = $database;
+        }
+    }
+    
+    private static function getDb(): PDO {
+        if (self::$db === null) {
+            self::$db = Database::getConnection();
+        }
+        return self::$db;
     }
     
     /**
@@ -26,7 +33,7 @@ class HorasExtras {
         ?string $motivo = null,
         ?int $apontamento_id = null
     ): int {
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             INSERT INTO horas_extras 
             (usuario_id, apontamento_id, data_referencia, horas_extras, tipo, motivo, status)
             VALUES (?, ?, ?, ?, ?, ?, 'pendente')
@@ -36,24 +43,22 @@ class HorasExtras {
         
         // Registrar auditoria
         AuditoriaAlteracao::registrarAlteracao(
-            $usuario_id,
+            $apontamento_id ?? 0,
             $usuario_id,
             'hora_extra_registrada',
+            null,
             "Hora extra de {$horas_extras}h registrada para {$data_referencia} (tipo: {$tipo}%)",
-            null,
-            null,
-            null,
-            $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'
+            $motivo ?? ''
         );
         
-        return (int)self::$db->lastInsertId();
+        return (int)self::getDb()->lastInsertId();
     }
     
     /**
      * Obter hora extra por ID
      */
     public static function obterPorId(int $id): ?array {
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT he.*, u.nome as usuario_nome 
             FROM horas_extras he
             JOIN usuarios u ON he.usuario_id = u.id
@@ -91,7 +96,7 @@ class HorasExtras {
         
         $query .= " ORDER BY he.data_referencia DESC";
         
-        $stmt = self::$db->prepare($query);
+        $stmt = self::getDb()->prepare($query);
         $stmt->execute($params);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -104,7 +109,7 @@ class HorasExtras {
         $he = self::obterPorId($id);
         if (!$he) return false;
         
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             UPDATE horas_extras 
             SET status = 'aprovado', 
                 aprovado_por = ?, 
@@ -116,14 +121,12 @@ class HorasExtras {
         
         if ($resultado) {
             AuditoriaAlteracao::registrarAlteracao(
-                $he['usuario_id'],
+                $he['apontamento_id'] ?? 0,
                 $usuario_aprovador_id,
                 'hora_extra_aprovada',
-                "Hora extra #{$id} aprovada ({$he['horas_extras']}h em {$he['data_referencia']})",
-                null,
-                null,
-                null,
-                $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'
+                "status=pendente",
+                "status=aprovado",
+                "Hora extra #{$id} aprovada ({$he['horas_extras']}h em {$he['data_referencia']})"
             );
         }
         
@@ -137,7 +140,7 @@ class HorasExtras {
         $he = self::obterPorId($id);
         if (!$he) return false;
         
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             UPDATE horas_extras 
             SET status = 'rejeitado', 
                 motivo = CONCAT(COALESCE(motivo, ''), ' [REJEIÇÃO: ', ?, ']')
@@ -148,14 +151,12 @@ class HorasExtras {
         
         if ($resultado) {
             AuditoriaAlteracao::registrarAlteracao(
-                $he['usuario_id'],
+                $he['apontamento_id'] ?? 0,
                 $usuario_rejeitor_id,
                 'hora_extra_rejeitada',
-                "Hora extra #{$id} rejeitada. Motivo: {$motivo}",
-                null,
-                null,
-                null,
-                $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'
+                "status=pendente",
+                "status=rejeitado",
+                "Hora extra #{$id} rejeitada. Motivo: {$motivo}"
             );
         }
         
@@ -166,7 +167,7 @@ class HorasExtras {
      * Marcar como pago
      */
     public static function marcarComoPago(int $id): bool {
-        return self::$db->prepare("
+        return self::getDb()->prepare("
             UPDATE horas_extras 
             SET status = 'pago' 
             WHERE id = ?
@@ -181,7 +182,7 @@ class HorasExtras {
             $mes_ano = date('Y-m');
         }
         
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT * FROM horas_extras
             WHERE usuario_id = ? 
             AND DATE_FORMAT(data_referencia, '%Y-%m') = ?
@@ -200,7 +201,7 @@ class HorasExtras {
             $mes_ano = date('Y-m');
         }
         
-        $stmt = self::$db->prepare("
+        $stmt = self::getDb()->prepare("
             SELECT COALESCE(SUM(horas_extras), 0) as total
             FROM horas_extras
             WHERE usuario_id = ? 

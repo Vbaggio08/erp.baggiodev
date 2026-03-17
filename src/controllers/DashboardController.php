@@ -64,7 +64,7 @@ class DashboardController {
         $usuario_id = $_SESSION['user_id'];
 
         try {
-            $db = requireConnection();
+            $db = Database::getConnection();
 
             // Dados básicos do usuário
             $sql = "SELECT id, nome, email FROM usuarios WHERE id = ?";
@@ -107,25 +107,27 @@ class DashboardController {
             $extras_pend = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             // Extras a pagar
-            $sql = "SELECT COUNT(*) as total FROM horas_extras WHERE usuario_id = ? AND status = 'aprovado' AND pago = 0";
+            $sql = "SELECT COUNT(*) as total FROM horas_extras WHERE usuario_id = ? AND status = 'aprovado'";
             $stmt = $db->prepare($sql);
             $stmt->execute([$usuario_id]);
             $extras_pagar_row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             return [
                 'status' => 'sucesso',
-                'usuario' => $usuario,
-                'metricas' => [
-                    'horas_hoje' => (float)($hoje['horas'] ?? 0),
-                    'saldo_mes' => (float)($saldo['saldo'] ?? 0),
-                    'extras_pendentes' => (int)($extras_pend['total'] ?? 0),
-                    'extras_pagar' => (int)($extras_pagar_row['total'] ?? 0)
-                ],
-                'proximosEventos' => [
-                    'dsr' => null,
-                    'feriado' => null
-                ],
-                'anomalias' => []
+                'dados' => [
+                    'usuario' => $usuario,
+                    'metricas' => [
+                        'horas_hoje' => (float)($hoje['horas'] ?? 0),
+                        'saldo_mes' => (float)($saldo['saldo'] ?? 0),
+                        'extras_pendentes' => (int)($extras_pend['total'] ?? 0),
+                        'extras_pagar' => (int)($extras_pagar_row['total'] ?? 0)
+                    ],
+                    'proximos_eventos' => [
+                        'dsr' => null,
+                        'feriado' => null
+                    ],
+                    'anomalias' => []
+                ]
             ];
 
         } catch (\Exception $e) {
@@ -147,7 +149,7 @@ class DashboardController {
         $usuario_id = $_SESSION['user_id'];
 
         try {
-            $db = requireConnection();
+            $db = Database::getConnection();
 
             $sql = "
                 SELECT 
@@ -224,7 +226,7 @@ class DashboardController {
         $usuario_id = $_SESSION['user_id'];
 
         try {
-            $db = requireConnection();
+            $db = Database::getConnection();
             $meses = 6;
             $labels = [];
             $dados = [];
@@ -281,7 +283,7 @@ class DashboardController {
         $ano = (int)($_GET['ano'] ?? date('Y'));
 
         try {
-            $db = requireConnection();
+            $db = Database::getConnection();
 
             // Totais gerais
             $sql = "
@@ -312,15 +314,31 @@ class DashboardController {
             $stmt->execute([$mes, $ano]);
             $totais = $stmt->fetch(\PDO::FETCH_ASSOC);
 
+            // Total de usuários
+            $sql2 = "SELECT COUNT(*) as total FROM usuarios";
+            $stmt2 = $db->prepare($sql2);
+            $stmt2->execute();
+            $usuarios_ativos = $stmt2->fetch(\PDO::FETCH_ASSOC);
+
+            // Extras pendentes e a pagar
+            $sql3 = "SELECT 
+                SUM(CASE WHEN status = 'pendente' THEN 1 ELSE 0 END) as pendentes,
+                SUM(CASE WHEN status = 'aprovado' THEN 1 ELSE 0 END) as a_pagar
+                FROM horas_extras WHERE MONTH(data_referencia) = ? AND YEAR(data_referencia) = ?";
+            $stmt3 = $db->prepare($sql3);
+            $stmt3->execute([$mes, $ano]);
+            $extras = $stmt3->fetch(\PDO::FETCH_ASSOC);
+
             return [
                 'status' => 'sucesso',
                 'periodo' => "$mes/$ano",
                 'dados' => [
                     'totais' => [
+                        'usuarios_ativos' => (int)($usuarios_ativos['total'] ?? 0),
                         'usuarios_com_apontamento' => (int)($totais['usuarios'] ?? 0),
                         'horas_trabalhadas_total' => (float)($totais['horas_total'] ?? 0),
-                        'extras_pendentes' => 0,
-                        'extras_pagar' => 0
+                        'extras_pendentes' => (int)($extras['pendentes'] ?? 0),
+                        'extras_pagar' => (int)($extras['a_pagar'] ?? 0)
                     ],
                     'top_horas_extras' => [],
                     'usuarios_com_faltas' => [],

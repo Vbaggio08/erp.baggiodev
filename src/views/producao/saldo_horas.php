@@ -17,7 +17,7 @@
                     
                     <!-- Mês/Ano -->
                     <div class="text-center mb-4">
-                        <p class="text-muted">Período: <?php echo strftime('%B de %Y', mktime(0, 0, 0, $mes_atual, 1, $ano_atual)); ?></p>
+                        <p class="text-muted">Período: <?php $meses_br = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']; echo $meses_br[(int)$mes_atual] . ' de ' . $ano_atual; ?></p>
                     </div>
                     
                     <!-- Saldo Grande -->

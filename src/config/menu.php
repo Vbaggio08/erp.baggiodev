@@ -98,18 +98,23 @@ return [
             'requer' => [],
             'submenu' => [
                 [
-                    'label' => 'Nova Ficha Técnica',
+                    'label' => 'Produção de Camiseta',
                     'rota' => 'novo_gabarito',
                     'requer' => []
                 ],
                 [
-                    'label' => 'Novo Pedido DTF',
+                    'label' => 'Produção DTF',
                     'rota' => 'novo_dtf',
                     'requer' => []
                 ],
                 [
-                    'label' => 'Ver Fichas',
+                    'label' => 'Ver Produção de Camiseta',
                     'rota' => 'listar_gabaritos',
+                    'requer' => []
+                ],
+                [
+                    'label' => 'Ver Produção DTF',
+                    'rota' => 'ver_producao_dtf',
                     'requer' => []
                 ],
                 [
@@ -177,9 +182,15 @@ return [
                 ],
                 [
                     'label' => 'Gerenciar Pontos',
-                    'rota' => 'gerenciar_ponto_todos',
+                    'rota' => 'ponto_todos',
                     'requer' => ['admin'],
                     'icon' => '🕐'
+                ],
+                [
+                    'label' => 'Espelho de Ponto',
+                    'rota' => 'espelho_ponto_funcionario',
+                    'requer' => ['admin'],
+                    'icon' => '🪞'
                 ],
                 [
                     'label' => 'Dashboard RH',
@@ -192,6 +203,12 @@ return [
                     'rota' => 'auditoria_dashboard',
                     'requer' => ['admin'],
                     'icon' => '🔍'
+                ],
+                [
+                    'label' => 'Autorizar Alterações',
+                    'rota' => 'solicitacoes_alteracao_ponto',
+                    'requer' => ['admin'],
+                    'icon' => '✅'
                 ],
                 [
                     'label' => '---',

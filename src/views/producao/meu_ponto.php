@@ -36,15 +36,7 @@
                                     <td><?php echo $apt['hora_entrada_2'] ?? '---'; ?></td>
                                     <td><?php echo $apt['hora_saida_2'] ?? '---'; ?></td>
                                     <td>
-                                        <?php 
-                                            $horas = 0;
-                                            if ($apt['hora_entrada_1'] && $apt['hora_saida_1']) {
-                                                $entrada = strtotime($apt['hora_entrada_1']);
-                                                $saida = strtotime($apt['hora_saida_1']);
-                                                $horas = ($saida - $entrada) / 3600;
-                                            }
-                                            echo number_format($horas, 2, ',', '.');
-                                        ?>h
+                                        <?php echo number_format($apt['total_horas'] ?? 0, 2, ',', '.'); ?>h
                                     </td>
                                     <td>
                                         <?php 
@@ -58,8 +50,8 @@
                                         <span class="badge <?php echo $status_badge; ?>"><?php echo $status_texto; ?></span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" title="Ver detalhes">👁️</button>
-                                        <button class="btn btn-sm btn-outline-warning" title="Solicitar alteração">✏️</button>
+                                        <a href="index.php?rota=editar_ponto&id=<?php echo $apt['id']; ?>" class="btn btn-sm btn-outline-primary" title="Ver detalhes">👁️</a>
+                                        <a href="index.php?rota=solicitar_alteracao_ponto&data=<?php echo $apt['data']; ?>" class="btn btn-sm btn-outline-warning" title="Solicitar alteração">✏️</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -100,11 +92,7 @@
                                 <?php 
                                     $total_horas = 0;
                                     foreach ($apontamentos as $apt) {
-                                        if ($apt['hora_entrada_1'] && $apt['hora_saida_1']) {
-                                            $entrada = strtotime($apt['hora_entrada_1']);
-                                            $saida = strtotime($apt['hora_saida_1']);
-                                            $total_horas += ($saida - $entrada) / 3600;
-                                        }
+                                        $total_horas += $apt['total_horas'] ?? 0;
                                     }
                                     echo number_format($total_horas, 2, ',', '.');
                                 ?>h

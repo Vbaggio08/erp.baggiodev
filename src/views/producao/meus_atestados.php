@@ -93,7 +93,7 @@
                             <div class="col-lg-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h6 class="mb-0">🏥 <?php echo $atestado['tipo_afastamento']; ?></h6>
+                                        <h6 class="mb-0">🏥 <?php echo ucfirst(str_replace('_', ' ', $atestado['tipo'])); ?></h6>
                                         <span class="badge badge-<?php 
                                             echo $atestado['status'] === 'pendente' ? 'warning' : 
                                                  ($atestado['status'] === 'aprovado' ? 'success' : 'danger'); 
@@ -111,7 +111,7 @@
                                                 echo $dias;
                                             ?>
                                         </p>
-                                        <p><strong>📝 Solicitado em:</strong> <?php echo date('d/m/Y H:i', strtotime($atestado['data_criacao'])); ?></p>
+                                        <p><strong>📝 Solicitado em:</strong> <?php echo date('d/m/Y H:i', strtotime($atestado['criado_em'])); ?></p>
                                         
                                         <?php if ($atestado['status'] === 'rejeitado' && $atestado['motivo_rejeicao']): ?>
                                             <div class="alert alert-danger small">
@@ -121,8 +121,8 @@
                                         <?php endif; ?>
                                     </div>
                                     <div class="card-footer bg-light d-flex gap-2">
-                                        <?php if (file_exists('assets/uploads/atestados/' . $atestado['arquivo_comprovante'])): ?>
-                                            <a href="assets/uploads/atestados/<?php echo $atestado['arquivo_comprovante']; ?>" 
+                                        <?php if (!empty($atestado['comprovante_url']) && file_exists('assets/uploads/atestados/' . $atestado['comprovante_url'])): ?>
+                                            <a href="assets/uploads/atestados/<?php echo $atestado['comprovante_url']; ?>" 
                                                target="_blank" 
                                                class="btn btn-sm btn-info flex-grow-1">
                                                 👁️ Ver Arquivo
@@ -164,7 +164,7 @@
                                 <div class="col-lg-6 mb-3">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h6>🏥 <?php echo $atestado['tipo_afastamento']; ?></h6>
+                                            <h6>🏥 <?php echo ucfirst(str_replace('_', ' ', $atestado['tipo'])); ?></h6>
                                             <p class="small text-muted">📅 <?php echo date('d/m/Y', strtotime($atestado['data_inicio'])); ?> até <?php echo date('d/m/Y', strtotime($atestado['data_fim'])); ?></p>
                                             <div class="alert alert-warning small">
                                                 ⏳ <strong>Em análise pelo RH</strong> - Você será notificado em até 24 horas
@@ -203,7 +203,7 @@
                                 <tbody>
                                     <?php foreach ($atestados_aprovados as $atestado): ?>
                                         <tr>
-                                            <td><?php echo $atestado['tipo_afastamento']; ?></td>
+                                            <td><?php echo ucfirst(str_replace('_', ' ', $atestado['tipo'])); ?></td>
                                             <td>
                                                 <?php echo date('d/m', strtotime($atestado['data_inicio'])); ?> a 
                                                 <?php echo date('d/m/Y', strtotime($atestado['data_fim'])); ?>
@@ -215,7 +215,7 @@
                                                     echo $fim->diff($inicio)->days + 1;
                                                 ?>
                                             </td>
-                                            <td><?php echo date('d/m/Y', strtotime($atestado['data_processamento'])); ?></td>
+                                            <td><?php echo $atestado['aprovado_em'] ? date('d/m/Y', strtotime($atestado['aprovado_em'])) : '-'; ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>

@@ -87,7 +87,7 @@
                 <div class="card shadow-sm h-100">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">👤 <?php echo $atestado['nome']; ?></h5>
+                            <h5 class="mb-0">👤 <?php echo $atestado['usuario_nome']; ?></h5>
                             <span class="badge badge-<?php 
                                 echo $atestado['status'] === 'pendente' ? 'warning' : 
                                      ($atestado['status'] === 'aprovado' ? 'success' : 'danger'); 
@@ -97,8 +97,8 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p><strong>📅 Data do Atestado:</strong> <?php echo date('d/m/Y', strtotime($atestado['data_atestado'])); ?></p>
-                        <p><strong>🩺 Tipo de Afastamento:</strong> <?php echo $atestado['tipo_afastamento']; ?></p>
+                        <p><strong>📅 Data do Atestado:</strong> <?php echo date('d/m/Y', strtotime($atestado['criado_em'])); ?></p>
+                        <p><strong>🩺 Tipo de Afastamento:</strong> <?php echo ucfirst(str_replace('_', ' ', $atestado['tipo'])); ?></p>
                         <p><strong>⏱️ Período:</strong> <?php echo date('d/m/Y', strtotime($atestado['data_inicio'])); ?> à <?php echo date('d/m/Y', strtotime($atestado['data_fim'])); ?></p>
                         <p><strong>📝 Dias:</strong> <?php 
                             $inicio = new DateTime($atestado['data_inicio']);
@@ -107,16 +107,16 @@
                             echo $dias;
                         ?></p>
                         
-                        <?php if ($atestado['observacoes']): ?>
-                            <p><strong>📌 Observações:</strong> <?php echo $atestado['observacoes']; ?></p>
+                        <?php if (!empty($atestado['motivo_rejeicao'])): ?>
+                            <p><strong>📌 Motivo Rejeição:</strong> <?php echo $atestado['motivo_rejeicao']; ?></p>
                         <?php endif; ?>
                     </div>
                     
                     <!-- Comprovante -->
                     <div class="card-footer bg-light">
                         <p class="mb-2"><strong>📎 Comprovante:</strong></p>
-                        <?php if (file_exists('assets/uploads/atestados/' . $atestado['arquivo_comprovante'])): ?>
-                            <a href="assets/uploads/atestados/<?php echo $atestado['arquivo_comprovante']; ?>" 
+                        <?php if (!empty($atestado['comprovante_url']) && file_exists('assets/uploads/atestados/' . $atestado['comprovante_url'])): ?>
+                            <a href="assets/uploads/atestados/<?php echo $atestado['comprovante_url']; ?>" 
                                target="_blank" 
                                class="btn btn-sm btn-info me-2">
                                 👁️ Visualizar
@@ -179,7 +179,7 @@
                         </div>
                     <?php else: ?>
                         <div class="card-footer text-muted">
-                            <strong>Processado:</strong> <?php echo date('d/m/Y H:i', strtotime($atestado['data_processamento'])); ?>
+                            <strong>Processado:</strong> <?php echo $atestado['aprovado_em'] ? date('d/m/Y H:i', strtotime($atestado['aprovado_em'])) : '-'; ?>
                         </div>
                     <?php endif; ?>
                 </div>

@@ -108,7 +108,7 @@
                     </div>
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Previsão Entrega</label>
-                        <input type="date" name="data_entrega" value="<?= $dtEnt ?>" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                        <input type="date" name="data_entrega" required value="<?= $dtEnt ?>" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
                     </div>
                 </div>
 

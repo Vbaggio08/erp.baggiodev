@@ -4,6 +4,13 @@
 ?>
 
 <div class="container-fluid py-5">
+    <?php $msg = $_GET['msg'] ?? ''; ?>
+    <?php if ($msg === 'autorizacao_pendente'): ?>
+        <div class="alert alert-info">Autorização pendente: esta alteração será aplicada apenas após aprovação de outro admin/RH.</div>
+    <?php elseif ($msg === 'apontamento_nao_encontrado'): ?>
+        <div class="alert alert-danger">Apontamento não encontrado.</div>
+    <?php endif; ?>
+
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="mb-4">👥 Dashboard de Pontos (RH)</h1>

@@ -27,7 +27,7 @@
                     <hr>
                     
                     <!-- Formulário -->
-                    <form id="form-editar-ponto" method="POST">
+                    <form id="form-editar-ponto" method="POST" action="index.php?rota=salvar_edicao_ponto">
                         <input type="hidden" name="apontamento_id" value="<?php echo $apontamento['id']; ?>">
                         <input type="hidden" name="usuario_id" value="<?php echo $apontamento['usuario_id']; ?>">
                         
