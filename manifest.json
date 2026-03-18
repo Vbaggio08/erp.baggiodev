@@ -4,8 +4,8 @@
   "description": "Sistema completo de ponto eletrônico com suporte offline, geolocalização e foto",
   "version": "4.0.0",
   "manifest_version": 3,
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./index.php",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#2c3e50",
@@ -74,5 +74,4 @@
       ]
     }
   ]
-}
 }

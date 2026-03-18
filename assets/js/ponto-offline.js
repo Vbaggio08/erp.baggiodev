@@ -16,6 +16,7 @@ class PontoOfflineManager {
         this.usuario_id = null;
         this.numero_batida = 1;
         this.swRegistration = null;
+        this.device_id = this.gerarDeviceId();
 
         this.init();
     }
@@ -84,7 +85,8 @@ class PontoOfflineManager {
                 latitude: geo.latitude,
                 longitude: geo.longitude,
                 precisao: geo.precisao,
-                foto: foto
+                foto: foto,
+                device_id: this.device_id
             };
 
             // 4. Tentar enviar para servidor
@@ -105,7 +107,7 @@ class PontoOfflineManager {
      * 
      * @returns {Promise<Object>} {latitude, longitude, precisao}
      */
-    async obterGeollocalizacao() {
+    async obterGeolocalizacao() {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
                 console.warn('[Ponto] Geolocation não disponível');
@@ -204,6 +206,9 @@ class PontoOfflineManager {
             formData.append('geo_lat', dados.latitude);
             formData.append('geo_lng', dados.longitude);
             formData.append('geo_precisao', dados.precisao);
+            if (dados.device_id) {
+                formData.append('device_id', dados.device_id);
+            }
 
             if (dados.foto) {
                 formData.append('foto', dados.foto, 'ponto.jpg');
@@ -245,7 +250,8 @@ class PontoOfflineManager {
                 numero_batida: dados.numero_batida,
                 latitude: dados.latitude,
                 longitude: dados.longitude,
-                precisao: dados.precisao
+                precisao: dados.precisao,
+                device_id: dados.device_id || this.device_id
             });
 
             // Salvar foto se houver
@@ -302,6 +308,9 @@ class PontoOfflineManager {
                     formData.append('geo_lng', batida.longitude);
                     formData.append('geo_precisao', batida.precisao);
                     formData.append('sync_offline', 'true');
+                    if (batida.device_id) {
+                        formData.append('device_id', batida.device_id);
+                    }
 
                     if (foto) {
                         formData.append('foto', foto, 'ponto.jpg');
@@ -450,6 +459,41 @@ class PontoOfflineManager {
      */
     async obterEstatisticas() {
         return await indexedDBManager.obterEstatisticas();
+    }
+
+    gerarDeviceId() {
+        try {
+            const chave = 'erp_device_seed_v1';
+            let seed = localStorage.getItem(chave);
+            if (!seed) {
+                if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                    seed = window.crypto.randomUUID();
+                } else {
+                    seed = 'seed-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+                }
+                localStorage.setItem(chave, seed);
+            }
+
+            let hash = 2166136261;
+            const screenInfo = (window.screen ? (window.screen.width + 'x' + window.screen.height) : 'sem-tela');
+            const bruto = [
+                seed,
+                navigator.userAgent || '',
+                navigator.platform || '',
+                navigator.language || '',
+                String(navigator.hardwareConcurrency || ''),
+                screenInfo
+            ].join('|');
+
+            for (let i = 0; i < bruto.length; i++) {
+                hash ^= bruto.charCodeAt(i);
+                hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+            }
+
+            return 'dev-' + (hash >>> 0).toString(16).padStart(8, '0') + '-' + seed.slice(0, 8);
+        } catch (e) {
+            return 'fallback-' + (navigator.userAgent || 'na').slice(0, 20);
+        }
     }
 }
 

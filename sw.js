@@ -19,8 +19,8 @@ const CRITICAL_ASSETS = [
   'index.php',
   'assets/estilo.css',
   'manifest.json',
-  'js/ponto-offline.js',
-  'js/indexeddb.js'
+  'assets/js/ponto-offline.js',
+  'assets/js/indexeddb.js'
 ];
 
 /**

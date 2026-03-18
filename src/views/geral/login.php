@@ -199,13 +199,42 @@
         let streamVideoLogin = null;
 
         function gerarDeviceIdLogin() {
+            function obterSeedDispositivo() {
+                const chave = 'erp_device_seed_v1';
+                let seed = localStorage.getItem(chave);
+                if (!seed) {
+                    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                        seed = window.crypto.randomUUID();
+                    } else {
+                        seed = 'seed-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+                    }
+                    localStorage.setItem(chave, seed);
+                }
+                return seed;
+            }
+
+            function hashTexto(texto) {
+                let hash = 2166136261;
+                for (let i = 0; i < texto.length; i++) {
+                    hash ^= texto.charCodeAt(i);
+                    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+                }
+                return (hash >>> 0).toString(16).padStart(8, '0');
+            }
+
             try {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = '14px Arial';
-                ctx.fillText(navigator.userAgent, 2, 2);
-                return canvas.toDataURL().slice(-32);
+                const seed = obterSeedDispositivo();
+                const screenInfo = (window.screen ? (window.screen.width + 'x' + window.screen.height) : 'sem-tela');
+                const bruto = [
+                    seed,
+                    navigator.userAgent || '',
+                    navigator.platform || '',
+                    navigator.language || '',
+                    String(navigator.hardwareConcurrency || ''),
+                    screenInfo
+                ].join('|');
+
+                return 'dev-' + hashTexto(bruto) + '-' + seed.slice(0, 8);
             } catch (e) {
                 return 'fallback-' + navigator.userAgent.slice(0, 20);
             }

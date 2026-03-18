@@ -113,6 +113,11 @@
     </div>
 </div>
 
+<span class="d-none" data-usuario-id="<?php echo (int)($_SESSION['user_id'] ?? 0); ?>"></span>
+
+<script src="assets/js/indexeddb.js"></script>
+<script src="assets/js/ponto-offline.js"></script>
+
 <!-- Modal: Batida Próxima (Validação) -->
 <div class="modal fade" id="modal-validacao" tabindex="-1">
     <div class="modal-dialog">
@@ -176,13 +181,42 @@ function atualizarBotao() {
 
 // ===== Device Fingerprint =====
 function gerarDeviceId() {
+    function obterSeedDispositivo() {
+        const chave = 'erp_device_seed_v1';
+        let seed = localStorage.getItem(chave);
+        if (!seed) {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                seed = window.crypto.randomUUID();
+            } else {
+                seed = 'seed-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+            }
+            localStorage.setItem(chave, seed);
+        }
+        return seed;
+    }
+
+    function hashTexto(texto) {
+        let hash = 2166136261;
+        for (let i = 0; i < texto.length; i++) {
+            hash ^= texto.charCodeAt(i);
+            hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+        }
+        return (hash >>> 0).toString(16).padStart(8, '0');
+    }
+
     try {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText(navigator.userAgent, 2, 2);
-        deviceId = canvas.toDataURL().slice(-32);
+        const seed = obterSeedDispositivo();
+        const screenInfo = (window.screen ? (window.screen.width + 'x' + window.screen.height) : 'sem-tela');
+        const bruto = [
+            seed,
+            navigator.userAgent || '',
+            navigator.platform || '',
+            navigator.language || '',
+            String(navigator.hardwareConcurrency || ''),
+            screenInfo
+        ].join('|');
+
+        deviceId = 'dev-' + hashTexto(bruto) + '-' + seed.slice(0, 8);
     } catch (e) {
         deviceId = 'fallback-' + navigator.userAgent.slice(0, 20);
     }
@@ -239,6 +273,26 @@ function pararCamera() {
     }
     const container = document.getElementById('camera-container');
     if (container) container.classList.add('d-none');
+}
+
+function base64ParaBlob(base64Data) {
+    if (!base64Data || typeof base64Data !== 'string' || base64Data.indexOf(',') === -1) {
+        return null;
+    }
+
+    try {
+        const partes = base64Data.split(',');
+        const mime = (partes[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+        const binario = atob(partes[1]);
+        const len = binario.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binario.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: mime });
+    } catch (e) {
+        return null;
+    }
 }
 
 // ===== Bater Ponto =====
@@ -307,6 +361,30 @@ async function baterPonto(forcarConfirmacao = false) {
             resetarBotao();
         }
     } catch (err) {
+        if (!navigator.onLine && typeof pontoOffline !== 'undefined') {
+            try {
+                const fotoBlob = base64ParaBlob(fotoBase64);
+                await pontoOffline.salvarPontoOffline({
+                    usuario_id: <?php echo (int)($_SESSION['user_id'] ?? 0); ?>,
+                    tipo: prox.tipo,
+                    numero_batida: prox.numero,
+                    latitude: geoData.lat,
+                    longitude: geoData.lng,
+                    precisao: geoData.precisao,
+                    foto: fotoBlob,
+                    device_id: deviceId
+                });
+
+                mostrarSucesso('Sem internet: ponto salvo offline e será sincronizado automaticamente.');
+                document.getElementById('sync-indicator').classList.add('d-none');
+                atualizarBotao();
+                document.getElementById('btn-bater-ponto').disabled = false;
+                return;
+            } catch (offlineErr) {
+                // Cai no erro padrão abaixo
+            }
+        }
+
         mostrarErro('Erro de conexão. Verifique sua internet.');
         resetarBotao();
     }
