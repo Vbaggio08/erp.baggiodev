@@ -5,3 +5,11 @@ composer.lock
 # Arquivos do sistema operacional
 .DS_Store
 Thumbs.db
+
+# Arquivos de ambiente locais/servidor
+.env
+.env.production
+.env.local
+.env.*.local
+*.env.bak
+*.env.production.bak
