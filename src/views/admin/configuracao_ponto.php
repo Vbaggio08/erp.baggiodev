@@ -395,12 +395,23 @@ $dias = [
             <div class="card shadow-sm border-danger">
                 <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-desktop"></i> Máquina Global para Bater Ponto por CPF</h5>
-                    <button class="btn btn-light btn-sm" type="button" onclick="autorizarMaquinaGlobalAtual()">
-                        <i class="fas fa-shield-alt"></i> Autorizar Esta Máquina
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light btn-sm" type="button" onclick="autorizarMaquinaGlobalAtual()">
+                            <i class="fas fa-shield-alt"></i> Autorizar Esta Máquina
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" type="button" onclick="revogarMaquinaGlobal()">
+                            <i class="fas fa-ban"></i> Revogar
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <p class="mb-2">Somente esta máquina poderá bater ponto de todos os usuários via CPF na tela de login.</p>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label for="nome_maquina_global" class="form-label">Nome da máquina autorizada</label>
+                            <input type="text" class="form-control" id="nome_maquina_global" placeholder="Ex.: Recepção, RH, PCP">
+                        </div>
+                    </div>
                     <div id="status_maquina_global" class="alert alert-secondary mb-0">Carregando status da máquina autorizada...</div>
                 </div>
             </div>
@@ -555,6 +566,7 @@ const ROTAS_PONTO = {
     salvarConfigUsuario: 'index.php?rota=salvar_configuracao_ponto_usuario',
     autorizarMaquinaGlobal: 'index.php?rota=autorizar_maquina_global_ponto',
     statusMaquinaGlobal: 'index.php?rota=status_maquina_global_ponto',
+    revogarMaquinaGlobal: 'index.php?rota=revogar_maquina_global_ponto',
     resetarConfig: 'index.php?rota=resetar_configuracao_ponto',
     listarFeriados: 'index.php?rota=listar_feriados_ponto',
     adicionarFeriado: 'index.php?rota=adicionar_feriado_ponto',
@@ -617,13 +629,16 @@ function carregarStatusMaquinaGlobal() {
             if (!d.device_id) {
                 box.removeClass('alert-secondary alert-success').addClass('alert-warning');
                 box.text('Nenhuma máquina global autorizada no momento.');
+                $('#nome_maquina_global').val('');
                 return;
             }
 
             const fim = d.device_id.slice(-8);
+            const nome = (d.nome_maquina || '').trim();
             const atualizado = d.atualizado_em ? (' | Atualizado em: ' + d.atualizado_em) : '';
             box.removeClass('alert-secondary alert-warning').addClass('alert-success');
-            box.text('Máquina autorizada (ID final: ' + fim + ')' + atualizado);
+            box.text('Máquina autorizada' + (nome ? ' [' + nome + ']' : '') + ' (ID final: ' + fim + ')' + atualizado);
+            $('#nome_maquina_global').val(nome);
         },
         error: function() {
             const box = $('#status_maquina_global');
@@ -639,11 +654,13 @@ function autorizarMaquinaGlobalAtual() {
         return;
     }
 
+    const nomeMaquina = ($('#nome_maquina_global').val() || '').trim();
+
     $.ajax({
         url: ROTAS_PONTO.autorizarMaquinaGlobal,
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({ device_id: DEVICE_ID_ATUAL }),
+        data: JSON.stringify({ device_id: DEVICE_ID_ATUAL, nome_maquina: nomeMaquina }),
         success: function(response) {
             if (response && response.sucesso) {
                 Swal.fire('Sucesso', 'Máquina global autorizada com sucesso', 'success');
@@ -655,6 +672,37 @@ function autorizarMaquinaGlobalAtual() {
         error: function() {
             Swal.fire('Erro', 'Não foi possível autorizar a máquina', 'error');
         }
+    });
+}
+
+function revogarMaquinaGlobal() {
+    Swal.fire({
+        title: 'Revogar máquina autorizada?',
+        text: 'Após revogar, nenhuma máquina poderá bater ponto até nova autorização.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, revogar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        $.ajax({
+            url: ROTAS_PONTO.revogarMaquinaGlobal,
+            type: 'POST',
+            success: function(response) {
+                if (response && response.sucesso) {
+                    Swal.fire('Revogada', 'A máquina global foi revogada com sucesso.', 'success');
+                    carregarStatusMaquinaGlobal();
+                    return;
+                }
+                Swal.fire('Erro', (response && response.erro) || 'Não foi possível revogar a máquina', 'error');
+            },
+            error: function() {
+                Swal.fire('Erro', 'Não foi possível revogar a máquina', 'error');
+            }
+        });
     });
 }
 

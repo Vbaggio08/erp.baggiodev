@@ -664,6 +664,7 @@ class Ponto {
         } catch (\Throwable $e) {
             return [
                 'device_id' => '',
+                'nome_maquina' => '',
                 'autorizado_por' => null,
                 'ip_origem' => null,
                 'user_agent' => null,
@@ -674,6 +675,7 @@ class Ponto {
         if (!$row || empty($row['valor'])) {
             return [
                 'device_id' => '',
+                'nome_maquina' => '',
                 'autorizado_por' => null,
                 'ip_origem' => null,
                 'user_agent' => null,
@@ -688,6 +690,7 @@ class Ponto {
 
         return [
             'device_id' => (string)($payload['device_id'] ?? ''),
+            'nome_maquina' => (string)($payload['nome_maquina'] ?? ''),
             'autorizado_por' => $payload['autorizado_por'] ?? null,
             'ip_origem' => $payload['ip_origem'] ?? null,
             'user_agent' => $payload['user_agent'] ?? null,
@@ -698,11 +701,12 @@ class Ponto {
     /**
      * Define a máquina global autorizada para bater ponto por CPF.
      */
-    public static function salvarMaquinaGlobalAutorizada(string $device_id, int $autorizado_por, ?string $ip_origem = null, ?string $user_agent = null): bool {
+    public static function salvarMaquinaGlobalAutorizada(string $device_id, int $autorizado_por, ?string $ip_origem = null, ?string $user_agent = null, ?string $nome_maquina = null): bool {
         $pdo = Database::getConnection();
         $chave = 'ponto_maquina_global_autorizada';
         $payload = json_encode([
             'device_id' => trim($device_id),
+            'nome_maquina' => trim((string)($nome_maquina ?? '')),
             'autorizado_por' => $autorizado_por,
             'ip_origem' => $ip_origem,
             'user_agent' => $user_agent,
@@ -720,6 +724,17 @@ class Ponto {
             'Device global autorizado para batida por CPF no login',
             'json',
         ]);
+    }
+
+    /**
+     * Revoga a máquina global autorizada para batida por CPF.
+     */
+    public static function revogarMaquinaGlobalAutorizada(): bool {
+        $pdo = Database::getConnection();
+        $chave = 'ponto_maquina_global_autorizada';
+        $sql = 'DELETE FROM configuracoes_ponto WHERE chave = ? LIMIT 1';
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$chave]);
     }
 
     /**

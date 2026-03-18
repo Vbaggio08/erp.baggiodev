@@ -45,9 +45,18 @@ class PontoController {
         $geo_lat = $_POST['geo_lat'] ?? null;
         $geo_lng = $_POST['geo_lng'] ?? null;
         $geo_precisao = $_POST['geo_precisao'] ?? null;
-        $device_id = $_POST['device_id'] ?? null;
+        $device_id = trim((string)($_POST['device_id'] ?? ''));
         
         try {
+            $erroMaquina = $this->validarMaquinaGlobalAutorizada($device_id);
+            if ($erroMaquina !== null) {
+                http_response_code(403);
+                return json_encode([
+                    'status' => 'erro',
+                    'mensagem' => $erroMaquina,
+                ]);
+            }
+
             // Valida proximidade de batida (< 5 minutos)
             $ultima_batida = Ponto::obterUltimaBatidaDia($usuario_id);
             if ($ultima_batida) {
@@ -139,8 +148,15 @@ class PontoController {
         
         $usuario_id = $_SESSION['user_id'];
         $tipo_acao = $_POST['tipo_acao'] ?? null; // confirmar_saida, alterar_entrada, alterar_saida, cancelada
+        $device_id = trim((string)($_POST['device_id'] ?? ''));
         
         try {
+            $erroMaquina = $this->validarMaquinaGlobalAutorizada($device_id);
+            if ($erroMaquina !== null) {
+                http_response_code(403);
+                return json_encode(['status' => 'erro', 'mensagem' => $erroMaquina]);
+            }
+
             $apontamento = Ponto::obterApontamentoDia($usuario_id);
             
             if (!$apontamento) {
@@ -159,7 +175,7 @@ class PontoController {
                         $_POST['geo_lng'] ?? null,
                         $_POST['geo_precisao'] ?? null,
                         $_SERVER['REMOTE_ADDR'],
-                        $_POST['device_id'] ?? null,
+                        $device_id,
                         $_SERVER['HTTP_USER_AGENT'] ?? null
                     );
                     
@@ -346,6 +362,7 @@ class PontoController {
         try {
             $dados = $this->obterDadosRequisicao();
             $device_id = trim((string)($dados['device_id'] ?? ''));
+            $nome_maquina = trim((string)($dados['nome_maquina'] ?? ''));
 
             if ($device_id === '') {
                 http_response_code(400);
@@ -356,7 +373,8 @@ class PontoController {
                 $device_id,
                 (int)($_SESSION['user_id'] ?? 0),
                 $_SERVER['REMOTE_ADDR'] ?? null,
-                $_SERVER['HTTP_USER_AGENT'] ?? null
+                $_SERVER['HTTP_USER_AGENT'] ?? null,
+                $nome_maquina
             );
 
             return json_encode([
@@ -379,6 +397,25 @@ class PontoController {
         try {
             $dados = Ponto::obterMaquinaGlobalAutorizada();
             return json_encode(['sucesso' => true, 'dados' => $dados]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Revoga a máquina global autorizada para batida por CPF.
+     */
+    public function revogarMaquinaGlobalPonto() {
+        $this->verificarRH();
+        header('Content-Type: application/json');
+
+        try {
+            $ok = Ponto::revogarMaquinaGlobalAutorizada();
+            return json_encode([
+                'sucesso' => $ok,
+                'mensagem' => $ok ? 'Máquina global revogada com sucesso' : 'Falha ao revogar máquina global'
+            ]);
         } catch (\Exception $e) {
             http_response_code(500);
             return json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
@@ -753,6 +790,20 @@ class PontoController {
         try {
             $usuario_id = $_SESSION['user_id'];
             $lote_pontos = $_POST['pontos'] ?? [];
+
+            if (!is_array($lote_pontos) || empty($lote_pontos)) {
+                http_response_code(400);
+                return json_encode(['status' => 'erro', 'mensagem' => 'Lote de pontos inválido']);
+            }
+
+            foreach ($lote_pontos as $ponto) {
+                $device_id = trim((string)($ponto['device_id'] ?? ''));
+                $erroMaquina = $this->validarMaquinaGlobalAutorizada($device_id);
+                if ($erroMaquina !== null) {
+                    http_response_code(403);
+                    return json_encode(['status' => 'erro', 'mensagem' => $erroMaquina]);
+                }
+            }
             
             $resultado = SyncOffline::sincronizarComServidor($usuario_id, $lote_pontos);
             
@@ -1885,6 +1936,29 @@ class PontoController {
         }
 
         return ['completo' => true, 'tipo' => null, 'numero_batida' => 0];
+    }
+
+    /**
+     * Regra global: apenas uma maquina autorizada pode bater ponto.
+     * Retorna null quando valido, ou mensagem de erro quando invalido.
+     */
+    private function validarMaquinaGlobalAutorizada(string $device_id): ?string {
+        if ($device_id === '') {
+            return 'Dispositivo não identificado';
+        }
+
+        $maquina = Ponto::obterMaquinaGlobalAutorizada();
+        $deviceAutorizado = trim((string)($maquina['device_id'] ?? ''));
+
+        if ($deviceAutorizado === '') {
+            return 'Nenhuma máquina global autorizada para bater ponto';
+        }
+
+        if ($deviceAutorizado !== $device_id) {
+            return 'Máquina não autorizada para bater ponto';
+        }
+
+        return null;
     }
 }
 ?>

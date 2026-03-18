@@ -722,6 +722,11 @@ switch ($rota) {
         echo (new PontoController())->statusMaquinaGlobalPonto();
         break;
 
+    case 'revogar_maquina_global_ponto':
+        require_once 'src/controllers/PontoController.php';
+        echo (new PontoController())->revogarMaquinaGlobalPonto();
+        break;
+
     case 'configuracao_ponto_usuario_json':
         require_once 'src/controllers/PontoController.php';
         echo (new PontoController())->obterConfiguracaoPontoUsuario();
