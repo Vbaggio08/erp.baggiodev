@@ -1,11 +1,11 @@
-﻿-- phpMyAdmin SQL Dump
+-- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geraÃ§Ã£o: 15/03/2026 Ã s 02:28
--- VersÃ£o do servidor: 10.4.32-MariaDB
--- VersÃ£o do PHP: 8.2.12
+-- Tempo de geração: 18/03/2026 às 12:14
+-- Versão do servidor: 10.4.32-MariaDB
+-- Versão do PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -27,7 +27,6 @@ SET time_zone = "+00:00";
 -- Estrutura para tabela `apontamentos_ponto`
 --
 
-DROP TABLE IF EXISTS `apontamentos_ponto`;
 CREATE TABLE `apontamentos_ponto` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -38,7 +37,7 @@ CREATE TABLE `apontamentos_ponto` (
   `foto_saida_1` varchar(255) DEFAULT NULL,
   `geo_entrada_1` varchar(50) DEFAULT NULL COMMENT 'Formato: -23.5505,-46.6333',
   `geo_saida_1` varchar(50) DEFAULT NULL,
-  `geo_precisao_entrada_1` int(11) DEFAULT NULL COMMENT 'PrecisÃ£o em metros',
+  `geo_precisao_entrada_1` int(11) DEFAULT NULL COMMENT 'Precisão em metros',
   `geo_precisao_saida_1` int(11) DEFAULT NULL,
   `ip_origem_entrada_1` varchar(50) DEFAULT NULL,
   `ip_origem_saida_1` varchar(50) DEFAULT NULL,
@@ -66,6 +65,7 @@ CREATE TABLE `apontamentos_ponto` (
   `foto_saida_3` varchar(255) DEFAULT NULL,
   `geo_entrada_3` varchar(50) DEFAULT NULL,
   `geo_saida_3` varchar(50) DEFAULT NULL,
+  `geo_precisao_entrada_3` int(11) DEFAULT NULL,
   `geo_precisao_saida_3` int(11) DEFAULT NULL,
   `ip_origem_entrada_3` varchar(50) DEFAULT NULL,
   `ip_origem_saida_3` varchar(50) DEFAULT NULL,
@@ -79,13 +79,22 @@ CREATE TABLE `apontamentos_ponto` (
   `atualizado_em` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `apontamentos_ponto`
+--
+
+INSERT INTO `apontamentos_ponto` (`id`, `usuario_id`, `data`, `hora_entrada_1`, `hora_saida_1`, `foto_entrada_1`, `foto_saida_1`, `geo_entrada_1`, `geo_saida_1`, `geo_precisao_entrada_1`, `geo_precisao_saida_1`, `ip_origem_entrada_1`, `ip_origem_saida_1`, `device_id_entrada_1`, `device_id_saida_1`, `user_agent_entrada_1`, `user_agent_saida_1`, `hora_entrada_2`, `hora_saida_2`, `foto_entrada_2`, `foto_saida_2`, `geo_entrada_2`, `geo_saida_2`, `geo_precisao_entrada_2`, `geo_precisao_saida_2`, `ip_origem_entrada_2`, `ip_origem_saida_2`, `device_id_entrada_2`, `device_id_saida_2`, `user_agent_entrada_2`, `user_agent_saida_2`, `hora_entrada_3`, `hora_saida_3`, `foto_entrada_3`, `foto_saida_3`, `geo_entrada_3`, `geo_saida_3`, `geo_precisao_entrada_3`, `geo_precisao_saida_3`, `ip_origem_entrada_3`, `ip_origem_saida_3`, `device_id_entrada_3`, `device_id_saida_3`, `user_agent_entrada_3`, `user_agent_saida_3`, `status`, `observacao`, `criado_em`, `atualizado_em`) VALUES
+(1, 6, '2026-03-15', '13:51:00', '16:53:00', '2026-03-15/user_6_entrada_1.jpg', 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNj', NULL, NULL, NULL, NULL, '::1', '::1', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '17:56:00', '19:58:00', '2026-03-15/user_6_entrada_2.jpg', '2026-03-15/user_6_saida_2.jpg', NULL, NULL, NULL, NULL, '::1', '::1', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '12:55:22', '13:10:33', '2026-03-15/user_6_entrada_3.jpg', '2026-03-15/user_6_saida_3.jpg', NULL, NULL, NULL, NULL, '::1', '::1', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'presente', NULL, '2026-03-15 00:17:35', '2026-03-16 13:52:21'),
+(2, 6, '2026-03-16', '08:30:51', '13:51:22', '2026-03-16/user_6_entrada_1.jpg', '2026-03-16/user_6_saida_1.jpg', NULL, NULL, NULL, NULL, '::1', '::1', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '17:13:41', '18:16:24', '2026-03-16/user_6_entrada_2.jpg', '2026-03-16/user_6_saida_2.jpg', NULL, NULL, NULL, NULL, '::1', '::1', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', '22:49:31', '22:49:52', NULL, NULL, NULL, NULL, NULL, NULL, '::1', '::1', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', 'presente', NULL, '2026-03-16 08:30:51', '2026-03-16 22:49:52'),
+(3, 6, '2026-03-17', '08:13:22', NULL, 'fotos_ponto/2026-03-17/user_6_1773746002.jpg', NULL, NULL, NULL, NULL, NULL, '::1', NULL, 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', NULL, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'presente', NULL, '2026-03-17 08:13:22', '2026-03-17 08:13:22'),
+(4, 5, '2026-03-17', '08:35:18', NULL, 'fotos_ponto/2026-03-17/user_5_1773747318.jpg', NULL, NULL, NULL, NULL, NULL, '::1', NULL, 'AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==', NULL, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'presente', NULL, '2026-03-17 08:35:18', '2026-03-17 08:35:18');
+
 -- --------------------------------------------------------
 
 --
 -- Estrutura para tabela `atestados`
 --
 
-DROP TABLE IF EXISTS `atestados`;
 CREATE TABLE `atestados` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -106,7 +115,6 @@ CREATE TABLE `atestados` (
 -- Estrutura para tabela `clientes`
 --
 
-DROP TABLE IF EXISTS `clientes`;
 CREATE TABLE `clientes` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -125,7 +133,6 @@ CREATE TABLE `clientes` (
 -- Estrutura para tabela `compensacao_horas`
 --
 
-DROP TABLE IF EXISTS `compensacao_horas`;
 CREATE TABLE `compensacao_horas` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -144,7 +151,6 @@ CREATE TABLE `compensacao_horas` (
 -- Estrutura para tabela `compras`
 --
 
-DROP TABLE IF EXISTS `compras`;
 CREATE TABLE `compras` (
   `id` int(11) NOT NULL,
   `fornecedor` varchar(100) DEFAULT NULL,
@@ -165,7 +171,6 @@ CREATE TABLE `compras` (
 -- Estrutura para tabela `configuracao_ponto`
 --
 
-DROP TABLE IF EXISTS `configuracao_ponto`;
 CREATE TABLE `configuracao_ponto` (
   `id` int(11) NOT NULL DEFAULT 1,
   `tolerancia_atraso_minutos` int(11) DEFAULT 5,
@@ -174,13 +179,13 @@ CREATE TABLE `configuracao_ponto` (
   `considerar_feriados` tinyint(4) DEFAULT 1,
   `lista_feriados` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Array de datas: ["2026-03-14", "2026-04-21", ...]' CHECK (json_valid(`lista_feriados`)),
   `usar_dsr` tinyint(4) DEFAULT 1 COMMENT 'Descanso Semanal Remunerado',
-  `quantidade_batidas` int(11) DEFAULT 2 COMMENT 'Valores: 2 (entrada/saÃ­da), 4 (entrada/saÃ­da/entrada/saÃ­da), 6 (3x entrada/saÃ­da)',
+  `quantidade_batidas` int(11) DEFAULT 2 COMMENT 'Valores: 2 (entrada/saída), 4 (entrada/saída/entrada/saída), 6 (3x entrada/saída)',
   `usar_geolocalizacao` tinyint(4) DEFAULT 0,
   `raio_permitido_metros` int(11) DEFAULT 500,
   `exigir_foto_mobile` tinyint(4) DEFAULT 1,
   `exigir_foto_desktop` tinyint(4) DEFAULT 0,
-  `modo_multiplas_maquinas` tinyint(4) DEFAULT 0 COMMENT 'Se 0: apenas 1 mÃ¡quina/usuÃ¡rio. Se 1: mÃºltiplas permitidas',
-  `limiar_proximidade_minutos` int(11) DEFAULT 5 COMMENT 'Aviso de batida prÃ³xima',
+  `modo_multiplas_maquinas` tinyint(4) DEFAULT 0 COMMENT 'Se 0: apenas 1 máquina/usuário. Se 1: múltiplas permitidas',
+  `limiar_proximidade_minutos` int(11) DEFAULT 5 COMMENT 'Aviso de batida próxima',
   `atualizado_em` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -189,7 +194,7 @@ CREATE TABLE `configuracao_ponto` (
 --
 
 INSERT INTO `configuracao_ponto` (`id`, `tolerancia_atraso_minutos`, `horario_inicio_expediente`, `horario_fim_expediente`, `considerar_feriados`, `lista_feriados`, `usar_dsr`, `quantidade_batidas`, `usar_geolocalizacao`, `raio_permitido_metros`, `exigir_foto_mobile`, `exigir_foto_desktop`, `modo_multiplas_maquinas`, `limiar_proximidade_minutos`, `atualizado_em`) VALUES
-(1, 5, '08:00:00', '17:00:00', 1, NULL, 1, 2, 0, 500, 1, 0, 0, 5, '2026-03-14 14:10:00');
+(1, 7, '08:00:00', '17:00:00', 1, NULL, 1, 4, 0, 500, 1, 0, 0, 5, '2026-03-16 15:57:54');
 
 -- --------------------------------------------------------
 
@@ -197,7 +202,6 @@ INSERT INTO `configuracao_ponto` (`id`, `tolerancia_atraso_minutos`, `horario_in
 -- Estrutura para tabela `configuracao_pontos_avancado`
 --
 
-DROP TABLE IF EXISTS `configuracao_pontos_avancado`;
 CREATE TABLE `configuracao_pontos_avancado` (
   `id` int(11) NOT NULL,
   `empresa_id` int(11) DEFAULT NULL,
@@ -223,7 +227,67 @@ CREATE TABLE `configuracao_pontos_avancado` (
 --
 
 INSERT INTO `configuracao_pontos_avancado` (`id`, `empresa_id`, `permite_horas_extras`, `limite_horas_extras_diarias`, `limite_horas_extras_mensais`, `percentual_hora_extra_50`, `percentual_hora_extra_100`, `calcula_dsr`, `dsr_dias_compensacao`, `desconta_feriado_nao_trabalhado`, `aplicar_dsr_compensado_feriado`, `tolerancia_entrada_minutos`, `tolerancia_saida_minutos`, `considerar_lunch_automatico`, `duracao_lunch_minutos`, `criado_em`, `updated_at`) VALUES
-(1, NULL, 1, 2.00, 20.00, 50.00, 100.00, 1, 1, 0, 1, 5, 5, 0, 60, '2026-03-14 20:23:06', '2026-03-14 20:23:06');
+(1, NULL, 1, 3.50, 42.00, 55.00, 110.00, 1, 2, 0, 1, 7, 9, 1, 75, '2026-03-14 20:23:06', '2026-03-16 18:57:54');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `configuracao_ponto_usuario`
+--
+
+CREATE TABLE `configuracao_ponto_usuario` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `permite_horas_extras` tinyint(1) NOT NULL DEFAULT 1,
+  `batidas_padrao_dia` int(11) NOT NULL DEFAULT 4,
+  `dias_ativos_json` text DEFAULT NULL,
+  `batidas_por_dia_json` text DEFAULT NULL,
+  `horario_entrada_1` time DEFAULT NULL,
+  `horario_saida_1` time DEFAULT NULL,
+  `horario_entrada_2` time DEFAULT NULL,
+  `horario_saida_2` time DEFAULT NULL,
+  `atualizado_em` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `configuracao_ponto_usuario`
+--
+
+INSERT INTO `configuracao_ponto_usuario` (`id`, `usuario_id`, `permite_horas_extras`, `batidas_padrao_dia`, `dias_ativos_json`, `batidas_por_dia_json`, `horario_entrada_1`, `horario_saida_1`, `horario_entrada_2`, `horario_saida_2`, `atualizado_em`) VALUES
+(1, 8, 1, 4, '{\"seg\":true,\"ter\":true,\"qua\":true,\"qui\":true,\"sex\":true,\"sab\":true,\"dom\":false}', '{\"seg\":4,\"ter\":4,\"qua\":4,\"qui\":4,\"sex\":4,\"sab\":2,\"dom\":0}', '08:00:00', '12:00:00', '13:00:00', '18:00:00', '2026-03-16 20:54:10'),
+(2, 6, 1, 4, '{\"seg\":true,\"ter\":false,\"qua\":true,\"qui\":true,\"sex\":true,\"sab\":true,\"dom\":false}', '{\"seg\":4,\"ter\":4,\"qua\":4,\"qui\":4,\"sex\":4,\"sab\":2,\"dom\":0}', '08:00:00', '12:00:00', '13:00:00', '18:00:00', '2026-03-17 02:08:25');
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `configuracoes_ponto`
+--
+
+CREATE TABLE `configuracoes_ponto` (
+  `id` int(11) NOT NULL,
+  `chave` varchar(100) NOT NULL,
+  `valor` text DEFAULT NULL,
+  `descricao` text DEFAULT NULL,
+  `tipo` varchar(20) DEFAULT NULL,
+  `atualizado_em` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `configuracoes_ponto`
+--
+
+INSERT INTO `configuracoes_ponto` (`id`, `chave`, `valor`, `descricao`, `tipo`, `atualizado_em`) VALUES
+(1, 'carga_horaria_padrao', '8.00', 'Carga horária padrão em horas', NULL, '2026-03-15 01:59:53'),
+(2, 'intervalo_minimo_entre_batidas', '60', 'Intervalo mínimo em segundos entre batidas', NULL, '2026-03-15 01:59:53'),
+(3, 'permitir_edicao_ponto', '1', 'Permite que usuários editem seu próprio ponto', NULL, '2026-03-15 01:59:53'),
+(4, 'prazo_edicao_dias', '7', 'Dias após o ponto para permitir edição', NULL, '2026-03-15 01:59:53'),
+(5, 'notificar_falta', '1', 'Envia notificação quando detecta falta', NULL, '2026-03-15 01:59:53'),
+(6, 'sincronizar_offline', '1', 'Ativa sincronização offline', NULL, '2026-03-15 01:59:53'),
+(25, 'ponto_regra_incompleto_fim_dia', '1', 'Marcar apontamento como incompleto ao final do dia', 'bool', '2026-03-16 18:57:54'),
+(26, 'ponto_batidas_padrao_dia', '4', 'Quantidade padrao de batidas por dia', 'int', '2026-03-16 18:57:54'),
+(27, 'ponto_dias_ativos', '{\"seg\":true,\"ter\":true,\"qua\":true,\"qui\":true,\"sex\":true,\"sab\":true,\"dom\":false}', 'Dias ativos para escala de ponto (JSON)', 'json', '2026-03-16 21:06:05'),
+(28, 'ponto_batidas_por_dia', '{\"seg\":4,\"ter\":4,\"qua\":4,\"qui\":4,\"sex\":4,\"sab\":2,\"dom\":0}', 'Quantidade de batidas por dia da semana (JSON)', 'json', '2026-03-16 21:06:05'),
+(37, 'ponto_maquina_global_autorizada', '{\"device_id\":\"AwBJ2Bta8WxrIQAAAABJRU5ErkJggg==\",\"autorizado_por\":6,\"ip_origem\":\"::1\",\"user_agent\":\"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/145.0.0.0 Safari\\/537.36\",\"autorizado_em\":\"2026-03-16 21:29:47\"}', 'Device global autorizado para batida por CPF no login', 'json', '2026-03-17 00:29:47');
 
 -- --------------------------------------------------------
 
@@ -231,12 +295,11 @@ INSERT INTO `configuracao_pontos_avancado` (`id`, `empresa_id`, `permite_horas_e
 -- Estrutura para tabela `dispositivos_autorizados`
 --
 
-DROP TABLE IF EXISTS `dispositivos_autorizados`;
 CREATE TABLE `dispositivos_autorizados` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
-  `device_id` varchar(255) NOT NULL COMMENT 'Fingerprint Ãºnico da mÃ¡quina (canvas hash)',
-  `device_nome` varchar(255) DEFAULT NULL COMMENT 'Notebook JoÃ£o, Desktop Oficina, etc',
+  `device_id` varchar(255) NOT NULL COMMENT 'Fingerprint único da máquina (canvas hash)',
+  `device_nome` varchar(255) DEFAULT NULL COMMENT 'Notebook João, Desktop Oficina, etc',
   `ip_address` varchar(100) DEFAULT NULL,
   `user_agent` text DEFAULT NULL,
   `tipo_dispositivo` varchar(50) DEFAULT NULL COMMENT 'desktop, mobile, tablet',
@@ -252,7 +315,6 @@ CREATE TABLE `dispositivos_autorizados` (
 -- Estrutura para tabela `dsr_descansos`
 --
 
-DROP TABLE IF EXISTS `dsr_descansos`;
 CREATE TABLE `dsr_descansos` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -273,7 +335,6 @@ CREATE TABLE `dsr_descansos` (
 -- Estrutura para tabela `empresas`
 --
 
-DROP TABLE IF EXISTS `empresas`;
 CREATE TABLE `empresas` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -292,7 +353,6 @@ CREATE TABLE `empresas` (
 -- Estrutura para tabela `estoque_movimentacao`
 --
 
-DROP TABLE IF EXISTS `estoque_movimentacao`;
 CREATE TABLE `estoque_movimentacao` (
   `id` int(11) NOT NULL,
   `produto_id` int(11) NOT NULL,
@@ -308,7 +368,6 @@ CREATE TABLE `estoque_movimentacao` (
 -- Estrutura para tabela `estoque_movimentacoes`
 --
 
-DROP TABLE IF EXISTS `estoque_movimentacoes`;
 CREATE TABLE `estoque_movimentacoes` (
   `id` int(11) NOT NULL,
   `tipo` enum('entrada','saida') NOT NULL,
@@ -327,7 +386,6 @@ CREATE TABLE `estoque_movimentacoes` (
 -- Estrutura para tabela `estoque_saldo`
 --
 
-DROP TABLE IF EXISTS `estoque_saldo`;
 CREATE TABLE `estoque_saldo` (
   `id` int(11) NOT NULL,
   `id_produto` int(11) NOT NULL,
@@ -341,7 +399,6 @@ CREATE TABLE `estoque_saldo` (
 -- Estrutura para tabela `feriados`
 --
 
-DROP TABLE IF EXISTS `feriados`;
 CREATE TABLE `feriados` (
   `id` int(11) NOT NULL,
   `data` date NOT NULL,
@@ -363,10 +420,10 @@ INSERT INTO `feriados` (`id`, `data`, `descricao`, `tipo`, `empresa_id`, `criado
 (4, '2026-04-03', 'Sexta-feira Santa', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (5, '2026-04-21', 'Tiradentes', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (6, '2026-05-01', 'Dia do Trabalho', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
-(7, '2026-09-07', 'IndependÃªncia do Brasil', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
+(7, '2026-09-07', 'Independência do Brasil', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (8, '2026-10-12', 'Nossa Senhora Aparecida', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (9, '2026-11-02', 'Finados', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
-(10, '2026-11-20', 'ConsciÃªncia Negra', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
+(10, '2026-11-20', 'Consciência Negra', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06'),
 (11, '2026-12-25', 'Natal', 'nacional', NULL, '2026-03-14 20:23:06', '2026-03-14 20:23:06');
 
 -- --------------------------------------------------------
@@ -375,7 +432,6 @@ INSERT INTO `feriados` (`id`, `data`, `descricao`, `tipo`, `empresa_id`, `criado
 -- Estrutura para tabela `fornecedores`
 --
 
-DROP TABLE IF EXISTS `fornecedores`;
 CREATE TABLE `fornecedores` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -394,7 +450,6 @@ CREATE TABLE `fornecedores` (
 -- Estrutura para tabela `gabaritos`
 --
 
-DROP TABLE IF EXISTS `gabaritos`;
 CREATE TABLE `gabaritos` (
   `id` int(11) NOT NULL,
   `cliente` varchar(100) DEFAULT NULL,
@@ -426,18 +481,18 @@ CREATE TABLE `gabaritos` (
 --
 
 INSERT INTO `gabaritos` (`id`, `cliente`, `numero_pedido`, `plataforma`, `contato`, `modelo`, `cor`, `tamanho`, `quantidade`, `valor_unit`, `valor_total`, `forma_pagamento`, `data_pagamento`, `data_pedido`, `data_entrega`, `imagem_mockup`, `observacoes`, `meio_pagamento`, `caminho_comprovante`, `vendedor_id`, `data_criacao`, `status`, `itens_json`) VALUES
-(1, 'FABENE CRUZ', '01', 'WhatsApp', '+55 47 8444-2116', 'Camiseta Oversized', 'Preta', 'G1:1', 1, 0.00, 0.00, NULL, NULL, '2026-02-26', '2026-03-03', '69a57c914889e.png', '', 'Pago em Loja', '', 6, '2026-03-02 08:18:15', 'Estampado', '{\"G1\":\"1\"}'),
+(1, 'FABENE CRUZ', '01', 'WhatsApp', '+55 47 8444-2116', 'Camiseta Oversized', 'Preta', 'G1:1', 1, 0.00, 0.00, NULL, NULL, '2026-02-26', '2026-03-03', '69a57c914889e.png', '', 'Pago em Loja', '', 6, '2026-03-02 08:18:15', 'Enviado', '{\"G1\":\"1\"}'),
 (2, 'FABENE CRUZ', '01', 'WhatsApp', '+55 47 8444-2116', 'Camiseta Oversized', 'Branca', 'G1:1', 1, 0.00, 0.00, NULL, NULL, '2026-02-26', '2026-03-03', '69a573e44b028.png', '', NULL, NULL, NULL, '2026-03-02 08:19:03', 'Mockup', '{\"G1\":\"1\"}'),
-(3, 'FABENE CRUZ', '02', 'WhatsApp', '+55 47 8444-2116', 'Camiseta Oversized', 'Preta', 'G1:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-02', '2026-03-04', '69a5c656bc2dd.png', '', 'Pix', '69a6ca9cb1303_comp.jpeg', 6, '2026-03-02 14:16:53', 'Estampado', '{\"G1\":\"1\"}'),
-(5, 'juboeing', '03', 'WhatsApp', '+55 47 9917-8871', 'Camiseta Oversized', 'Preta', 'P:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-03', '2026-03-04', '69a74899a0a6d.jpeg', '', 'Pix', '69a74899a11a5_comp.jpeg', 6, '2026-03-03 17:46:17', 'Estampado', '{\"P\":\"1\"}'),
-(6, 'Vitor Alves', '04', 'WhatsApp', '+55 13 98139-1242', 'Camiseta Oversized', 'Preta', 'G:2', 2, 0.00, 0.00, NULL, NULL, '2026-03-04', '2026-03-06', '69a82fdf8837f.png', '', 'Pix', '69a82fdf89130_comp.jpeg', 6, '2026-03-04 10:13:03', 'Impresso', '{\"G\":\"2\"}'),
+(3, 'FABENE CRUZ', '02', 'WhatsApp', '+55 47 8444-2116', 'Camiseta Oversized', 'Preta', 'G1:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-02', '2026-03-04', '69a5c656bc2dd.png', '', 'Pix', '69a6ca9cb1303_comp.jpeg', 6, '2026-03-02 14:16:53', 'Enviado', '{\"G1\":\"1\"}'),
+(5, 'juboeing', '03', 'WhatsApp', '+55 47 9917-8871', 'Camiseta Oversized', 'Preta', 'P:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-03', '2026-03-04', '69a74899a0a6d.jpeg', '', 'Pix', '69a74899a11a5_comp.jpeg', 6, '2026-03-03 17:46:17', 'Enviado', '{\"P\":\"1\"}'),
+(6, 'Vitor Alves', '04', 'WhatsApp', '+55 13 98139-1242', 'Camiseta Oversized', 'Preta', 'G:2', 2, 0.00, 0.00, NULL, NULL, '2026-03-04', '2026-03-06', '69a82fdf8837f.png', '', 'Pix', '69a82fdf89130_comp.jpeg', 6, '2026-03-04 10:13:03', 'Enviado', '{\"G\":\"2\"}'),
 (7, 'Vitor Alves', '04', 'WhatsApp', '+55 13 98139-1242', 'Camiseta Oversized', 'Branca', 'G:2', 2, 0.00, 0.00, NULL, NULL, '2026-03-04', '2026-03-06', '69a8300b41603.png', '', 'Pix', NULL, 0, '2026-03-04 10:13:47', 'Mockup', '{\"G\":\"2\"}'),
 (8, 'cliente baby', '05', 'WhatsApp', '', 'Camiseta Oversized', 'Branca', 'PP:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-06', '0000-00-00', '69aacb2fc9f2b.png', 'IMAGEM MAIOR', 'Pago em Loja', NULL, 6, '2026-03-06 09:40:15', 'Enviado', '{\"PP\":\"1\"}'),
 (9, 'cliente baby', '05', 'WhatsApp', '', 'Camiseta Infantil Cotton', 'BRANCA', 'PP:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-06', '0000-00-00', '69aacb5921d61.png', '', 'Dinheiro', NULL, 0, '2026-03-06 09:40:57', 'Mockup', '{\"PP\":\"1\"}'),
-(13, 'Carla', '06', 'WhatsApp', '+55 47 9916-1931', 'Camiseta Infantil Cotton', 'Preta', '10:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-12', '2026-03-12', '69b2c99f4dbb5.png', '', '', NULL, 6, '2026-03-12 11:11:43', 'Mockup', '{\"10\":\"1\"}'),
+(13, 'Carla', '06', 'WhatsApp', '+55 47 9916-1931', 'Camiseta Infantil Cotton', 'Preta', '10:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-12', '2026-03-12', '69b2c99f4dbb5.png', '', '', NULL, 6, '2026-03-12 11:11:43', 'Enviado', '{\"10\":\"1\"}'),
 (14, 'Carla', '06', 'WhatsApp', '+55 47 9916-1931', 'Camiseta Infantil Cotton', 'Branca', '12:1', 1, 0.00, 0.00, NULL, NULL, '2026-03-12', '2026-03-12', '69b2c9bd7f085.png', '', '', NULL, 0, '2026-03-12 11:12:13', 'Mockup', '{\"12\":\"1\"}'),
-(15, 'Andreia Nego', '07', 'WhatsApp', '+55 47 9601-2462', 'Camiseta Oversized', 'Preta', 'P:1 M:1 GG:1', 3, 0.00, 0.00, NULL, NULL, '2026-03-12', '2026-03-12', '69b2cc89e27cc.png', '', 'Pix', '69b2cc89e30b9_comp.jpeg', 0, '2026-03-12 11:24:09', 'Mockup', '{\"P\":\"1\",\"M\":\"1\",\"GG\":\"1\"}'),
-(16, 'Pamela', '08', 'WhatsApp', '+55 47 9645-3325', 'Camiseta Regular Cotton', 'Preta', 'G:2', 2, 0.00, 0.00, NULL, NULL, '2026-03-13', '0000-00-00', '69b457691f1f3.png', 'Tamanho: G masculino \r\nFrase verso: Rafael da Sarah \r\n\r\nTamanho: G masculino\r\nFrase verso: Maicon da Pamela', 'Pago em Loja', '', 6, '2026-03-13 15:28:57', 'Estampado', '{\"G\":\"2\"}'),
+(15, 'Andreia Nego', '07', 'WhatsApp', '+55 47 9601-2462', 'Camiseta Oversized', 'Preta', 'P:1 M:1 GG:1', 3, 0.00, 0.00, NULL, NULL, '2026-03-12', '2026-03-12', '69b2cc89e27cc.png', '', 'Pix', '69b2cc89e30b9_comp.jpeg', 0, '2026-03-12 11:24:09', 'Enviado', '{\"P\":\"1\",\"M\":\"1\",\"GG\":\"1\"}'),
+(16, 'Pamela', '08', 'WhatsApp', '+55 47 9645-3325', 'Camiseta Regular Cotton', 'Preta', 'G:2', 2, 0.00, 0.00, NULL, NULL, '2026-03-13', '0000-00-00', '69b457691f1f3.png', 'Tamanho: G masculino \r\nFrase verso: Rafael da Sarah \r\n\r\nTamanho: G masculino\r\nFrase verso: Maicon da Pamela', 'Pago em Loja', '', 6, '2026-03-13 15:28:57', 'Enviado', '{\"G\":\"2\"}'),
 (17, 'Pamela', '08', 'WhatsApp', '+55 47 9645-3325', 'Baby Look Feminina', 'Preta', 'P:1 G:1', 2, 0.00, 0.00, NULL, NULL, '2026-03-13', '0000-00-00', '69b45952a82f2.png', 'Tamanho: G(feminina)\r\nFrase verso: Sarah do Rafael \r\n\r\nTamanho: P (feminina)\r\nFrase verso: Pamela do Maicon ', 'Pago em Loja', NULL, 6, '2026-03-13 15:37:06', 'Mockup', '{\"P\":\"1\",\"G\":\"1\"}');
 
 -- --------------------------------------------------------
@@ -446,7 +501,6 @@ INSERT INTO `gabaritos` (`id`, `cliente`, `numero_pedido`, `plataforma`, `contat
 -- Estrutura para tabela `geolocation_empresa`
 --
 
-DROP TABLE IF EXISTS `geolocation_empresa`;
 CREATE TABLE `geolocation_empresa` (
   `id` int(11) NOT NULL,
   `empresa_id` int(11) DEFAULT 1 COMMENT 'Para multi-empresa, FK para tabela empresa (se houver)',
@@ -465,11 +519,10 @@ CREATE TABLE `geolocation_empresa` (
 -- Estrutura para tabela `historico_alteracoes_ponto`
 --
 
-DROP TABLE IF EXISTS `historico_alteracoes_ponto`;
 CREATE TABLE `historico_alteracoes_ponto` (
   `id` int(11) NOT NULL,
   `apontamento_id` int(11) NOT NULL,
-  `usuario_alterador_id` int(11) NOT NULL COMMENT 'Quem fez a alteraÃ§Ã£o',
+  `usuario_alterador_id` int(11) NOT NULL COMMENT 'Quem fez a alteração',
   `tipo_alteracao` varchar(100) NOT NULL COMMENT 'entrada_criada, saida_criada, entrada_editada, saida_editada, validacao_proximidade_confirmada_saida, etc',
   `valor_anterior` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Valores originais em JSON' CHECK (json_valid(`valor_anterior`)),
   `valor_novo` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Novos valores em JSON' CHECK (json_valid(`valor_novo`)),
@@ -478,13 +531,38 @@ CREATE TABLE `historico_alteracoes_ponto` (
   `hash_sha256` varchar(64) DEFAULT NULL COMMENT 'Hash de integridade (sha256)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `historico_alteracoes_ponto`
+--
+
+INSERT INTO `historico_alteracoes_ponto` (`id`, `apontamento_id`, `usuario_alterador_id`, `tipo_alteracao`, `valor_anterior`, `valor_novo`, `motivo_alteracao`, `criado_em`, `hash_sha256`) VALUES
+(1, 1, 6, 'entrada_criada', NULL, '{\"hora\":\"00:17:35\",\"batida\":1}', 'Primeira entrada do dia', '2026-03-15 00:17:35', '76f6f98be9cd5fd98950b3a68b5257af0000ad14f08e662fc56560df43ec9cdb'),
+(2, 1, 6, 'saida_criada', NULL, '{\"hora\":\"00:17:47\",\"batida\":1}', 'Saída registrada', '2026-03-15 00:17:47', 'e67cd2dad921879902f093df10cf227447554f2ab4ed065e6115dc68cf26ddff'),
+(3, 1, 6, 'validacao_proximidade_confirmada_saida', NULL, '{\"acao\":\"confirmada_saida\"}', 'Usuário confirmou saída após aviso de proximidade', '2026-03-15 00:17:47', '801cb96bbcbde0d3d49ba1dc14702c8a3f042a79703390804087ceb21def6166'),
+(4, 1, 6, 'saida_criada', NULL, '{\"hora\":\"00:17:53\",\"batida\":1}', 'Saída registrada', '2026-03-15 00:17:53', '4f95f0fa38bcdcc24fb8bed0457437d4fdafa730dedb22816d4f4041e8f78566'),
+(5, 1, 6, 'validacao_proximidade_confirmada_saida', NULL, '{\"acao\":\"confirmada_saida\"}', 'Usuário confirmou saída após aviso de proximidade', '2026-03-15 00:17:53', 'f8559c013f01d773944a811b92fd4aed4bbc5394433244aefec08b6e2a7bd2a1'),
+(6, 1, 6, 'saida_criada', NULL, '{\"hora\":\"00:18:04\",\"batida\":1}', 'Saída registrada', '2026-03-15 00:18:04', 'f278a2cddf4718c7c68ebb90acbe2d17f2c9c9640f7a6333a5bb9bf30d34bb78'),
+(7, 1, 6, 'validacao_proximidade_confirmada_saida', NULL, '{\"acao\":\"confirmada_saida\"}', 'Usuário confirmou saída após aviso de proximidade', '2026-03-15 00:18:04', '355c54684b18d5e476a2cd086991c0fbf10952fb03cf177e3697de8c6e15d75f'),
+(8, 1, 6, 'entrada_criada', NULL, '{\"hora\":\"10:41:23\",\"batida\":2}', 'Entrada registrada', '2026-03-15 10:41:23', '1741fc0fe30007460f08d7de133efe2640043465aa0a10d1b86850f0576a1bfe'),
+(9, 1, 6, 'saida_criada', NULL, '{\"hora\":\"11:11:31\",\"batida\":2}', 'Saída registrada', '2026-03-15 11:11:31', '0a44fd4bc8f2358dce3ea5294efdb2876a7b6fa5f06ec43cdf42e0f4ed6c73f5'),
+(10, 1, 6, 'entrada_criada', NULL, '{\"hora\":\"12:55:22\",\"batida\":3}', 'Entrada registrada', '2026-03-15 12:55:22', 'bc300c03fe8318223bc1609e3da27f78fe1eed276857c53fd7d110f05b9f6eb6'),
+(11, 1, 6, 'saida_criada', NULL, '{\"hora\":\"13:10:33\",\"batida\":3}', 'Saída registrada', '2026-03-15 13:10:33', 'c78f5983ec8c28aac813fb2de8f4db8a5200a7cfcf2d84908508a75d55a4ae38'),
+(12, 2, 6, 'entrada_criada', NULL, '{\"hora\":\"08:30:51\",\"batida\":1}', 'Primeira entrada do dia', '2026-03-16 08:30:51', 'b034a559eb551196adef52fb2b4a996b3705ee9c0b02ef86011b221f5ce7bdb8'),
+(13, 2, 6, 'saida_criada', NULL, '{\"hora\":\"13:51:22\",\"batida\":1}', 'Saída registrada', '2026-03-16 13:51:22', '4ff3804ee0a61a4c13a1da42d639277d04f2c3d89c45768db4cec41bc3ccac10'),
+(14, 1, 6, 'entrada_saida_editada', '{\"entrada_1\":\"00:17:35\",\"saida_1\":\"00:18:04\",\"entrada_2\":\"10:41:23\",\"saida_2\":\"11:11:31\"}', '{\"entrada_1\":\"13:51\",\"saida_1\":\"16:53\",\"entrada_2\":\"17:56\",\"saida_2\":\"19:58\"}', 'teste', '2026-03-16 13:52:21', 'afd90011fbcd5fc2641eeba3037e230f4e9ace179b1666b47b9f2c80faa8fcef'),
+(15, 2, 6, 'entrada_criada', NULL, '{\"hora\":\"17:13:41\",\"batida\":2}', 'Entrada registrada', '2026-03-16 17:13:41', '55cd0e0a4a5ace1dadfeec592dd26687442f2f52241b41983ce706cb69ae0bf5'),
+(16, 2, 6, 'saida_criada', NULL, '{\"hora\":\"18:16:24\",\"batida\":2}', 'Saída registrada', '2026-03-16 18:16:24', 'ec0ae63f1411524ae4c0182b7edababff486aaad4aeb2a32969b8f0dba82fdc1'),
+(17, 2, 6, 'entrada_criada', NULL, '{\"hora\":\"22:49:31\",\"batida\":3}', 'Entrada registrada', '2026-03-16 22:49:31', 'b8f0227db21bd1b7f566c2efdfbfceb6d5c01c5432e48638e412597aa6c8fe2f'),
+(18, 2, 6, 'saida_criada', NULL, '{\"hora\":\"22:49:52\",\"batida\":3}', 'Saída registrada', '2026-03-16 22:49:52', '770ce3a678148734fdcc4aa8d54bc85bd70ba38fc672f7ff1a5d35ecea043c64'),
+(19, 3, 6, 'entrada_criada', NULL, '{\"hora\":\"08:13:22\",\"batida\":1}', 'Primeira entrada do dia', '2026-03-17 08:13:22', 'ed1b1377273d3f12dbfa298034a73a404e0281e1f97d0c5b42b6bdc20d246773'),
+(20, 4, 5, 'entrada_criada', NULL, '{\"hora\":\"08:35:18\",\"batida\":1}', 'Primeira entrada do dia', '2026-03-17 08:35:18', 'a27e814fce2051d4b9cb9d6b779d31904f24f571e25e19a23b3a8bad333fc69c');
+
 -- --------------------------------------------------------
 
 --
 -- Estrutura para tabela `historico_movimentacao`
 --
 
-DROP TABLE IF EXISTS `historico_movimentacao`;
 CREATE TABLE `historico_movimentacao` (
   `id` int(11) NOT NULL,
   `sku` varchar(50) DEFAULT NULL,
@@ -507,7 +585,6 @@ CREATE TABLE `historico_movimentacao` (
 -- Estrutura para tabela `horas_extras`
 --
 
-DROP TABLE IF EXISTS `horas_extras`;
 CREATE TABLE `horas_extras` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -529,14 +606,15 @@ CREATE TABLE `horas_extras` (
 -- Estrutura para tabela `notificacoes_ponto`
 --
 
-DROP TABLE IF EXISTS `notificacoes_ponto`;
 CREATE TABLE `notificacoes_ponto` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
   `tipo` enum('alerta','info','erro','sucesso') DEFAULT 'info',
+  `topico` varchar(50) DEFAULT NULL COMMENT 'horas_extras, dsr, feriado, ponto, config',
   `titulo` varchar(100) NOT NULL,
   `mensagem` text DEFAULT NULL,
   `link` varchar(255) DEFAULT NULL,
+  `dados_adicionais` text DEFAULT NULL COMMENT 'Dados JSON adicionais',
   `lida` tinyint(1) DEFAULT 0,
   `data_leitura` timestamp NULL DEFAULT NULL,
   `criada_em` timestamp NOT NULL DEFAULT current_timestamp()
@@ -548,7 +626,6 @@ CREATE TABLE `notificacoes_ponto` (
 -- Estrutura para tabela `pedidos_dtf`
 --
 
-DROP TABLE IF EXISTS `pedidos_dtf`;
 CREATE TABLE `pedidos_dtf` (
   `id` int(11) NOT NULL,
   `cliente` varchar(255) NOT NULL,
@@ -561,8 +638,10 @@ CREATE TABLE `pedidos_dtf` (
   `valor_metro` decimal(10,2) NOT NULL,
   `valor_final` decimal(10,2) NOT NULL,
   `observacoes` text DEFAULT NULL,
+  `meio_pagamento` varchar(50) DEFAULT NULL,
   `arquivo_impressao` varchar(255) DEFAULT NULL,
   `caminho_comprovante` varchar(255) DEFAULT NULL,
+  `vendedor_id` int(11) DEFAULT NULL,
   `data_criacao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -570,8 +649,8 @@ CREATE TABLE `pedidos_dtf` (
 -- Despejando dados para a tabela `pedidos_dtf`
 --
 
-INSERT INTO `pedidos_dtf` (`id`, `cliente`, `contato`, `plataforma`, `numero_pedido`, `data_pedido`, `data_entrega`, `metros`, `valor_metro`, `valor_final`, `observacoes`, `arquivo_impressao`, `caminho_comprovante`, `data_criacao`) VALUES
-(1, 'test', '+55 47 8444-2116', 'BalcÃ£o', '01', '2026-03-03', NULL, 24.00, 44.99, 1079.76, '', '69a7085016bd2.png', '69a7085017223_comp.jpeg', '2026-03-03 16:12:00');
+INSERT INTO `pedidos_dtf` (`id`, `cliente`, `contato`, `plataforma`, `numero_pedido`, `data_pedido`, `data_entrega`, `metros`, `valor_metro`, `valor_final`, `observacoes`, `meio_pagamento`, `arquivo_impressao`, `caminho_comprovante`, `vendedor_id`, `data_criacao`) VALUES
+(1, 'test', '+55 47 8444-2116', 'Balcão', '01', '2026-03-03', NULL, 24.00, 44.99, 1079.76, '', NULL, '69a7085016bd2.png', '69a7085017223_comp.jpeg', NULL, '2026-03-03 16:12:00');
 
 -- --------------------------------------------------------
 
@@ -579,7 +658,6 @@ INSERT INTO `pedidos_dtf` (`id`, `cliente`, `contato`, `plataforma`, `numero_ped
 -- Estrutura para tabela `pedidos_producao`
 --
 
-DROP TABLE IF EXISTS `pedidos_producao`;
 CREATE TABLE `pedidos_producao` (
   `id` int(11) NOT NULL,
   `sku` varchar(50) DEFAULT NULL,
@@ -607,7 +685,6 @@ CREATE TABLE `pedidos_producao` (
 -- Estrutura para tabela `produtos`
 --
 
-DROP TABLE IF EXISTS `produtos`;
 CREATE TABLE `produtos` (
   `id` int(11) NOT NULL,
   `sku` varchar(50) NOT NULL,
@@ -822,10 +899,30 @@ INSERT INTO `produtos` (`id`, `sku`, `nome`, `tamanho`, `cor`, `preco_venda`, `c
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `saldos_mensais`
+--
+
+CREATE TABLE `saldos_mensais` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `mes` int(2) NOT NULL,
+  `ano` int(4) NOT NULL,
+  `saldo_horas` decimal(8,2) DEFAULT 0.00,
+  `dias_trabalhados` int(3) DEFAULT 0,
+  `dias_uteis` int(3) DEFAULT 0,
+  `faltas` int(3) DEFAULT 0,
+  `atestados` int(3) DEFAULT 0,
+  `horas_extras` decimal(8,2) DEFAULT 0.00,
+  `criado_em` timestamp NOT NULL DEFAULT current_timestamp(),
+  `atualizado_em` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `servicos`
 --
 
-DROP TABLE IF EXISTS `servicos`;
 CREATE TABLE `servicos` (
   `id` int(11) NOT NULL,
   `cliente` varchar(100) NOT NULL,
@@ -843,7 +940,6 @@ CREATE TABLE `servicos` (
 -- Estrutura para tabela `servicos_os`
 --
 
-DROP TABLE IF EXISTS `servicos_os`;
 CREATE TABLE `servicos_os` (
   `id` int(11) NOT NULL,
   `cliente` varchar(100) NOT NULL,
@@ -864,7 +960,6 @@ CREATE TABLE `servicos_os` (
 -- Estrutura para tabela `sincronizacoes_offline`
 --
 
-DROP TABLE IF EXISTS `sincronizacoes_offline`;
 CREATE TABLE `sincronizacoes_offline` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
@@ -879,19 +974,47 @@ CREATE TABLE `sincronizacoes_offline` (
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `solicitacoes_alteracao_ponto`
+--
+
+CREATE TABLE `solicitacoes_alteracao_ponto` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `data_apontamento` date NOT NULL,
+  `tipo_alteracao` varchar(50) NOT NULL COMMENT 'entrada_ausente, saida_ausente, entrada_incorreta, saida_incorreta, ambas_incorretas',
+  `entrada_1_corrigida` time DEFAULT NULL,
+  `saida_1_corrigida` time DEFAULT NULL,
+  `entrada_2_corrigida` time DEFAULT NULL,
+  `saida_2_corrigida` time DEFAULT NULL,
+  `motivo` text NOT NULL,
+  `status` enum('pendente','aprovado','rejeitado') NOT NULL DEFAULT 'pendente',
+  `aprovador_id` int(11) DEFAULT NULL,
+  `observacao_aprovador` text DEFAULT NULL,
+  `criado_em` datetime NOT NULL DEFAULT current_timestamp(),
+  `atualizado_em` datetime DEFAULT NULL ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `usuarios`
 --
 
-DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
+  `username` varchar(50) DEFAULT NULL,
   `email` varchar(100) NOT NULL,
+  `cpf` varchar(14) DEFAULT NULL,
   `departamento` varchar(100) DEFAULT 'Geral',
   `cargo` varchar(100) DEFAULT 'Operacional',
   `senha` varchar(255) NOT NULL,
   `nivel` varchar(20) DEFAULT 'comum',
   `carga_horaria_diaria` decimal(4,2) DEFAULT 8.00,
+  `horario_entrada_1` time DEFAULT '08:00:00',
+  `horario_saida_1` time DEFAULT '12:00:00',
+  `horario_entrada_2` time DEFAULT '13:00:00',
+  `horario_saida_2` time DEFAULT '18:00:00',
   `data_admissao` date DEFAULT NULL,
   `tipo_contrato` varchar(50) DEFAULT 'CLT'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -900,20 +1023,19 @@ CREATE TABLE `usuarios` (
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `departamento`, `cargo`, `senha`, `nivel`, `carga_horaria_diaria`, `data_admissao`, `tipo_contrato`) VALUES
-(5, 'Julia Gomes De Souza', 'ripfirejulia@gmail.com', 'Geral', 'Operacional', '$2y$10$PM2vt4UJA9P4H8dnSHjsQ.IisfC.2401iUFgEZzDAwsLqG1d3tD72', 'admin', 8.00, '2026-03-14', 'CLT'),
-(6, 'Vinicius Baggio', 'Vbaggio08@gmail.com', 'Geral', 'Operacional', '$2y$10$yrMP27GEVz6sH1JiLrSvseKLGBbFXTgtHTm6Qkrcbe6VEuBxav66e', 'admin', 8.00, '2026-03-14', 'CLT'),
-(7, 'Jeison De Souza', 'jeison.tst22@gmail.com', 'Geral', 'Operacional', '$2y$10$8FApHk1k7ERks5Zky8ixe.KCB16J1Ah8cW0dutpwv0RUjDHxv4OEu', 'admin', 8.00, '2026-03-14', 'CLT'),
-(8, 'Caio Tribeck', 'rptribeck@gmail.com', 'Geral', 'Operacional', '$2y$10$ii17DpJpXLdC/QSNlreYa.eN80PK9n22yResljhuvdtOFX9nhOjPm', 'funcionario', 8.00, '2026-03-14', 'CLT'),
-(10, 'mateus crescencio ', 'mtscrescencio@gmail.com', 'Geral', 'Operacional', '$2y$10$T1i8.5jklKfCZY3hBozFqe5jxkO8jZO0s4DGZLjjDwLr3YR4HU0Qu', 'funcionario', 8.00, '2026-03-14', 'CLT');
+INSERT INTO `usuarios` (`id`, `nome`, `username`, `email`, `cpf`, `departamento`, `cargo`, `senha`, `nivel`, `carga_horaria_diaria`, `horario_entrada_1`, `horario_saida_1`, `horario_entrada_2`, `horario_saida_2`, `data_admissao`, `tipo_contrato`) VALUES
+(5, 'Julia Gomes De Souza', NULL, 'ripfirejulia@gmail.com', '11464915903', 'Geral', 'Operacional', '$2y$10$PM2vt4UJA9P4H8dnSHjsQ.IisfC.2401iUFgEZzDAwsLqG1d3tD72', 'admin', 8.00, '08:00:00', '12:00:00', '13:00:00', '18:00:00', '2026-03-17', 'CLT'),
+(6, 'Vinicius Baggio', 'vbaggio', 'Vbaggio08@gmail.com', '13089476908', 'Geral', 'Operacional', '$2y$10$yrMP27GEVz6sH1JiLrSvseKLGBbFXTgtHTm6Qkrcbe6VEuBxav66e', 'admin', 8.00, '08:00:00', '12:00:00', '13:00:00', '18:00:00', '2026-03-17', 'CLT'),
+(7, 'Jeison De Souza', NULL, 'jeison.tst22@gmail.com', NULL, 'Geral', 'Operacional', '$2y$10$8FApHk1k7ERks5Zky8ixe.KCB16J1Ah8cW0dutpwv0RUjDHxv4OEu', 'admin', 8.00, '08:00:00', '12:00:00', '13:00:00', '18:00:00', '2026-03-14', 'CLT'),
+(8, 'Caio Tribeck', NULL, 'rptribeck@gmail.com', NULL, 'Geral', 'Operacional', '$2y$10$ii17DpJpXLdC/QSNlreYa.eN80PK9n22yResljhuvdtOFX9nhOjPm', 'funcionario', 8.00, '08:00:00', '12:00:00', '13:00:00', '18:00:00', '2026-03-14', 'CLT'),
+(10, 'mateus crescencio ', NULL, 'mtscrescencio@gmail.com', NULL, 'Geral', 'Operacional', '$2y$10$T1i8.5jklKfCZY3hBozFqe5jxkO8jZO0s4DGZLjjDwLr3YR4HU0Qu', 'funcionario', 8.00, '08:00:00', '12:00:00', '13:00:00', '18:00:00', '2026-03-14', 'CLT');
 
 -- --------------------------------------------------------
 
 --
 -- Estrutura stand-in para view `vw_horas_extras_resumo`
--- (Veja abaixo para a visÃ£o atual)
+-- (Veja abaixo para a visão atual)
 --
-DROP TABLE IF EXISTS `vw_horas_extras_resumo`;
 CREATE TABLE `vw_horas_extras_resumo` (
 `usuario_id` int(11)
 ,`nome` varchar(100)
@@ -929,9 +1051,8 @@ CREATE TABLE `vw_horas_extras_resumo` (
 
 --
 -- Estrutura stand-in para view `vw_saldo_horas_mensais`
--- (Veja abaixo para a visÃ£o atual)
+-- (Veja abaixo para a visão atual)
 --
-DROP TABLE IF EXISTS `vw_saldo_horas_mensais`;
 CREATE TABLE `vw_saldo_horas_mensais` (
 `usuario_id` int(11)
 ,`nome` varchar(100)
@@ -951,7 +1072,7 @@ CREATE TABLE `vw_saldo_horas_mensais` (
 --
 DROP TABLE IF EXISTS `vw_horas_extras_resumo`;
 
-CREATE ALGORITHM=UNDEFINED VIEW `vw_horas_extras_resumo` AS SELECT `he`.`usuario_id` AS `usuario_id`, `u`.`nome` AS `nome`, year(`he`.`data_referencia`) AS `ano`, month(`he`.`data_referencia`) AS `mes`, count(0) AS `quantidade`, round(sum(`he`.`horas_extras`),2) AS `total_horas`, round(sum(case when `he`.`status` = 'aprovado' then `he`.`horas_extras` else 0 end),2) AS `horas_aprovadas`, round(sum(case when `he`.`status` = 'pago' then `he`.`horas_extras` else 0 end),2) AS `horas_pagas` FROM (`horas_extras` `he` join `usuarios` `u` on(`he`.`usuario_id` = `u`.`id`)) GROUP BY `he`.`usuario_id`, year(`he`.`data_referencia`), month(`he`.`data_referencia`) ;
+CREATE ALGORITHM=UNDEFINED VIEW `vw_horas_extras_resumo`  AS SELECT `he`.`usuario_id` AS `usuario_id`, `u`.`nome` AS `nome`, year(`he`.`data_referencia`) AS `ano`, month(`he`.`data_referencia`) AS `mes`, count(0) AS `quantidade`, round(sum(`he`.`horas_extras`),2) AS `total_horas`, round(sum(case when `he`.`status` = 'aprovado' then `he`.`horas_extras` else 0 end),2) AS `horas_aprovadas`, round(sum(case when `he`.`status` = 'pago' then `he`.`horas_extras` else 0 end),2) AS `horas_pagas` FROM (`horas_extras` `he` join `usuarios` `u` on(`he`.`usuario_id` = `u`.`id`)) GROUP BY `he`.`usuario_id`, year(`he`.`data_referencia`), month(`he`.`data_referencia`) ;
 
 -- --------------------------------------------------------
 
@@ -960,14 +1081,14 @@ CREATE ALGORITHM=UNDEFINED VIEW `vw_horas_extras_resumo` AS SELECT `he`.`usuario
 --
 DROP TABLE IF EXISTS `vw_saldo_horas_mensais`;
 
-CREATE ALGORITHM=UNDEFINED VIEW `vw_saldo_horas_mensais` AS SELECT `u`.`id` AS `usuario_id`, `u`.`nome` AS `nome`, `u`.`departamento` AS `departamento`, year(`ap`.`data`) AS `ano`, month(`ap`.`data`) AS `mes`, count(distinct `ap`.`data`) AS `dias_trabalhados`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0),2) AS `total_horas`, round(cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `horas_esperadas`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0) - cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `saldo_horas` FROM (`usuarios` `u` left join `apontamentos_ponto` `ap` on(`u`.`id` = `ap`.`usuario_id` and year(`ap`.`data`) = year(current_timestamp()) and month(`ap`.`data`) = month(current_timestamp()))) GROUP BY `u`.`id`, year(`ap`.`data`), month(`ap`.`data`) ;
+CREATE ALGORITHM=UNDEFINED VIEW `vw_saldo_horas_mensais`  AS SELECT `u`.`id` AS `usuario_id`, `u`.`nome` AS `nome`, `u`.`departamento` AS `departamento`, year(`ap`.`data`) AS `ano`, month(`ap`.`data`) AS `mes`, count(distinct `ap`.`data`) AS `dias_trabalhados`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0),2) AS `total_horas`, round(cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `horas_esperadas`, round(coalesce(sum(case when `ap`.`hora_saida_1` is not null and `ap`.`hora_entrada_1` is not null then (time_to_sec(`ap`.`hora_saida_1`) - time_to_sec(`ap`.`hora_entrada_1`)) / 3600.0 else 0 end + case when `ap`.`hora_saida_2` is not null and `ap`.`hora_entrada_2` is not null then (time_to_sec(`ap`.`hora_saida_2`) - time_to_sec(`ap`.`hora_entrada_2`)) / 3600.0 else 0 end),0) - cast(`u`.`carga_horaria_diaria` as decimal(5,2)) * 20,2) AS `saldo_horas` FROM (`usuarios` `u` left join `apontamentos_ponto` `ap` on(`u`.`id` = `ap`.`usuario_id` and year(`ap`.`data`) = year(current_timestamp()) and month(`ap`.`data`) = month(current_timestamp()))) GROUP BY `u`.`id`, year(`ap`.`data`), month(`ap`.`data`) ;
 
 --
--- Ãndices para tabelas despejadas
+-- Índices para tabelas despejadas
 --
 
 --
--- Ãndices de tabela `apontamentos_ponto`
+-- Índices de tabela `apontamentos_ponto`
 --
 ALTER TABLE `apontamentos_ponto`
   ADD PRIMARY KEY (`id`),
@@ -977,7 +1098,7 @@ ALTER TABLE `apontamentos_ponto`
   ADD KEY `idx_usuario_mes` (`usuario_id`,`data`);
 
 --
--- Ãndices de tabela `atestados`
+-- Índices de tabela `atestados`
 --
 ALTER TABLE `atestados`
   ADD PRIMARY KEY (`id`),
@@ -987,7 +1108,7 @@ ALTER TABLE `atestados`
   ADD KEY `idx_data_inicio` (`data_inicio`);
 
 --
--- Ãndices de tabela `clientes`
+-- Índices de tabela `clientes`
 --
 ALTER TABLE `clientes`
   ADD PRIMARY KEY (`id`),
@@ -997,7 +1118,7 @@ ALTER TABLE `clientes`
   ADD UNIQUE KEY `cpf_cnpj_2` (`cpf_cnpj`);
 
 --
--- Ãndices de tabela `compensacao_horas`
+-- Índices de tabela `compensacao_horas`
 --
 ALTER TABLE `compensacao_horas`
   ADD PRIMARY KEY (`id`),
@@ -1006,26 +1127,41 @@ ALTER TABLE `compensacao_horas`
   ADD KEY `fk_ch_dsr` (`dsr_id`);
 
 --
--- Ãndices de tabela `compras`
+-- Índices de tabela `compras`
 --
 ALTER TABLE `compras`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `configuracao_ponto`
+-- Índices de tabela `configuracao_ponto`
 --
 ALTER TABLE `configuracao_ponto`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `configuracao_pontos_avancado`
+-- Índices de tabela `configuracao_pontos_avancado`
 --
 ALTER TABLE `configuracao_pontos_avancado`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_empresa` (`empresa_id`);
 
 --
--- Ãndices de tabela `dispositivos_autorizados`
+-- Índices de tabela `configuracao_ponto_usuario`
+--
+ALTER TABLE `configuracao_ponto_usuario`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_config_ponto_usuario` (`usuario_id`),
+  ADD KEY `idx_config_ponto_usuario_user` (`usuario_id`);
+
+--
+-- Índices de tabela `configuracoes_ponto`
+--
+ALTER TABLE `configuracoes_ponto`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `chave` (`chave`);
+
+--
+-- Índices de tabela `dispositivos_autorizados`
 --
 ALTER TABLE `dispositivos_autorizados`
   ADD PRIMARY KEY (`id`),
@@ -1034,7 +1170,7 @@ ALTER TABLE `dispositivos_autorizados`
   ADD KEY `idx_ativo` (`ativo`);
 
 --
--- Ãndices de tabela `dsr_descansos`
+-- Índices de tabela `dsr_descansos`
 --
 ALTER TABLE `dsr_descansos`
   ADD PRIMARY KEY (`id`),
@@ -1043,7 +1179,7 @@ ALTER TABLE `dsr_descansos`
   ADD KEY `idx_data_dsr` (`data_dsr`);
 
 --
--- Ãndices de tabela `empresas`
+-- Índices de tabela `empresas`
 --
 ALTER TABLE `empresas`
   ADD PRIMARY KEY (`id`),
@@ -1053,27 +1189,27 @@ ALTER TABLE `empresas`
   ADD UNIQUE KEY `cnpj_2` (`cnpj`);
 
 --
--- Ãndices de tabela `estoque_movimentacao`
+-- Índices de tabela `estoque_movimentacao`
 --
 ALTER TABLE `estoque_movimentacao`
   ADD PRIMARY KEY (`id`),
   ADD KEY `produto_id` (`produto_id`);
 
 --
--- Ãndices de tabela `estoque_movimentacoes`
+-- Índices de tabela `estoque_movimentacoes`
 --
 ALTER TABLE `estoque_movimentacoes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `estoque_saldo`
+-- Índices de tabela `estoque_saldo`
 --
 ALTER TABLE `estoque_saldo`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_produto` (`id_produto`);
 
 --
--- Ãndices de tabela `feriados`
+-- Índices de tabela `feriados`
 --
 ALTER TABLE `feriados`
   ADD PRIMARY KEY (`id`),
@@ -1083,7 +1219,7 @@ ALTER TABLE `feriados`
   ADD KEY `fk_feriado_empresa` (`empresa_id`);
 
 --
--- Ãndices de tabela `fornecedores`
+-- Índices de tabela `fornecedores`
 --
 ALTER TABLE `fornecedores`
   ADD PRIMARY KEY (`id`),
@@ -1092,13 +1228,13 @@ ALTER TABLE `fornecedores`
   ADD UNIQUE KEY `cnpj` (`cnpj`);
 
 --
--- Ãndices de tabela `gabaritos`
+-- Índices de tabela `gabaritos`
 --
 ALTER TABLE `gabaritos`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `geolocation_empresa`
+-- Índices de tabela `geolocation_empresa`
 --
 ALTER TABLE `geolocation_empresa`
   ADD PRIMARY KEY (`id`),
@@ -1106,7 +1242,7 @@ ALTER TABLE `geolocation_empresa`
   ADD KEY `idx_ativo` (`ativo`);
 
 --
--- Ãndices de tabela `historico_alteracoes_ponto`
+-- Índices de tabela `historico_alteracoes_ponto`
 --
 ALTER TABLE `historico_alteracoes_ponto`
   ADD PRIMARY KEY (`id`),
@@ -1115,13 +1251,13 @@ ALTER TABLE `historico_alteracoes_ponto`
   ADD KEY `idx_criado_em` (`criado_em`);
 
 --
--- Ãndices de tabela `historico_movimentacao`
+-- Índices de tabela `historico_movimentacao`
 --
 ALTER TABLE `historico_movimentacao`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `horas_extras`
+-- Índices de tabela `horas_extras`
 --
 ALTER TABLE `horas_extras`
   ADD PRIMARY KEY (`id`),
@@ -1132,45 +1268,55 @@ ALTER TABLE `horas_extras`
   ADD KEY `idx_data_referencia` (`data_referencia`);
 
 --
--- Ãndices de tabela `notificacoes_ponto`
+-- Índices de tabela `notificacoes_ponto`
 --
 ALTER TABLE `notificacoes_ponto`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_usuario_lida` (`usuario_id`,`lida`);
+  ADD KEY `idx_usuario_lida` (`usuario_id`,`lida`),
+  ADD KEY `idx_topico` (`topico`);
 
 --
--- Ãndices de tabela `pedidos_dtf`
+-- Índices de tabela `pedidos_dtf`
 --
 ALTER TABLE `pedidos_dtf`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `pedidos_producao`
+-- Índices de tabela `pedidos_producao`
 --
 ALTER TABLE `pedidos_producao`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `produtos`
+-- Índices de tabela `produtos`
 --
 ALTER TABLE `produtos`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `sku` (`sku`);
 
 --
--- Ãndices de tabela `servicos`
+-- Índices de tabela `saldos_mensais`
+--
+ALTER TABLE `saldos_mensais`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `usuario_mes_ano` (`usuario_id`,`mes`,`ano`),
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `mes_ano` (`mes`,`ano`);
+
+--
+-- Índices de tabela `servicos`
 --
 ALTER TABLE `servicos`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `servicos_os`
+-- Índices de tabela `servicos_os`
 --
 ALTER TABLE `servicos_os`
   ADD PRIMARY KEY (`id`);
 
 --
--- Ãndices de tabela `sincronizacoes_offline`
+-- Índices de tabela `sincronizacoes_offline`
 --
 ALTER TABLE `sincronizacoes_offline`
   ADD PRIMARY KEY (`id`),
@@ -1178,11 +1324,22 @@ ALTER TABLE `sincronizacoes_offline`
   ADD KEY `idx_sincronizado_em` (`sincronizado_em`);
 
 --
--- Ãndices de tabela `usuarios`
+-- Índices de tabela `solicitacoes_alteracao_ponto`
+--
+ALTER TABLE `solicitacoes_alteracao_ponto`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_sol_usuario` (`usuario_id`),
+  ADD KEY `idx_sol_status` (`status`),
+  ADD KEY `idx_sol_data` (`data_apontamento`);
+
+--
+-- Índices de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `uk_usuarios_cpf` (`cpf`),
+  ADD UNIQUE KEY `uk_usuarios_username` (`username`);
 
 --
 -- AUTO_INCREMENT para tabelas despejadas
@@ -1192,7 +1349,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `apontamentos_ponto`
 --
 ALTER TABLE `apontamentos_ponto`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de tabela `atestados`
@@ -1222,7 +1379,19 @@ ALTER TABLE `compras`
 -- AUTO_INCREMENT de tabela `configuracao_pontos_avancado`
 --
 ALTER TABLE `configuracao_pontos_avancado`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de tabela `configuracao_ponto_usuario`
+--
+ALTER TABLE `configuracao_ponto_usuario`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de tabela `configuracoes_ponto`
+--
+ALTER TABLE `configuracoes_ponto`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de tabela `dispositivos_autorizados`
@@ -1264,7 +1433,7 @@ ALTER TABLE `estoque_saldo`
 -- AUTO_INCREMENT de tabela `feriados`
 --
 ALTER TABLE `feriados`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de tabela `fornecedores`
@@ -1288,7 +1457,7 @@ ALTER TABLE `geolocation_empresa`
 -- AUTO_INCREMENT de tabela `historico_alteracoes_ponto`
 --
 ALTER TABLE `historico_alteracoes_ponto`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de tabela `historico_movimentacao`
@@ -1312,7 +1481,7 @@ ALTER TABLE `notificacoes_ponto`
 -- AUTO_INCREMENT de tabela `pedidos_dtf`
 --
 ALTER TABLE `pedidos_dtf`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_producao`
@@ -1325,6 +1494,12 @@ ALTER TABLE `pedidos_producao`
 --
 ALTER TABLE `produtos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=392;
+
+--
+-- AUTO_INCREMENT de tabela `saldos_mensais`
+--
+ALTER TABLE `saldos_mensais`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `servicos`
@@ -1345,30 +1520,36 @@ ALTER TABLE `sincronizacoes_offline`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de tabela `solicitacoes_alteracao_ponto`
+--
+ALTER TABLE `solicitacoes_alteracao_ponto`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- RestriÃ§Ãµes para tabelas despejadas
+-- Restrições para tabelas despejadas
 --
 
 --
--- RestriÃ§Ãµes para tabelas `apontamentos_ponto`
+-- Restrições para tabelas `apontamentos_ponto`
 --
 ALTER TABLE `apontamentos_ponto`
   ADD CONSTRAINT `apontamentos_ponto_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- RestriÃ§Ãµes para tabelas `atestados`
+-- Restrições para tabelas `atestados`
 --
 ALTER TABLE `atestados`
   ADD CONSTRAINT `atestados_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `atestados_ibfk_2` FOREIGN KEY (`aprovador_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
--- RestriÃ§Ãµes para tabelas `compensacao_horas`
+-- Restrições para tabelas `compensacao_horas`
 --
 ALTER TABLE `compensacao_horas`
   ADD CONSTRAINT `fk_ch_dsr` FOREIGN KEY (`dsr_id`) REFERENCES `dsr_descansos` (`id`) ON DELETE SET NULL,
@@ -1376,50 +1557,50 @@ ALTER TABLE `compensacao_horas`
   ADD CONSTRAINT `fk_ch_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- RestriÃ§Ãµes para tabelas `configuracao_pontos_avancado`
+-- Restrições para tabelas `configuracao_pontos_avancado`
 --
 ALTER TABLE `configuracao_pontos_avancado`
   ADD CONSTRAINT `fk_config_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
--- RestriÃ§Ãµes para tabelas `dispositivos_autorizados`
+-- Restrições para tabelas `dispositivos_autorizados`
 --
 ALTER TABLE `dispositivos_autorizados`
   ADD CONSTRAINT `dispositivos_autorizados_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- RestriÃ§Ãµes para tabelas `dsr_descansos`
+-- Restrições para tabelas `dsr_descansos`
 --
 ALTER TABLE `dsr_descansos`
   ADD CONSTRAINT `fk_dsr_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- RestriÃ§Ãµes para tabelas `estoque_movimentacao`
+-- Restrições para tabelas `estoque_movimentacao`
 --
 ALTER TABLE `estoque_movimentacao`
   ADD CONSTRAINT `estoque_movimentacao_ibfk_1` FOREIGN KEY (`produto_id`) REFERENCES `produtos` (`id`) ON DELETE CASCADE;
 
 --
--- RestriÃ§Ãµes para tabelas `estoque_saldo`
+-- Restrições para tabelas `estoque_saldo`
 --
 ALTER TABLE `estoque_saldo`
   ADD CONSTRAINT `estoque_saldo_ibfk_1` FOREIGN KEY (`id_produto`) REFERENCES `produtos` (`id`);
 
 --
--- RestriÃ§Ãµes para tabelas `feriados`
+-- Restrições para tabelas `feriados`
 --
 ALTER TABLE `feriados`
   ADD CONSTRAINT `fk_feriado_empresa` FOREIGN KEY (`empresa_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL;
 
 --
--- RestriÃ§Ãµes para tabelas `historico_alteracoes_ponto`
+-- Restrições para tabelas `historico_alteracoes_ponto`
 --
 ALTER TABLE `historico_alteracoes_ponto`
   ADD CONSTRAINT `historico_alteracoes_ponto_ibfk_1` FOREIGN KEY (`apontamento_id`) REFERENCES `apontamentos_ponto` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `historico_alteracoes_ponto_ibfk_2` FOREIGN KEY (`usuario_alterador_id`) REFERENCES `usuarios` (`id`);
 
 --
--- RestriÃ§Ãµes para tabelas `horas_extras`
+-- Restrições para tabelas `horas_extras`
 --
 ALTER TABLE `horas_extras`
   ADD CONSTRAINT `fk_he_apontamento` FOREIGN KEY (`apontamento_id`) REFERENCES `apontamentos_ponto` (`id`) ON DELETE SET NULL,
@@ -1427,16 +1608,28 @@ ALTER TABLE `horas_extras`
   ADD CONSTRAINT `fk_he_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- RestriÃ§Ãµes para tabelas `notificacoes_ponto`
+-- Restrições para tabelas `notificacoes_ponto`
 --
 ALTER TABLE `notificacoes_ponto`
   ADD CONSTRAINT `fk_not_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
--- RestriÃ§Ãµes para tabelas `sincronizacoes_offline`
+-- Restrições para tabelas `saldos_mensais`
+--
+ALTER TABLE `saldos_mensais`
+  ADD CONSTRAINT `fk_saldos_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `sincronizacoes_offline`
 --
 ALTER TABLE `sincronizacoes_offline`
   ADD CONSTRAINT `sincronizacoes_offline_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `solicitacoes_alteracao_ponto`
+--
+ALTER TABLE `solicitacoes_alteracao_ponto`
+  ADD CONSTRAINT `fk_sol_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -165,6 +165,8 @@ class GabaritoController {
             $resumoTexto = "UNICA";
         }
         $jsonGrade = json_encode($gradeFinal);
+        $valorUnit = $this->normalizarDecimal($_POST['valor_unit'] ?? null);
+        $valorTotal = $this->normalizarDecimal($_POST['valor_total'] ?? null);
 
         $dados = [
             $_POST['cliente'],
@@ -176,8 +178,8 @@ class GabaritoController {
             $_POST['cor'],
             trim($resumoTexto),
             $totalQtd,
-            str_replace(',', '.', $_POST['valor_unit']),
-            str_replace(',', '.', $_POST['valor_total']),
+            $valorUnit,
+            $valorTotal,
             $_POST['data_entrega'],
             $imagemNome,
             $_POST['obs'] ?? '',
@@ -213,6 +215,25 @@ class GabaritoController {
         } else {
             header("Location: index.php?rota=imprimir_gabarito&id=$lastId");
         }
+    }
+
+    private function normalizarDecimal($valor): string {
+        $valor = trim((string)($valor ?? ''));
+
+        if ($valor === '') {
+            return '0.00';
+        }
+
+        $valor = str_replace(' ', '', $valor);
+
+        if (strpos($valor, ',') !== false && strpos($valor, '.') !== false) {
+            $valor = str_replace('.', '', $valor);
+            $valor = str_replace(',', '.', $valor);
+        } else {
+            $valor = str_replace(',', '.', $valor);
+        }
+
+        return is_numeric($valor) ? number_format((float)$valor, 2, '.', '') : '0.00';
     }
 
     /**
