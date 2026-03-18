@@ -167,26 +167,29 @@ class GabaritoController {
         $jsonGrade = json_encode($gradeFinal);
         $valorUnit = $this->normalizarDecimal($_POST['valor_unit'] ?? null);
         $valorTotal = $this->normalizarDecimal($_POST['valor_total'] ?? null);
+        $vendedorId = $this->normalizarInteiroNulo($_POST['vendedor_id'] ?? null);
+        $dataPedido = $this->normalizarDataNula($_POST['data_pedido'] ?? null);
+        $dataEntrega = $this->normalizarDataNula($_POST['data_entrega'] ?? null);
 
         $dados = [
             $_POST['cliente'],
             $_POST['numero_pedido'],
             $_POST['plataforma'],
             $_POST['contato'],
-            $_POST['data_pedido'],
+            $dataPedido,
             $_POST['modelo'],
             $_POST['cor'],
             trim($resumoTexto),
             $totalQtd,
             $valorUnit,
             $valorTotal,
-            $_POST['data_entrega'],
+            $dataEntrega,
             $imagemNome,
             $_POST['obs'] ?? '',
             $jsonGrade,
             $_POST['meio_pagamento'] ?? '',
             $comprovanteNome,
-            $_POST['vendedor_id'] ?? null
+            $vendedorId
         ];
 
         if ($id) {
@@ -234,6 +237,16 @@ class GabaritoController {
         }
 
         return is_numeric($valor) ? number_format((float)$valor, 2, '.', '') : '0.00';
+    }
+
+    private function normalizarInteiroNulo($valor): ?int {
+        $valor = trim((string)($valor ?? ''));
+        return ($valor === '' || !is_numeric($valor)) ? null : (int)$valor;
+    }
+
+    private function normalizarDataNula($valor): ?string {
+        $valor = trim((string)($valor ?? ''));
+        return $valor === '' ? null : $valor;
     }
 
     /**
