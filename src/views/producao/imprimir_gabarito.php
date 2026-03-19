@@ -42,6 +42,17 @@
             background: #f9f9f9;
             width: 14cm;
             height: 14cm;
+            overflow: hidden;
+        }
+
+        .box-imagem img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+            border: none;
+            background: #fff;
         }
 
         .aviso { font-weight: bold; background: #eee; padding: 5px; border: 1px solid #000; margin-top: 5px; font-size: 9px; }
@@ -162,7 +173,7 @@
                     <iframe src="<?= $arquivo ?>#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="100%" style="border:none;" loading="lazy"></iframe>
                 <?php else: ?>
                     <?php $img_url = ImageOptimizer::getOptimizedImageUrl($ficha['imagem_mockup'], 530, 530); ?>
-                    <img src="<?= $img_url ?: $arquivo ?>" style="width:100%; height:100%; object-fit: cover; display: block; border:none;" loading="lazy">
+                    <img src="<?= $img_url ?: $arquivo ?>" loading="lazy">
                 <?php endif; ?>
 
             <?php else: ?>
@@ -201,7 +212,7 @@
                 <iframe src="<?= $arquivoComp ?>" width="100%" height="100%" style="border:none;" loading="lazy"></iframe>
             <?php else: ?>
                 <?php $img_comp_url = ImageOptimizer::getOptimizedImageUrl($ficha['caminho_comprovante'], 800, 800); ?>
-                <img src="<?= $img_comp_url ?: $arquivoComp ?>" style="width:100%; height:100%; object-fit: cover; display: block;" loading="lazy">
+                <img src="<?= $img_comp_url ?: $arquivoComp ?>" loading="lazy">
             <?php endif; ?>
         </div>
     </div>
