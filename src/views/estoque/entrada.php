@@ -7,7 +7,9 @@
     <div style="background: var(--bg-surface-2); padding: 25px; border-radius: 8px; border: 1px solid #444; margin-top: 20px;">
         
         <form action="index.php?rota=salvar_estoque" method="POST">
+            <input type="hidden" name="csrf_estoque_mov" value="<?= htmlspecialchars($_SESSION['csrf_estoque_mov'] ?? '') ?>">
             
+            <input type="hidden" name="produto_id" id="inputProdutoId">
             <input type="hidden" name="produto" id="inputProduto">
             <input type="hidden" name="tamanho" id="inputTamanho">
             <input type="hidden" name="cor" id="inputCor">
@@ -20,7 +22,7 @@
                         <option value="">-- Escolha um item --</option>
                         <?php if (!empty($listaProdutos)): ?>
                             <?php foreach ($listaProdutos as $prod): ?>
-                                <option value="<?= $prod['nome'] ?>|<?= $prod['tamanho'] ?>|<?= $prod['cor'] ?>">
+                                <option value="<?= (int)($prod['id'] ?? 0) ?>|<?= htmlspecialchars($prod['nome']) ?>|<?= htmlspecialchars($prod['tamanho']) ?>|<?= htmlspecialchars($prod['cor']) ?>">
                                     [<?= $prod['sku'] ?? 'S/N' ?>] <?= $prod['nome'] ?> - <?= $prod['cor'] ?> (<?= $prod['tamanho'] ?>)
                                 </option>
                             <?php endforeach; ?>
@@ -69,9 +71,10 @@ function atualizarCampos() {
     var valor = select.value; 
     if(valor) {
         var partes = valor.split('|');
-        document.getElementById('inputProduto').value = partes[0];
-        document.getElementById('inputTamanho').value = partes[1];
-        document.getElementById('inputCor').value = partes[2];
+        document.getElementById('inputProdutoId').value = partes[0] || '';
+        document.getElementById('inputProduto').value = partes[1] || '';
+        document.getElementById('inputTamanho').value = partes[2] || '';
+        document.getElementById('inputCor').value = partes[3] || '';
     }
 }
 </script>

@@ -13,7 +13,7 @@
             <p style="color:#888; font-size:13px;">Inventário completo, incluindo itens sem saldo.</p>
         </div>
         <div style="display:flex; gap:10px;">
-            <a href="index.php?rota=tela_entrada" class="btn-green" style="text-decoration:none;">+ Nova Movimentação</a>
+            <a href="index.php?rota=entrada" class="btn-green" style="text-decoration:none;">+ Nova Movimentação</a>
             <a href="index.php?rota=estoque_historico" class="btn-blue" style="text-decoration:none;">Ver Histórico</a>
         </div>
     </div>

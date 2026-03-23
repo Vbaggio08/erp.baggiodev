@@ -99,12 +99,18 @@ class ProdutoController {
             exit;
         }
 
-        $id = $_GET['id'] ?? null;
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         
         if ($id) {
             Produto::excluir($id); // Chama o Soft Delete
         }
 
-        header('Location: index.php?rota=produtos');
+        $redirect = $_GET['redirect'] ?? '';
+        if ($redirect === 'criar_produto') {
+            header('Location: index.php?rota=criar_produto');
+        } else {
+            header('Location: index.php?rota=produtos');
+        }
+        exit;
     }
 }

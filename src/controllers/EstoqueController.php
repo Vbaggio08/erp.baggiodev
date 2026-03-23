@@ -16,6 +16,9 @@ class EstoqueController {
 
     public function telaEntrada() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        if (empty($_SESSION['csrf_estoque_mov'])) {
+            $_SESSION['csrf_estoque_mov'] = bin2hex(random_bytes(32));
+        }
         $listaProdutos = Produto::listarTodos();
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/estoque/entrada.php';
@@ -26,8 +29,20 @@ class EstoqueController {
     public function salvarEntrada() {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        $tipoFormulario = $_POST['tipo'];
-        $obs = $_POST['observacao'];
+        $csrfForm = (string)($_POST['csrf_estoque_mov'] ?? '');
+        $csrfSessao = (string)($_SESSION['csrf_estoque_mov'] ?? '');
+        if ($csrfForm === '' || $csrfSessao === '' || !hash_equals($csrfSessao, $csrfForm)) {
+            echo "<script>alert('Erro de seguranca (CSRF). Recarregue a tela e tente novamente.'); window.history.back();</script>";
+            exit;
+        }
+
+        $tipoFormulario = trim((string)($_POST['tipo'] ?? ''));
+        $obs = trim((string)($_POST['observacao'] ?? ''));
+
+        if (!in_array($tipoFormulario, ['entrada', 'saida', 'perda'], true)) {
+            echo "<script>alert('Erro: Tipo de movimentacao invalido!'); window.history.back();</script>";
+            exit;
+        }
 
         // LÓGICA INTELIGENTE:
         // Se o usuário escolheu "perda", a gente converte para "saida" no banco
@@ -41,16 +56,18 @@ class EstoqueController {
 
         $dados = [
             'tipo'       => $tipoBanco, // Grava como saida ou entrada
-            'produto'    => $_POST['produto'],
-            'tamanho'    => $_POST['tamanho'],
-            'cor'        => $_POST['cor'],
+            'produto_id' => (int)($_POST['produto_id'] ?? 0),
+            'produto'    => trim((string)($_POST['produto'] ?? '')),
+            'tamanho'    => trim((string)($_POST['tamanho'] ?? '')),
+            'cor'        => trim((string)($_POST['cor'] ?? '')),
             'quantidade' => (int)$_POST['quantidade'],
             'observacao' => $obs,
-            'usuario'    => $_SESSION['user_name'] ?? 'Admin'
+            'usuario'    => $_SESSION['user_name'] ?? 'Admin',
+            'usuario_id' => (int)($_SESSION['user_id'] ?? 0)
         ];
 
         // Validação
-        if (empty($dados['produto']) || empty($dados['quantidade'])) {
+        if (empty($dados['produto']) || empty($dados['tamanho']) || empty($dados['cor']) || empty($dados['quantidade'])) {
              echo "<script>alert('Erro: Preencha todos os campos!'); window.history.back();</script>";
              exit;
         }
@@ -59,7 +76,9 @@ class EstoqueController {
         if (Estoque::registrarMovimento($dados)) {
             header('Location: index.php?rota=estoque_historico');
         } else {
-            echo "<script>alert('Erro ao salvar!'); window.history.back();</script>";
+            $erro = Estoque::getUltimoErro();
+            $mensagem = $erro !== '' ? $erro : 'Erro ao salvar!';
+            echo "<script>alert('" . addslashes($mensagem) . "'); window.history.back();</script>";
         }
     }
 

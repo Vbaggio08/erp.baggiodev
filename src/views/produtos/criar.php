@@ -122,6 +122,7 @@ function marcarGrade(tipo) {
                         <tr>
                             <th style="padding:10px; text-align:left; border-bottom:1px solid #555;">Produto</th>
                             <th style="padding:10px; text-align:center; border-bottom:1px solid #555;">Tam / Cor</th>
+                            <th style="padding:10px; text-align:center; border-bottom:1px solid #555;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,11 +137,17 @@ function marcarGrade(tipo) {
                                     <?= htmlspecialchars($p['tamanho'] ?? 'UN') ?> <br> 
                                     <?= htmlspecialchars($p['cor'] ?? '-') ?>
                                 </td>
+                                <td style="padding:10px; text-align:center;">
+                                    <a href="index.php?rota=excluir_produto&id=<?= (int)$p['id'] ?>&redirect=criar_produto"
+                                       style="color:#e74c3c; font-size:16px; text-decoration:none;"
+                                       title="Excluir este item"
+                                       onclick="return confirm('Excluir somente este item (<?= htmlspecialchars(addslashes($p['nome'] ?? '')) ?> - <?= htmlspecialchars($p['tamanho'] ?? '') ?> / <?= htmlspecialchars($p['cor'] ?? '') ?>)?')">🗑️</a>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="2" style="text-align:center; padding:30px; color:#666;">
+                                <td colspan="3" style="text-align:center; padding:30px; color:#666;">
                                     Nenhum produto cadastrado ainda.
                                 </td>
                             </tr>
