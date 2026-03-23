@@ -115,7 +115,7 @@
 
                                 <?php if(isset($_SESSION['user_nivel']) && $_SESSION['user_nivel'] === 'admin'): ?>
                                     <a href="index.php?rota=excluir_gabarito&id=<?= $f['id'] ?>" 
-                                       onclick="return confirm('Excluir este pedido?')" 
+                                       onclick="return confirm('Excluir somente este item?')" 
                                        style="color:#e74c3c;">
                                         <span class="material-icons" style="font-size:20px;">delete</span>
                                     </a>

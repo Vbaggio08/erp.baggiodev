@@ -357,7 +357,7 @@ class GabaritoController {
         require __DIR__ . '/../views/producao/imprimir_gabarito.php';
     }
 
-    // 6. EXCLUIR PEDIDO COMPLETO
+    // 6. EXCLUIR APENAS O ITEM SELECIONADO
     public function excluir() {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
@@ -366,20 +366,14 @@ class GabaritoController {
             exit;
         }
 
-        $id = $_GET['id'] ?? null;
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         if ($id) {
             $pdo = Database::getConnection();
-            $stmt = $pdo->prepare("SELECT numero_pedido FROM gabaritos WHERE id = ?");
-            $stmt->execute([$id]);
-            $numeroPedido = $stmt->fetchColumn();
-
-            if ($numeroPedido) {
-                $pdo->prepare("DELETE FROM gabaritos WHERE numero_pedido = ?")->execute([$numeroPedido]);
-            } else {
-                $pdo->prepare("DELETE FROM gabaritos WHERE id = ?")->execute([$id]);
-            }
+            $pdo->prepare("DELETE FROM gabaritos WHERE id = ?")->execute([$id]);
         }
+
         header('Location: index.php?rota=listar_gabaritos');
+        exit;
     }
 
     // 7. MUDAR STATUS
