@@ -209,10 +209,21 @@
                     <?php endif; ?>
                 </div>
 
+                <?php if(isset($ficha['id']) && isset($_SESSION['user_nivel']) && $_SESSION['user_nivel'] === 'admin'): ?>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                    <button type="submit" name="acao" value="continuar" class="btn-blue" style="padding:15px; font-weight:bold;">💾 Atualizar e Próximo Item</button>
+                    <button type="submit" name="acao" value="finalizar" class="btn-green" style="padding:15px; font-weight:bold;">✅ Atualizar e Sair</button>
+                    <a href="index.php?rota=excluir_gabarito&id=<?= (int)$ficha['id'] ?>"
+                       class="btn-red"
+                       style="padding:15px; font-weight:bold; text-decoration:none; display:flex; align-items:center; justify-content:center;"
+                       onclick="return confirm('Excluir somente este item?')">🗑️ Apagar Item</a>
+                </div>
+                <?php else: ?>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
                     <button type="submit" name="acao" value="continuar" class="btn-blue" style="padding:15px; font-weight:bold;">💾 Atualizar e Próximo Item</button>
                     <button type="submit" name="acao" value="finalizar" class="btn-green" style="padding:15px; font-weight:bold;">✅ Atualizar e Sair</button>
                 </div>
+                <?php endif; ?>
             </form>
         </div>
     </div>
