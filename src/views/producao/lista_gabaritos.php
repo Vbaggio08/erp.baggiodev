@@ -3,8 +3,11 @@
         padding: 6px 10px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; color: #fff; text-align: center; width: 100%; max-width: 140px; font-size: 11px; appearance: none; text-align-last: center; transition: 0.2s;
     }
     .status-Mockup { background-color: #7f8c8d; }
+    .status-FilaDeImpressão { background-color: #e74c3c; }
     .status-Impresso { background-color: #3498db; }
+    .status-FilaDeEstampa { background-color: #e67e22; }
     .status-Estampado { background-color: #9b59b6; }
+    .status-EsperandoColeta { background-color: #f39c12; }
     .status-Enviado { background-color: #2ecc71; }
     .status-select:hover { opacity: 0.9; transform: scale(1.02); }
 </style>
@@ -97,8 +100,11 @@
                             <select class="status-select status-<?= $classeStatus ?>" 
                                     onchange="mudarStatusFicha(this, <?= $f['id'] ?>)">
                                 <option value="Mockup" <?= ($f['status'] ?? '') == 'Mockup' ? 'selected' : '' ?>>🖼️ Mockup</option>
+                                <option value="FilaDeImpressão" <?= ($f['status'] ?? '') == 'FilaDeImpressão' ? 'selected' : '' ?>>🔴 Fila Impressão</option>
                                 <option value="Impresso" <?= ($f['status'] ?? '') == 'Impresso' ? 'selected' : '' ?>>🖨️ Impresso</option>
+                                <option value="FilaDeEstampa" <?= ($f['status'] ?? '') == 'FilaDeEstampa' ? 'selected' : '' ?>>🟠 Fila Estampa</option>
                                 <option value="Estampado" <?= ($f['status'] ?? '') == 'Estampado' ? 'selected' : '' ?>>👕 Estampado</option>
+                                <option value="EsperandoColeta" <?= ($f['status'] ?? '') == 'EsperandoColeta' ? 'selected' : '' ?>>🟡 Aguardando Coleta</option>
                                 <option value="Enviado" <?= ($f['status'] ?? '') == 'Enviado' ? 'selected' : '' ?>>🚀 Enviado</option>
                             </select>
                         </td>

@@ -18,6 +18,10 @@ class PedidoController {
         if (!$this->colunaExiste('pedidos_dtf', 'meio_pagamento')) {
             $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN meio_pagamento VARCHAR(50) NULL AFTER observacoes");
         }
+
+        if (!$this->colunaExiste('pedidos_dtf', 'status')) {
+            $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN status VARCHAR(50) DEFAULT 'Mockup' AFTER data_criacao");
+        }
     }
     
     // Lista a Fila de Produção
@@ -264,6 +268,28 @@ class PedidoController {
         if (!empty($id)) {
             $stmt = Database::getConnection()->prepare("DELETE FROM pedidos_dtf WHERE id = ?");
             $stmt->execute([$id]);
+        }
+
+        header('Location: index.php?rota=ver_producao_dtf');
+        exit;
+    }
+
+    public function mudar_status_dtf() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        $status = $_GET['status'] ?? null;
+
+        if ($id && $status) {
+            $this->garantirEstruturaPedidosDtf();
+            $pdo = Database::getConnection();
+            $stmt = $pdo->prepare("UPDATE pedidos_dtf SET status = ? WHERE id = ?");
+            $stmt->execute([$status, $id]);
         }
 
         header('Location: index.php?rota=ver_producao_dtf');

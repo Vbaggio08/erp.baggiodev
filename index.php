@@ -208,6 +208,11 @@ switch ($rota) {
         (new PedidoController())->excluir_dtf();
         break;
 
+    case 'mudar_status_dtf':
+        require_once 'src/controllers/PedidoController.php';
+        (new PedidoController())->mudar_status_dtf();
+        break;
+
 
     // --- 🛒 COMPRAS (NOVAS ROTAS) ---
     case 'compras':
