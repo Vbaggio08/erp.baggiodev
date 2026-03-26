@@ -50,6 +50,9 @@
                         
                         <td style="padding:12px;">
                             <strong style="color:#e6b800;">#<?= htmlspecialchars($f['numero_pedido'] ?? $f['id'] ?? '') ?></strong>
+                            <?php if (!empty($f['pedido_site'])): ?>
+                                <br><small style="color:#777;">Site: <?= htmlspecialchars($f['pedido_site']) ?></small>
+                            <?php endif; ?>
                         </td>
 
                         <td style="padding:12px;">
@@ -87,7 +90,12 @@
 
                         <td style="padding:12px;">
                             <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="color: #aaa;"><?= htmlspecialchars($f['meio_pagamento'] ?? '') ?></span>
+                                <span style="color: #aaa;">
+                                    <?= htmlspecialchars($f['meio_pagamento'] ?? '') ?>
+                                    <?php if (!empty($f['pedido_site'])): ?>
+                                        <br><small style="color:#777;">Pedido Site: <?= htmlspecialchars($f['pedido_site']) ?></small>
+                                    <?php endif; ?>
+                                </span>
                                 <?php if (!empty($f['caminho_comprovante'])): ?>
                                     <a href="assets/uploads/comprovantes/<?= $f['caminho_comprovante'] ?>" target="_blank" title="Ver Comprovante" style="color:#2ecc71;">
                                         <span class="material-icons" style="font-size:18px;">receipt_long</span>

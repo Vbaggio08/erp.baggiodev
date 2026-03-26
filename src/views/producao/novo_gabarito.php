@@ -4,6 +4,8 @@
     $tel = $_GET['contato'] ?? ($ficha['contato'] ?? '');
     $num = $_GET['numero_pedido'] ?? ($num ?? ($ficha['numero_pedido'] ?? '01'));
     $plat = $_GET['plataforma'] ?? ($ficha['plataforma'] ?? '');
+    $meioPg = $_GET['meio_pagamento'] ?? ($ficha['meio_pagamento'] ?? '');
+    $pedidoSite = $_GET['pedido_site'] ?? ($ficha['pedido_site'] ?? '');
     $dtPed = $_GET['data_pedido'] ?? ($ficha['data_pedido'] ?? date('Y-m-d'));
     $dtEnt = $_GET['data_entrega'] ?? ($ficha['data_entrega'] ?? '');
 ?>
@@ -44,7 +46,7 @@
             </div>
 
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
-                <a href="index.php?rota=novo_gabarito&cliente=<?= urlencode($cli) ?>&numero_pedido=<?= urlencode($num) ?>&contato=<?= urlencode($tel) ?>&plataforma=<?= urlencode($plat) ?>&data_pedido=<?= urlencode($dtPed) ?>&data_entrega=<?= urlencode($dtEnt) ?>" 
+                <a href="index.php?rota=novo_gabarito&cliente=<?= urlencode($cli) ?>&numero_pedido=<?= urlencode($num) ?>&contato=<?= urlencode($tel) ?>&plataforma=<?= urlencode($plat) ?>&meio_pagamento=<?= urlencode($meioPg) ?>&pedido_site=<?= urlencode($pedidoSite) ?>&data_pedido=<?= urlencode($dtPed) ?>&data_entrega=<?= urlencode($dtEnt) ?>" 
                    class="btn-green" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; padding: 10px; background: #2ecc71;">
                     <span class="material-icons" style="font-size: 16px;">add_circle</span> Novo Item neste Pedido
                 </a>
@@ -179,17 +181,25 @@
                     <textarea name="obs" style="width:100%; height:80px; background:#222; border:1px solid #555; color:#fff; padding:10px;"><?= htmlspecialchars($ficha['observacoes'] ?? '') ?></textarea>
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px; padding: 20px; background: #222; border: 1px solid #555; border-radius: 6px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-bottom:20px; padding: 20px; background: #222; border: 1px solid #555; border-radius: 6px;">
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Meio de Pagamento</label>
                         <select name="meio_pagamento" style="width:100%; padding:10px; background:#111; border:1px solid #555; color:#fff;">
                             <option value="">-- Selecione --</option>
-                            <option value="Pix" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Pix') ? 'selected' : '' ?>>Pix</option>
-                            <option value="Débito" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Débito') ? 'selected' : '' ?>>Cartão de Débito</option>
-                            <option value="Crédito" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Crédito') ? 'selected' : '' ?>>Cartão de Crédito</option>
-                            <option value="Dinheiro" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Dinheiro') ? 'selected' : '' ?>>Dinheiro</option>
-                            <option value="Pago em Loja" <?= (isset($ficha['meio_pagamento']) && $ficha['meio_pagamento'] == 'Pago em Loja') ? 'selected' : '' ?>>Pago em Loja</option>
+                            <option value="Pix" <?= $meioPg == 'Pix' ? 'selected' : '' ?>>Pix</option>
+                            <option value="Site" <?= $meioPg == 'Site' ? 'selected' : '' ?>>Site</option>
+                            <option value="Débito" <?= ($meioPg == 'Débito' || $meioPg == 'Debito') ? 'selected' : '' ?>>Cartão de Débito</option>
+                            <option value="Crédito" <?= ($meioPg == 'Crédito' || $meioPg == 'Credito') ? 'selected' : '' ?>>Cartão de Crédito</option>
+                            <option value="Dinheiro" <?= $meioPg == 'Dinheiro' ? 'selected' : '' ?>>Dinheiro</option>
+                            <option value="Pago em Loja" <?= $meioPg == 'Pago em Loja' ? 'selected' : '' ?>>Pago em Loja</option>
+                            <?php if (!empty($meioPg) && !in_array($meioPg, ['Pix', 'Site', 'Débito', 'Debito', 'Crédito', 'Credito', 'Dinheiro', 'Pago em Loja'], true)): ?>
+                                <option value="<?= htmlspecialchars($meioPg) ?>" selected><?= htmlspecialchars($meioPg) ?></option>
+                            <?php endif; ?>
                         </select>
+                    </div>
+                    <div>
+                        <label style="display:block; color:#aaa; margin-bottom:5px;">Nº Pedido do Site</label>
+                        <input type="text" name="pedido_site" value="<?= htmlspecialchars($pedidoSite) ?>" placeholder="Ex: SHP123456" style="width:100%; padding:10px; background:#111; border:1px solid #555; color:#fff;">
                     </div>
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Anexar Comprovante</label>

@@ -5,9 +5,23 @@ require_once __DIR__ . '/../models/Gabarito.php';
 
 class GabaritoController {
 
+    private function colunaExiste(string $tabela, string $coluna): bool {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->query("SHOW COLUMNS FROM {$tabela} LIKE '" . addslashes($coluna) . "'");
+        return (bool) ($stmt && $stmt->fetch(PDO::FETCH_ASSOC));
+    }
+
+    private function garantirEstruturaGabaritos(): void {
+        $pdo = Database::getConnection();
+        if (!$this->colunaExiste('gabaritos', 'pedido_site')) {
+            $pdo->exec("ALTER TABLE gabaritos ADD COLUMN pedido_site VARCHAR(100) NULL AFTER meio_pagamento");
+        }
+    }
+
     // 1. LISTAR GABARITOS (Agrupados)
     public function listar() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        $this->garantirEstruturaGabaritos();
         $pdo = Database::getConnection();
         
         $sql = "SELECT 
@@ -30,6 +44,7 @@ class GabaritoController {
     // 2. NOVO GABARITO (Com Numeração Automática 01, 02...)
     public function novo() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        $this->garantirEstruturaGabaritos();
         $pdo = Database::getConnection();
         
         if (!isset($_GET['numero_pedido'])) {
@@ -69,6 +84,7 @@ class GabaritoController {
     // 3. EDITAR GABARITO (Com Barra Lateral de Itens)
     public function editar() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        $this->garantirEstruturaGabaritos();
         $pdo = Database::getConnection();
         $id = $_GET['id'];
         
@@ -111,6 +127,7 @@ class GabaritoController {
     // 4. SALVAR GABARITO
     public function salvar() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        $this->garantirEstruturaGabaritos();
         $pdo = Database::getConnection();
 
         $id = $_POST['id'] ?? null;
@@ -172,6 +189,8 @@ class GabaritoController {
         $dataEntrega = $this->normalizarDataNula($_POST['data_entrega'] ?? null);
         $numeroPedido = trim((string)($_POST['numero_pedido'] ?? ''));
         $plataforma = trim((string)($_POST['plataforma'] ?? ''));
+        $meioPagamento = trim((string)($_POST['meio_pagamento'] ?? ''));
+        $pedidoSite = trim((string)($_POST['pedido_site'] ?? ''));
 
         $dados = [
             $_POST['cliente'],
@@ -189,18 +208,19 @@ class GabaritoController {
             $imagemNome,
             $_POST['obs'] ?? '',
             $jsonGrade,
-            $_POST['meio_pagamento'] ?? '',
+            $meioPagamento,
+            $pedidoSite,
             $comprovanteNome,
             $vendedorId
         ];
 
         if ($id) {
-            $sql = "UPDATE gabaritos SET cliente=?, numero_pedido=?, plataforma=?, contato=?, data_pedido=?, modelo=?, cor=?, tamanho=?, quantidade=?, valor_unit=?, valor_total=?, data_entrega=?, imagem_mockup=?, observacoes=?, itens_json=?, meio_pagamento=?, caminho_comprovante=?, vendedor_id=? WHERE id=?";
+            $sql = "UPDATE gabaritos SET cliente=?, numero_pedido=?, plataforma=?, contato=?, data_pedido=?, modelo=?, cor=?, tamanho=?, quantidade=?, valor_unit=?, valor_total=?, data_entrega=?, imagem_mockup=?, observacoes=?, itens_json=?, meio_pagamento=?, pedido_site=?, caminho_comprovante=?, vendedor_id=? WHERE id=?";
             $dados[] = $id;
             $pdo->prepare($sql)->execute($dados);
             $lastId = $id;
         } else {
-            $sql = "INSERT INTO gabaritos (cliente, numero_pedido, plataforma, contato, data_pedido, modelo, cor, tamanho, quantidade, valor_unit, valor_total, data_entrega, imagem_mockup, observacoes, itens_json, meio_pagamento, caminho_comprovante, vendedor_id, data_criacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Mockup')";
+            $sql = "INSERT INTO gabaritos (cliente, numero_pedido, plataforma, contato, data_pedido, modelo, cor, tamanho, quantidade, valor_unit, valor_total, data_entrega, imagem_mockup, observacoes, itens_json, meio_pagamento, pedido_site, caminho_comprovante, vendedor_id, data_criacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Mockup')";
             $stmt = $pdo->prepare($sql);
             $stmt->execute($dados);
             $lastId = $pdo->lastInsertId();
@@ -212,12 +232,20 @@ class GabaritoController {
             $stmt->execute([$plataforma, $numeroPedido]);
         }
 
+        // Mantem o meio de pagamento igual em todas as folhas do mesmo pedido.
+        if ($numeroPedido !== '') {
+            $stmt = $pdo->prepare("UPDATE gabaritos SET meio_pagamento = ?, pedido_site = ? WHERE numero_pedido = ?");
+            $stmt->execute([$meioPagamento, $pedidoSite, $numeroPedido]);
+        }
+
         if ($acao === 'continuar') {
             $params = http_build_query([
                 'cliente' => $_POST['cliente'],
                 'contato' => $_POST['contato'],
                 'numero_pedido' => $numeroPedido,
                 'plataforma' => $plataforma,
+                'meio_pagamento' => $meioPagamento,
+                'pedido_site' => $pedidoSite,
                 'data_pedido' => $_POST['data_pedido'],
                 'data_entrega' => $_POST['data_entrega'],
                 'msg' => 'item_adicionado'
@@ -339,6 +367,7 @@ class GabaritoController {
     // 5. IMPRIMIR (A que estava faltando!)
     public function imprimir() {
         if (session_status() === PHP_SESSION_NONE) session_start();
+        $this->garantirEstruturaGabaritos();
         $pdo = Database::getConnection();
         $id = $_GET['id'];
         
