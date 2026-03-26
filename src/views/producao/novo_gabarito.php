@@ -73,10 +73,13 @@
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Plataforma</label>
                         <select name="plataforma" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
-                            <option value="WhatsApp" <?= $plat == 'WhatsApp' ? 'selected' : '' ?>>WhatsApp</option>
-                            <option value="Balcão" <?= $plat == 'Balcão' ? 'selected' : '' ?>>Balcão / Loja</option>
-                            <option value="Instagram" <?= $plat == 'Instagram' ? 'selected' : '' ?>>Instagram</option>
-                            <option value="Mercado Livre" <?= $plat == 'Mercado Livre' ? 'selected' : '' ?>>Mercado Livre</option>
+                            <option value="WhatsApp" <?= $plat == 'WhatsApp' ? 'selected' : '' ?>>WhatsApp (WPP)</option>
+                            <option value="Site Proprio" <?= $plat == 'Site Proprio' ? 'selected' : '' ?>>Site Próprio</option>
+                            <option value="Balcao/Loja Fisica" <?= $plat == 'Balcao/Loja Fisica' ? 'selected' : '' ?>>Balcão / Loja Física</option>
+                            <option value="Shopee" <?= $plat == 'Shopee' ? 'selected' : '' ?>>Shopee</option>
+                            <?php if (!empty($plat) && !in_array($plat, ['WhatsApp', 'Site Proprio', 'Balcao/Loja Fisica', 'Shopee'], true)): ?>
+                                <option value="<?= htmlspecialchars($plat) ?>" selected><?= htmlspecialchars($plat) ?></option>
+                            <?php endif; ?>
                         </select>
                     </div>
                     <div>

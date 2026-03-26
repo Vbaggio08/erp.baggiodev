@@ -170,11 +170,13 @@ class GabaritoController {
         $vendedorId = $this->normalizarInteiroNulo($_POST['vendedor_id'] ?? null);
         $dataPedido = $this->normalizarDataNula($_POST['data_pedido'] ?? null);
         $dataEntrega = $this->normalizarDataNula($_POST['data_entrega'] ?? null);
+        $numeroPedido = trim((string)($_POST['numero_pedido'] ?? ''));
+        $plataforma = trim((string)($_POST['plataforma'] ?? ''));
 
         $dados = [
             $_POST['cliente'],
-            $_POST['numero_pedido'],
-            $_POST['plataforma'],
+            $numeroPedido,
+            $plataforma,
             $_POST['contato'],
             $dataPedido,
             $_POST['modelo'],
@@ -204,12 +206,18 @@ class GabaritoController {
             $lastId = $pdo->lastInsertId();
         }
 
+        // Mantem o canal de venda igual em todas as folhas do mesmo pedido.
+        if ($numeroPedido !== '' && $plataforma !== '') {
+            $stmt = $pdo->prepare("UPDATE gabaritos SET plataforma = ? WHERE numero_pedido = ?");
+            $stmt->execute([$plataforma, $numeroPedido]);
+        }
+
         if ($acao === 'continuar') {
             $params = http_build_query([
                 'cliente' => $_POST['cliente'],
                 'contato' => $_POST['contato'],
-                'numero_pedido' => $_POST['numero_pedido'],
-                'plataforma' => $_POST['plataforma'],
+                'numero_pedido' => $numeroPedido,
+                'plataforma' => $plataforma,
                 'data_pedido' => $_POST['data_pedido'],
                 'data_entrega' => $_POST['data_entrega'],
                 'msg' => 'item_adicionado'
