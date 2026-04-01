@@ -6,8 +6,23 @@ class ProdutoController {
 
     public function index() {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        // Chama o método estático do Model
-        $produtos = Produto::listarTodos();
+
+        $filtro = trim((string)($_GET['filtro'] ?? ''));
+        $paginaAtual = filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT);
+        $paginaAtual = ($paginaAtual && $paginaAtual > 0) ? $paginaAtual : 1;
+        $itensPorPagina = 25;
+        $offset = ($paginaAtual - 1) * $itensPorPagina;
+
+        $totalItens = Produto::contarAtivos($filtro);
+        $totalPaginas = max(1, (int) ceil($totalItens / $itensPorPagina));
+
+        if ($paginaAtual > $totalPaginas) {
+            $paginaAtual = $totalPaginas;
+            $offset = ($paginaAtual - 1) * $itensPorPagina;
+        }
+
+        $produtos = Produto::listarPaginado($filtro, $itensPorPagina, $offset);
+
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/produtos/listar.php';
         require __DIR__ . '/../views/geral/footer.php';
