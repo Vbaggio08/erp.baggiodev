@@ -125,6 +125,9 @@
                             <?php foreach($modelos_unicos as $modelo): ?>
                                 <option value="<?= htmlspecialchars($modelo) ?>" <?= (isset($ficha['modelo']) && $ficha['modelo'] == $modelo) ? 'selected' : '' ?>><?= htmlspecialchars($modelo) ?></option>
                             <?php endforeach; ?>
+                            <?php if (!empty($ficha['modelo']) && !in_array($ficha['modelo'], $modelos_unicos, true)): ?>
+                                <option value="<?= htmlspecialchars($ficha['modelo']) ?>" selected><?= htmlspecialchars($ficha['modelo']) ?> (modelo antigo)</option>
+                            <?php endif; ?>
                         </select>
                     </div>
                     <div>

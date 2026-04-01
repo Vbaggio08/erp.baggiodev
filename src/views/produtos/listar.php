@@ -21,6 +21,7 @@
         <table style="width:100%; border-collapse: collapse; color:#ddd;">
             <thead>
                 <tr style="background:#222; text-align:left;">
+                    <th style="padding:10px; width:60px;">#</th>
                     <th style="padding:10px;">SKU</th>
                     <th style="padding:10px;">Nome</th>
                     <th style="padding:10px;">Tam</th>
@@ -31,8 +32,10 @@
             </thead>
             <tbody>
                 <?php if (!empty($produtos)): ?>
+                    <?php $numeroLinha = (int)($offset ?? 0) + 1; ?>
                     <?php foreach($produtos as $prod): ?>
                     <tr style="border-bottom:1px solid #333;">
+                        <td style="padding:10px; color:#888;"><?= $numeroLinha ?></td>
                         <td style="padding:10px; color:#aaa; font-size:12px;"><?= htmlspecialchars($prod['sku']) ?></td>
                         <td style="padding:10px; font-weight:bold;"><?= htmlspecialchars($prod['nome']) ?></td>
                         <td style="padding:10px;"><?= htmlspecialchars($prod['tamanho']) ?></td>
@@ -42,14 +45,19 @@
                             <a href="index.php?rota=excluir_produto&id=<?= (int)$prod['id'] ?>" style="color:#e74c3c; text-decoration:none;" onclick="return confirm('Desativar este produto?')">🗑️</a>
                         </td>
                     </tr>
+                    <?php $numeroLinha++; ?>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="6" style="padding:20px; text-align:center; color:#888;">Nenhum produto encontrado.</td>
+                        <td colspan="7" style="padding:20px; text-align:center; color:#888;">Nenhum produto encontrado.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
+
+        <div style="margin-top:12px; color:#aaa; font-size:13px; text-align:right;">
+            Total de itens: <strong style="color:#fff;"><?= (int)($totalItens ?? 0) ?></strong>
+        </div>
 
         <?php if (($totalPaginas ?? 1) > 1): ?>
             <div style="display:flex; justify-content:center; gap:8px; margin-top:16px; flex-wrap:wrap;">

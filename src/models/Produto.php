@@ -18,8 +18,16 @@ class Produto {
         $params = [];
 
         if ($filtro !== '') {
-            $where .= " AND (nome LIKE :filtro OR sku LIKE :filtro OR tamanho LIKE :filtro OR cor LIKE :filtro)";
-            $params[':filtro'] = '%' . $filtro . '%';
+            $filtroUpper = mb_strtoupper($filtro, 'UTF-8');
+            $filtroSku = str_replace(['-', ' ', '_', '.'], '', $filtroUpper);
+
+            $where .= " AND (UPPER(nome) LIKE :filtro_like
+                        OR UPPER(tamanho) LIKE :filtro_like
+                        OR UPPER(cor) LIKE :filtro_like
+                        OR UPPER(sku) LIKE :filtro_like
+                        OR REPLACE(REPLACE(REPLACE(REPLACE(UPPER(sku), '-', ''), ' ', ''), '_', ''), '.', '') LIKE :filtro_sku)";
+            $params[':filtro_like'] = '%' . $filtroUpper . '%';
+            $params[':filtro_sku'] = '%' . $filtroSku . '%';
         }
 
         $sql = "SELECT * FROM produtos {$where} ORDER BY nome ASC, tamanho ASC LIMIT :limite OFFSET :offset";
@@ -43,8 +51,16 @@ class Produto {
         $params = [];
 
         if ($filtro !== '') {
-            $where .= " AND (nome LIKE :filtro OR sku LIKE :filtro OR tamanho LIKE :filtro OR cor LIKE :filtro)";
-            $params[':filtro'] = '%' . $filtro . '%';
+            $filtroUpper = mb_strtoupper($filtro, 'UTF-8');
+            $filtroSku = str_replace(['-', ' ', '_', '.'], '', $filtroUpper);
+
+            $where .= " AND (UPPER(nome) LIKE :filtro_like
+                        OR UPPER(tamanho) LIKE :filtro_like
+                        OR UPPER(cor) LIKE :filtro_like
+                        OR UPPER(sku) LIKE :filtro_like
+                        OR REPLACE(REPLACE(REPLACE(REPLACE(UPPER(sku), '-', ''), ' ', ''), '_', ''), '.', '') LIKE :filtro_sku)";
+            $params[':filtro_like'] = '%' . $filtroUpper . '%';
+            $params[':filtro_sku'] = '%' . $filtroSku . '%';
         }
 
         $sql = "SELECT COUNT(*) FROM produtos {$where}";
