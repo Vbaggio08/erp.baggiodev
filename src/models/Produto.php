@@ -21,13 +21,19 @@ class Produto {
             $filtroUpper = mb_strtoupper($filtro, 'UTF-8');
             $filtroSku = str_replace(['-', ' ', '_', '.'], '', $filtroUpper);
 
-            $where .= " AND (UPPER(nome) LIKE :filtro_like
-                        OR UPPER(tamanho) LIKE :filtro_like
-                        OR UPPER(cor) LIKE :filtro_like
-                        OR UPPER(sku) LIKE :filtro_like
-                        OR REPLACE(REPLACE(REPLACE(REPLACE(UPPER(sku), '-', ''), ' ', ''), '_', ''), '.', '') LIKE :filtro_sku)";
-            $params[':filtro_like'] = '%' . $filtroUpper . '%';
-            $params[':filtro_sku'] = '%' . $filtroSku . '%';
+            // Se digitar apenas 1 letra (ex: c, v), filtra nomes que COMECAM com essa letra.
+            if (mb_strlen($filtroUpper, 'UTF-8') === 1 && preg_match('/^[A-Z]$/u', $filtroUpper)) {
+                $where .= " AND UPPER(nome) LIKE :filtro_inicial";
+                $params[':filtro_inicial'] = $filtroUpper . '%';
+            } else {
+                $where .= " AND (UPPER(nome) LIKE :filtro_like
+                            OR UPPER(tamanho) LIKE :filtro_like
+                            OR UPPER(cor) LIKE :filtro_like
+                            OR UPPER(sku) LIKE :filtro_like
+                            OR REPLACE(REPLACE(REPLACE(REPLACE(UPPER(sku), '-', ''), ' ', ''), '_', ''), '.', '') LIKE :filtro_sku)";
+                $params[':filtro_like'] = '%' . $filtroUpper . '%';
+                $params[':filtro_sku'] = '%' . $filtroSku . '%';
+            }
         }
 
         $sql = "SELECT * FROM produtos {$where} ORDER BY nome ASC, tamanho ASC LIMIT :limite OFFSET :offset";
@@ -54,13 +60,18 @@ class Produto {
             $filtroUpper = mb_strtoupper($filtro, 'UTF-8');
             $filtroSku = str_replace(['-', ' ', '_', '.'], '', $filtroUpper);
 
-            $where .= " AND (UPPER(nome) LIKE :filtro_like
-                        OR UPPER(tamanho) LIKE :filtro_like
-                        OR UPPER(cor) LIKE :filtro_like
-                        OR UPPER(sku) LIKE :filtro_like
-                        OR REPLACE(REPLACE(REPLACE(REPLACE(UPPER(sku), '-', ''), ' ', ''), '_', ''), '.', '') LIKE :filtro_sku)";
-            $params[':filtro_like'] = '%' . $filtroUpper . '%';
-            $params[':filtro_sku'] = '%' . $filtroSku . '%';
+            if (mb_strlen($filtroUpper, 'UTF-8') === 1 && preg_match('/^[A-Z]$/u', $filtroUpper)) {
+                $where .= " AND UPPER(nome) LIKE :filtro_inicial";
+                $params[':filtro_inicial'] = $filtroUpper . '%';
+            } else {
+                $where .= " AND (UPPER(nome) LIKE :filtro_like
+                            OR UPPER(tamanho) LIKE :filtro_like
+                            OR UPPER(cor) LIKE :filtro_like
+                            OR UPPER(sku) LIKE :filtro_like
+                            OR REPLACE(REPLACE(REPLACE(REPLACE(UPPER(sku), '-', ''), ' ', ''), '_', ''), '.', '') LIKE :filtro_sku)";
+                $params[':filtro_like'] = '%' . $filtroUpper . '%';
+                $params[':filtro_sku'] = '%' . $filtroSku . '%';
+            }
         }
 
         $sql = "SELECT COUNT(*) FROM produtos {$where}";

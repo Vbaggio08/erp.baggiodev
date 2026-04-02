@@ -18,6 +18,38 @@ class GabaritoController {
         }
     }
 
+    private function prepararModelosETamanhos(array $produtos): array {
+        $modelos_unicos = [];
+        $tamanhos_por_modelo = [];
+        $chavesModelo = [];
+
+        foreach ($produtos as $p) {
+            $modeloRaw = trim((string)($p['nome'] ?? ''));
+            if ($modeloRaw === '') {
+                continue;
+            }
+
+            // Remove espacos repetidos e usa chave normalizada para evitar duplicados visuais.
+            $modelo = preg_replace('/\s+/', ' ', $modeloRaw);
+            $chaveModelo = mb_strtolower($modelo, 'UTF-8');
+
+            if (!isset($chavesModelo[$chaveModelo])) {
+                $chavesModelo[$chaveModelo] = $modelo;
+                $modelos_unicos[] = $modelo;
+                $tamanhos_por_modelo[$modelo] = [];
+            }
+
+            $modeloCanonico = $chavesModelo[$chaveModelo];
+            $tamanho = trim((string)($p['tamanho'] ?? ''));
+
+            if ($tamanho !== '' && !in_array($tamanho, $tamanhos_por_modelo[$modeloCanonico], true)) {
+                $tamanhos_por_modelo[$modeloCanonico][] = $tamanho;
+            }
+        }
+
+        return [$modelos_unicos, $tamanhos_por_modelo];
+    }
+
     // 1. LISTAR GABARITOS (Agrupados)
     public function listar() {
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -60,21 +92,7 @@ class GabaritoController {
         $produtos = $pdo->query("SELECT * FROM produtos WHERE ativo = 1 ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         $usuarios = $pdo->query("SELECT * FROM usuarios ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         
-        // Preparar modelos únicos e tamanhos disponíveis por modelo
-        $modelos_unicos = [];
-        $tamanhos_por_modelo = [];
-        foreach ($produtos as $p) {
-            $modelo = $p['nome'];
-            if (!in_array($modelo, $modelos_unicos)) {
-                $modelos_unicos[] = $modelo;
-            }
-            if (!isset($tamanhos_por_modelo[$modelo])) {
-                $tamanhos_por_modelo[$modelo] = [];
-            }
-            if (!in_array($p['tamanho'], $tamanhos_por_modelo[$modelo])) {
-                $tamanhos_por_modelo[$modelo][] = $p['tamanho'];
-            }
-        }
+        [$modelos_unicos, $tamanhos_por_modelo] = $this->prepararModelosETamanhos($produtos);
         
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/novo_gabarito.php';
@@ -103,21 +121,7 @@ class GabaritoController {
         $produtos = $pdo->query("SELECT * FROM produtos WHERE ativo = 1 ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         $usuarios = $pdo->query("SELECT * FROM usuarios ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
         
-        // Preparar modelos únicos e tamanhos disponíveis por modelo
-        $modelos_unicos = [];
-        $tamanhos_por_modelo = [];
-        foreach ($produtos as $p) {
-            $modelo = $p['nome'];
-            if (!in_array($modelo, $modelos_unicos)) {
-                $modelos_unicos[] = $modelo;
-            }
-            if (!isset($tamanhos_por_modelo[$modelo])) {
-                $tamanhos_por_modelo[$modelo] = [];
-            }
-            if (!in_array($p['tamanho'], $tamanhos_por_modelo[$modelo])) {
-                $tamanhos_por_modelo[$modelo][] = $p['tamanho'];
-            }
-        }
+        [$modelos_unicos, $tamanhos_por_modelo] = $this->prepararModelosETamanhos($produtos);
         
         require __DIR__ . '/../views/geral/header.php';
         require __DIR__ . '/../views/producao/novo_gabarito.php';

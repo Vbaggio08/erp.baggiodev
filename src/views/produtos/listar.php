@@ -9,7 +9,7 @@
     <div style="background: var(--bg-surface-2); padding: 15px; border-radius: 8px; border: 1px solid #444; margin-bottom: 15px;">
         <form action="index.php" method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <input type="hidden" name="rota" value="produtos">
-            <input type="text" name="filtro" value="<?= htmlspecialchars($filtro ?? '') ?>" placeholder="Buscar por SKU, nome, tamanho ou cor" style="flex:1; min-width:240px; padding:10px; background:#222; border:1px solid #555; color:#fff; border-radius:4px;">
+            <input type="text" name="filtro" value="<?= htmlspecialchars($filtro ?? '') ?>" placeholder="Digite 1 letra (C, V...) para nomes iniciais ou busque SKU/nome" style="flex:1; min-width:240px; padding:10px; background:#222; border:1px solid #555; color:#fff; border-radius:4px;">
             <button type="submit" class="btn-blue" style="padding:10px 16px;">Filtrar</button>
             <?php if (!empty($filtro)): ?>
                 <a href="index.php?rota=produtos" class="btn" style="padding:10px 16px; background:#444; color:#fff; text-decoration:none; border-radius:4px;">Limpar</a>
