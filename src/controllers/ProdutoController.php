@@ -46,6 +46,43 @@ class ProdutoController {
     $tamanhos = $_POST['tamanhos'] ?? [];
     $sku_base = strtoupper(trim($_POST['sku'] ?? ''));
 
+    $temGrade = is_array($cores) && count($cores) > 0 && is_array($tamanhos) && count($tamanhos) > 0;
+
+    // Suporta o formulario simples (tamanho/cor unitarios) da tela antiga de cadastros.
+    if (!$temGrade) {
+        $nome = trim((string)($_POST['nome'] ?? ''));
+        $tamanho = trim((string)($_POST['tamanho'] ?? ''));
+        $cor = trim((string)($_POST['cor'] ?? ''));
+        $preco_custo_raw = $_POST['preco_custo'] ?? ($_POST['custo'] ?? '0');
+        $preco_venda_raw = $_POST['preco_venda'] ?? ($_POST['preco'] ?? '0');
+
+        if ($nome === '' || $tamanho === '') {
+            echo "<script>alert('Erro: Preencha nome e tamanho do produto.'); window.history.back();</script>";
+            exit;
+        }
+
+        $preco_custo = str_replace(['R$', '.', ','], ['', '', '.'], (string)$preco_custo_raw);
+        $preco_venda = str_replace(['R$', '.', ','], ['', '', '.'], (string)$preco_venda_raw);
+
+        $dados = [
+            'nome'        => $nome,
+            'tamanho'     => $tamanho,
+            'cor'         => $cor,
+            'sku'         => $sku_base,
+            'preco_custo' => $preco_custo,
+            'preco_venda' => $preco_venda
+        ];
+
+        try {
+            Produto::salvar($dados);
+            header('Location: index.php?rota=produtos');
+            exit;
+        } catch (Exception $e) {
+            echo "<script>alert('Erro ao salvar produto: verifique SKU duplicado ou dados invalidos.'); window.history.back();</script>";
+            exit;
+        }
+    }
+
     // 1. Dicionário Oficial de Siglas da Ripfire
     $siglas_cores = [
         'Preta'         => 'PR',
@@ -70,6 +107,7 @@ class ProdutoController {
     $preco_venda = str_replace(['R$', '.', ','], ['', '', '.'], $_POST['preco']);
 
     // --- LOOP ANINHADO: Para cada COR, gera todos os TAMANHOS ---
+    $itensSalvos = 0;
     foreach ($cores as $cor) {
         
         // Busca a sigla exata. Se a cor não estiver no dicionário, usa as 2 primeiras letras como "quebra-galho"
@@ -95,11 +133,17 @@ class ProdutoController {
             // 2. Bloco Try-Catch para evitar o "Fatal Error" de SKU duplicado no banco
             try {
                 Produto::salvar($dados);
+                $itensSalvos++;
             } catch (Exception $e) {
                 // Se der erro (ex: código duplicado), o sistema apenas ignora este item e pula pro próximo
                 continue; 
             }
         }
+    }
+
+    if ($itensSalvos === 0) {
+        echo "<script>alert('Nenhum item foi salvo. Verifique se os SKUs gerados ja existem.'); window.history.back();</script>";
+        exit;
     }
     
     header('Location: index.php?rota=produtos');

@@ -203,8 +203,9 @@ class GabaritoController {
         $plataforma = trim((string)($_POST['plataforma'] ?? ''));
         $meioPagamento = trim((string)($_POST['meio_pagamento'] ?? ''));
         $pedidoSite = trim((string)($_POST['pedido_site'] ?? ''));
+        $temPedidoSite = $this->colunaExiste('gabaritos', 'pedido_site');
 
-        $dados = [
+        $dadosBase = [
             $_POST['cliente'],
             $numeroPedido,
             $plataforma,
@@ -221,33 +222,70 @@ class GabaritoController {
             $_POST['obs'] ?? '',
             $jsonGrade,
             $meioPagamento,
-            $pedidoSite,
             $comprovanteNome,
             $vendedorId
         ];
 
-        if ($id) {
-            $sql = "UPDATE gabaritos SET cliente=?, numero_pedido=?, plataforma=?, contato=?, data_pedido=?, modelo=?, cor=?, tamanho=?, quantidade=?, valor_unit=?, valor_total=?, data_entrega=?, imagem_mockup=?, observacoes=?, itens_json=?, meio_pagamento=?, pedido_site=?, caminho_comprovante=?, vendedor_id=? WHERE id=?";
-            $dados[] = $id;
-            $pdo->prepare($sql)->execute($dados);
-            $lastId = $id;
-        } else {
-            $sql = "INSERT INTO gabaritos (cliente, numero_pedido, plataforma, contato, data_pedido, modelo, cor, tamanho, quantidade, valor_unit, valor_total, data_entrega, imagem_mockup, observacoes, itens_json, meio_pagamento, pedido_site, caminho_comprovante, vendedor_id, data_criacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Mockup')";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($dados);
-            $lastId = $pdo->lastInsertId();
-        }
+        try {
+            if ($id) {
+                if ($temPedidoSite) {
+                    $sql = "UPDATE gabaritos SET cliente=?, numero_pedido=?, plataforma=?, contato=?, data_pedido=?, modelo=?, cor=?, tamanho=?, quantidade=?, valor_unit=?, valor_total=?, data_entrega=?, imagem_mockup=?, observacoes=?, itens_json=?, meio_pagamento=?, pedido_site=?, caminho_comprovante=?, vendedor_id=? WHERE id=?";
+                    $dados = $dadosBase;
+                    array_splice($dados, 16, 0, [$pedidoSite]);
+                } else {
+                    $sql = "UPDATE gabaritos SET cliente=?, numero_pedido=?, plataforma=?, contato=?, data_pedido=?, modelo=?, cor=?, tamanho=?, quantidade=?, valor_unit=?, valor_total=?, data_entrega=?, imagem_mockup=?, observacoes=?, itens_json=?, meio_pagamento=?, caminho_comprovante=?, vendedor_id=? WHERE id=?";
+                    $dados = $dadosBase;
+                }
 
-        // Mantem o canal de venda igual em todas as folhas do mesmo pedido.
-        if ($numeroPedido !== '' && $plataforma !== '') {
-            $stmt = $pdo->prepare("UPDATE gabaritos SET plataforma = ? WHERE numero_pedido = ?");
-            $stmt->execute([$plataforma, $numeroPedido]);
-        }
+                $dados[] = $id;
+                $pdo->prepare($sql)->execute($dados);
+                $lastId = $id;
+            } else {
+                if ($temPedidoSite) {
+                    $sql = "INSERT INTO gabaritos (cliente, numero_pedido, plataforma, contato, data_pedido, modelo, cor, tamanho, quantidade, valor_unit, valor_total, data_entrega, imagem_mockup, observacoes, itens_json, meio_pagamento, pedido_site, caminho_comprovante, vendedor_id, data_criacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Mockup')";
+                    $dados = $dadosBase;
+                    array_splice($dados, 16, 0, [$pedidoSite]);
+                } else {
+                    $sql = "INSERT INTO gabaritos (cliente, numero_pedido, plataforma, contato, data_pedido, modelo, cor, tamanho, quantidade, valor_unit, valor_total, data_entrega, imagem_mockup, observacoes, itens_json, meio_pagamento, caminho_comprovante, vendedor_id, data_criacao, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Mockup')";
+                    $dados = $dadosBase;
+                }
 
-        // Mantem o meio de pagamento igual em todas as folhas do mesmo pedido.
-        if ($numeroPedido !== '') {
-            $stmt = $pdo->prepare("UPDATE gabaritos SET meio_pagamento = ?, pedido_site = ? WHERE numero_pedido = ?");
-            $stmt->execute([$meioPagamento, $pedidoSite, $numeroPedido]);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($dados);
+                $lastId = $pdo->lastInsertId();
+            }
+
+            // Mantem o canal de venda igual em todas as folhas do mesmo pedido.
+            if ($numeroPedido !== '' && $plataforma !== '') {
+                $stmt = $pdo->prepare("UPDATE gabaritos SET plataforma = ? WHERE numero_pedido = ?");
+                $stmt->execute([$plataforma, $numeroPedido]);
+            }
+
+            // Mantem o meio de pagamento igual em todas as folhas do mesmo pedido.
+            if ($numeroPedido !== '') {
+                if ($temPedidoSite) {
+                    $stmt = $pdo->prepare("UPDATE gabaritos SET meio_pagamento = ?, pedido_site = ? WHERE numero_pedido = ?");
+                    $stmt->execute([$meioPagamento, $pedidoSite, $numeroPedido]);
+                } else {
+                    $stmt = $pdo->prepare("UPDATE gabaritos SET meio_pagamento = ? WHERE numero_pedido = ?");
+                    $stmt->execute([$meioPagamento, $numeroPedido]);
+                }
+            }
+        } catch (Exception $e) {
+            $_SESSION['erro_salvar_gabarito'] = $e->getMessage();
+            $paramsErro = http_build_query([
+                'cliente' => $_POST['cliente'],
+                'contato' => $_POST['contato'],
+                'numero_pedido' => $numeroPedido,
+                'plataforma' => $plataforma,
+                'meio_pagamento' => $meioPagamento,
+                'pedido_site' => $pedidoSite,
+                'data_pedido' => $_POST['data_pedido'] ?? '',
+                'data_entrega' => $_POST['data_entrega'] ?? '',
+                'msg' => 'erro_salvar'
+            ]);
+            header("Location: index.php?rota=novo_gabarito&$paramsErro");
+            exit;
         }
 
         if ($acao === 'continuar') {
@@ -263,8 +301,10 @@ class GabaritoController {
                 'msg' => 'item_adicionado'
             ]);
             header("Location: index.php?rota=novo_gabarito&$params");
+            exit;
         } else {
             header("Location: index.php?rota=imprimir_gabarito&id=$lastId");
+            exit;
         }
     }
 

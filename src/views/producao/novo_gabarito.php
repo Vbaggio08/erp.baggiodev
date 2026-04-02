@@ -17,6 +17,13 @@
     </div>
     <?php endif; ?>
 
+    <?php if (($_GET['msg'] ?? '') === 'erro_salvar'): ?>
+    <div style="margin-bottom:15px; padding:12px; border:1px solid #e74c3c; color:#ffb3ac; background:rgba(231, 76, 60, 0.08); border-radius:6px;">
+        Nao foi possivel salvar este item. <?= htmlspecialchars($_SESSION['erro_salvar_gabarito'] ?? 'Verifique os dados e tente novamente.') ?>
+    </div>
+    <?php unset($_SESSION['erro_salvar_gabarito']); ?>
+    <?php endif; ?>
+
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 class="login-title">
             <?= isset($ficha['id']) ? "✏️ Editando Pedido #$num" : '✨ Novo Pedido' ?>
