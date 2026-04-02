@@ -11,6 +11,12 @@
 ?>
 
 <div class="box-relatorio">
+    <?php if (($_GET['msg'] ?? '') === 'item_adicionado'): ?>
+    <div style="margin-bottom:15px; padding:12px; border:1px solid #2ecc71; color:#2ecc71; background:rgba(46, 204, 113, 0.08); border-radius:6px;">
+        Item salvo com sucesso neste pedido.
+    </div>
+    <?php endif; ?>
+
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 class="login-title">
             <?= isset($ficha['id']) ? "✏️ Editando Pedido #$num" : '✨ Novo Pedido' ?>

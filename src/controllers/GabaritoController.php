@@ -78,6 +78,9 @@ class GabaritoController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $this->garantirEstruturaGabaritos();
         $pdo = Database::getConnection();
+
+        $ficha = [];
+        $itens_pedido = [];
         
         if (!isset($_GET['numero_pedido'])) {
             // Busca o maior número e soma +1
@@ -87,6 +90,11 @@ class GabaritoController {
             $num = str_pad($proximo, 2, '0', STR_PAD_LEFT);
         } else {
             $num = $_GET['numero_pedido'];
+
+            // Ao continuar adicionando itens no mesmo pedido, mostra a barra lateral com os itens ja salvos.
+            $stmt = $pdo->prepare("SELECT id, modelo, cor, quantidade FROM gabaritos WHERE numero_pedido = ? ORDER BY id ASC");
+            $stmt->execute([$num]);
+            $itens_pedido = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         $produtos = $pdo->query("SELECT * FROM produtos WHERE ativo = 1 ORDER BY nome ASC")->fetchAll(PDO::FETCH_ASSOC);
