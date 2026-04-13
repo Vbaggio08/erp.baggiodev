@@ -1,26 +1,23 @@
 /**
- * Service Worker - FASE 4: Sincronização Offline
+ * Service Worker - Cache offline da aplicação
  * Path: sw.js
  * 
  * Funcionalidades:
  * - Cache de assets para offline
- * - Fila de batidas de ponto offline
- * - Sincronização automática quando online
- * - Notificações de status
+ * - Cache de páginas e assets
+ * - Fallback offline para recursos estáticos
  */
 
-const CACHE_NAME = 'ripfire-v4.0';
-const ASSETS_CACHE = 'ripfire-assets-v4';
-const API_CACHE = 'ripfire-api-v4';
+const CACHE_NAME = 'ripfire-v5.0';
+const ASSETS_CACHE = 'ripfire-assets-v5';
+const API_CACHE = 'ripfire-api-v5';
 
 // Assets críticos para offline
 const CRITICAL_ASSETS = [
   '/',
   'index.php',
   'assets/estilo.css',
-  'manifest.json',
-  'assets/js/ponto-offline.js',
-  'assets/js/indexeddb.js'
+  'manifest.json'
 ];
 
 /**
@@ -28,7 +25,7 @@ const CRITICAL_ASSETS = [
  * Faz cache dos assets críticos
  */
 self.addEventListener('install', event => {
-  console.log('[SW] Instalando Service Worker v4');
+  console.log('[SW] Instalando Service Worker v5');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       console.log('[SW] Cacheando assets críticos');
@@ -45,7 +42,7 @@ self.addEventListener('install', event => {
  * Limpa caches antigos
  */
 self.addEventListener('activate', event => {
-  console.log('[SW] Ativando Service Worker v4');
+  console.log('[SW] Ativando Service Worker v5');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
@@ -152,9 +149,6 @@ self.addEventListener('message', event => {
   const { type, data } = event.data;
 
   switch (type) {
-    case 'SYNC_PONTO':
-      handleSyncPonto(data, event);
-      break;
     case 'CLEAR_CACHE':
       handleClearCache(event);
       break;
@@ -165,39 +159,6 @@ self.addEventListener('message', event => {
       console.warn('[SW] Tipo desconhecido:', type);
   }
 });
-
-/**
- * Sincroniza batidas de ponto
- */
-async function handleSyncPonto(data, event) {
-  try {
-    console.log('[SW] Sincronizando ponto');
-
-    const response = await fetch('/index.php?rota=sincronizar_offline', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-
-    const result = await response.json();
-
-    event.ports[0].postMessage({
-      type: 'SYNC_PONTO_RESULT',
-      status: 'sucesso',
-      data: result
-    });
-
-    if ('setAppBadge' in navigator) {
-      navigator.setAppBadge(0);
-    }
-  } catch (error) {
-    event.ports[0].postMessage({
-      type: 'SYNC_PONTO_RESULT',
-      status: 'erro',
-      erro: error.message
-    });
-  }
-}
 
 /**
  * Limpa caches

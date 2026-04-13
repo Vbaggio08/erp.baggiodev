@@ -19,49 +19,6 @@ return [
             'requer' => []
         ],
 
-        // 🕐 PONTO - Novo grupo centralizado
-        [
-            'label' => 'Ponto',
-            'icon' => '🕐',
-            'requer' => [],
-            'submenu' => [
-                [
-                    'label' => 'Bater Ponto',
-                    'rota' => 'bater_ponto',
-                    'requer' => [],
-                    'icon' => '⏱️'
-                ],
-                [
-                    'label' => 'Meu Ponto',
-                    'rota' => 'meu_ponto',
-                    'requer' => [],
-                    'icon' => '📋'
-                ],
-                [
-                    'label' => 'Solicitar Atestado',
-                    'rota' => 'solicitar_atestado',
-                    'requer' => [],
-                    'icon' => '📄'
-                ],
-                [
-                    'label' => 'Dashboard Ponto',
-                    'rota' => 'dashboard_ponto',
-                    'requer' => [],
-                    'icon' => '📈'
-                ],
-                [
-                    'label' => 'Gerenciar Meu Ponto',
-                    'rota' => 'gerenciar_ponto_pessoal',
-                    'requer' => [],
-                    'icon' => '⚙️'
-                ],
-                [
-                    'label' => '---',
-                    'divisor' => true
-                ]
-            ]
-        ],
-
         // 📦 Estoque
         [
             'label' => 'Estoque',
@@ -179,52 +136,6 @@ return [
                     'rota' => 'gerenciar_usuarios',
                     'requer' => ['admin'],
                     'icon' => '👥'
-                ],
-                [
-                    'label' => 'Gerenciar Pontos',
-                    'rota' => 'ponto_todos',
-                    'requer' => ['admin'],
-                    'icon' => '🕐'
-                ],
-                [
-                    'label' => 'Espelho de Ponto',
-                    'rota' => 'espelho_ponto_funcionario',
-                    'requer' => ['admin'],
-                    'icon' => '🪞'
-                ],
-                [
-                    'label' => 'Dashboard RH',
-                    'rota' => 'dashboard_rh',
-                    'requer' => ['admin'],
-                    'icon' => '📊'
-                ],
-                [
-                    'label' => 'Auditoria',
-                    'rota' => 'auditoria_dashboard',
-                    'requer' => ['admin'],
-                    'icon' => '🔍'
-                ],
-                [
-                    'label' => 'Autorizar Alterações',
-                    'rota' => 'solicitacoes_alteracao_ponto',
-                    'requer' => ['admin'],
-                    'icon' => '✅'
-                ],
-                [
-                    'label' => '---',
-                    'divisor' => true
-                ],
-                [
-                    'label' => 'Horas Extras',
-                    'rota' => 'horas_extras_aprovar',
-                    'requer' => ['admin'],
-                    'icon' => '⏳'
-                ],
-                [
-                    'label' => 'Configuração de Ponto',
-                    'rota' => 'configuracao_ponto',
-                    'requer' => ['admin'],
-                    'icon' => '⚙️'
                 ]
             ]
         ]

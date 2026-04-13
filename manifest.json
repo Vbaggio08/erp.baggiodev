@@ -1,7 +1,7 @@
 {
-  "name": "Ripfire ERP - Sistema de Ponto Eletrônico",
-  "short_name": "Ripfire Ponto",
-  "description": "Sistema completo de ponto eletrônico com suporte offline, geolocalização e foto",
+  "name": "Ripfire ERP",
+  "short_name": "Ripfire ERP",
+  "description": "Sistema de gestão empresarial Ripfire",
   "version": "4.0.0",
   "manifest_version": 3,
   "start_url": "./index.php",
@@ -46,32 +46,6 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Bater Ponto",
-      "short_name": "Ponto",
-      "description": "Registrar entrada ou saída",
-      "url": "/index.php?rota=bater_ponto",
-      "icons": [
-        {
-          "src": "assets/img/logo_rip.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Meu Ponto",
-      "short_name": "Histórico",
-      "description": "Consultar histórico de batidas",
-      "url": "/index.php?rota=meu_ponto",
-      "icons": [
-        {
-          "src": "assets/img/logo_rip.png",
-          "sizes": "192x192"
-        }
-      ]
     }
   ]
 }
