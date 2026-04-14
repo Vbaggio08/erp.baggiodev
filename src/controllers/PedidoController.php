@@ -2,10 +2,21 @@
 require_once __DIR__ . '/../config/database.php';
 
 class PedidoController {
+
+    private const ALLOWED_SCHEMA_TABLES = [
+        'pedidos_dtf' => ['vendedor_id', 'meio_pagamento', 'status']
+    ];
+
     private function colunaExiste(string $tabela, string $coluna): bool {
+        if (!isset(self::ALLOWED_SCHEMA_TABLES[$tabela]) || !in_array($coluna, self::ALLOWED_SCHEMA_TABLES[$tabela], true)) {
+            return false;
+        }
+
         $pdo = Database::getConnection();
-        $stmt = $pdo->query("SHOW COLUMNS FROM {$tabela} LIKE '" . addslashes($coluna) . "'");
-        return (bool) ($stmt && $stmt->fetch(PDO::FETCH_ASSOC));
+        $sql = 'SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tabela, $coluna]);
+        return ((int)$stmt->fetchColumn() > 0);
     }
 
     private function garantirEstruturaPedidosDtf(): void {

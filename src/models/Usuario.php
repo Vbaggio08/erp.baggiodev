@@ -50,7 +50,15 @@ class Usuario {
         }
 
         $pdo = Database::getConnection();
-        $sql = "SELECT * FROM usuarios WHERE REPLACE(REPLACE(REPLACE($colunaCpf, '.', ''), '-', ''), '/', '') = ? LIMIT 1";
+
+        if ($colunaCpf === 'cpf') {
+            $sql = "SELECT * FROM usuarios WHERE REPLACE(REPLACE(REPLACE(COALESCE(cpf, ''), '.', ''), '-', ''), '/', '') = ? LIMIT 1";
+        } elseif ($colunaCpf === 'cpf_cnpj') {
+            $sql = "SELECT * FROM usuarios WHERE REPLACE(REPLACE(REPLACE(COALESCE(cpf_cnpj, ''), '.', ''), '-', ''), '/', '') = ? LIMIT 1";
+        } else {
+            return null;
+        }
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$cpfNormalizado]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -65,10 +73,12 @@ class Usuario {
 
         $pdo = Database::getConnection();
 
+        $sql = 'SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?';
+        $stmt = $pdo->prepare($sql);
+
         foreach (['cpf', 'cpf_cnpj'] as $coluna) {
-            // SHOW COLUMNS não suporta placeholders em MariaDB, usar query sem prepare
-            $result = $pdo->query("SHOW COLUMNS FROM usuarios LIKE '".addslashes($coluna)."'");
-            if ($result && $result->fetch(PDO::FETCH_ASSOC)) {
+            $stmt->execute(['usuarios', $coluna]);
+            if ((int)$stmt->fetchColumn() > 0) {
                 self::$colunaCpfCache = $coluna;
                 return self::$colunaCpfCache;
             }

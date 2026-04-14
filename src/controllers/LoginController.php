@@ -4,6 +4,10 @@ require_once __DIR__ . '/../models/Usuario.php';
 
 class LoginController {
 
+    private const ALLOWED_SCHEMA_TABLES = [
+        'usuarios' => ['username', 'cpf']
+    ];
+
     public function index() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (isset($_SESSION['user_id'])) {
@@ -74,9 +78,15 @@ class LoginController {
     }
 
     private function colunaExiste(string $tabela, string $coluna): bool {
+        if (!isset(self::ALLOWED_SCHEMA_TABLES[$tabela]) || !in_array($coluna, self::ALLOWED_SCHEMA_TABLES[$tabela], true)) {
+            return false;
+        }
+
         $pdo = Database::getConnection();
-        $stmt = $pdo->query("SHOW COLUMNS FROM {$tabela} LIKE '" . addslashes($coluna) . "'");
-        return (bool)($stmt && $stmt->fetch(PDO::FETCH_ASSOC));
+        $sql = 'SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tabela, $coluna]);
+        return ((int)$stmt->fetchColumn() > 0);
     }
 
     public function sair() {
