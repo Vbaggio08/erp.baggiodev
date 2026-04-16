@@ -39,6 +39,20 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- 1.1 TIMEOUT DE INATIVIDADE (8 horas) ---
+define('SESSION_TIMEOUT', 8 * 3600); // 28800 segundos
+if (isset($_SESSION['user_id'])) {
+    if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > SESSION_TIMEOUT) {
+        session_unset();
+        session_destroy();
+        header('Location: index.php?rota=login&timeout=1');
+        exit;
+    }
+    $_SESSION['LAST_ACTIVITY'] = time();
+} elseif (!isset($_SESSION['LAST_ACTIVITY'])) {
+    $_SESSION['LAST_ACTIVITY'] = time();
+}
+
 // --- 2. VERIFICAÇÃO DE SEGURANÇA ---
 $rota = $_GET['rota'] ?? 'dashboard'; // Se não tiver rota, vai pro dashboard
 

@@ -106,6 +106,12 @@
             <span class="logo-text">Ripfire</span>
         </div>
         
+        <?php if (isset($_GET['timeout']) && $_GET['timeout'] == '1'): ?>
+        <div style="background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:14px;text-align:center;">
+            Sua sessão expirou por inatividade. Faça login novamente.
+        </div>
+        <?php endif; ?>
+
         <form action="index.php?rota=autenticar" method="POST">
             <div class="input-group">
                 <label>Usuário, Email ou CPF</label>
