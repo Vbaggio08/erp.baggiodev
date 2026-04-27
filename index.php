@@ -34,13 +34,28 @@ if ($appDebug) {
     ini_set('error_log', __DIR__ . '/logs/error.log');
 }
 
-// Inicia a sessão se não estiver iniciada
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // --- 1.1 TIMEOUT DE INATIVIDADE (8 horas) ---
 define('SESSION_TIMEOUT', 8 * 3600); // 28800 segundos
+
+// Inicia a sessão se não estiver iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    // Garante que o garbage collector do PHP respeite o mesmo tempo de inatividade.
+    // Sem isso, o PHP pode descartar a sessão no servidor em ~24 min (padrão 1440s).
+    ini_set('session.gc_maxlifetime', SESSION_TIMEOUT);
+
+    // Cookie persiste pelo mesmo período mesmo após fechar o navegador.
+    $cookieParams = session_get_cookie_params();
+    session_set_cookie_params([
+        'lifetime' => SESSION_TIMEOUT,
+        'path'     => $cookieParams['path'],
+        'domain'   => $cookieParams['domain'],
+        'secure'   => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+
+    session_start();
+}
 if (isset($_SESSION['user_id'])) {
     if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > SESSION_TIMEOUT) {
         session_unset();
