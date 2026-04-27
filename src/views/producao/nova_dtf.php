@@ -1,18 +1,26 @@
 
 <?php
     // Mantém os dados do cliente e do pedido, se vierem via GET
-    $cli = $_GET['cliente'] ?? ($ficha['cliente'] ?? '');
+    $clienteBase = $ficha['cliente'] ?? '';
+    if (($ficha['status_pedido'] ?? '') === 'rascunho' && $clienteBase === 'Rascunho') {
+        $clienteBase = '';
+    }
+    $cli = $_GET['cliente'] ?? $clienteBase;
     $tel = $_GET['contato'] ?? ($ficha['contato'] ?? '');
     $num = $_GET['numero_pedido'] ?? ($num ?? ($ficha['numero_pedido'] ?? '01'));
     $plat = $_GET['plataforma'] ?? ($ficha['plataforma'] ?? '');
     $dtPed = $_GET['data_pedido'] ?? ($ficha['data_pedido'] ?? date('Y-m-d'));
     $dtEnt = $_GET['data_entrega'] ?? ($ficha['data_entrega'] ?? '');
+    $ehRascunhoInicial = isset($ficha['id'])
+        && (($ficha['status_pedido'] ?? '') === 'rascunho')
+        && (float)($ficha['metros'] ?? 0) === 0.0
+        && trim((string)($ficha['observacoes'] ?? '')) === '';
 ?>
 
 <div class="box-relatorio">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 class="login-title">
-            <?= isset($ficha['id']) ? "✏️ Editando Produção DTF #$num" : '✨ Produção DTF' ?>
+            <?= $ehRascunhoInicial ? "✨ Produção DTF #$num" : (isset($ficha['id']) ? "✏️ Editando Produção DTF #$num" : '✨ Produção DTF') ?>
         </h1>
         <a href="index.php?rota=ver_producao_dtf" class="btn-red" style="text-decoration:none;">Cancelar</a>
     </div>
@@ -59,7 +67,7 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-bottom:20px;">
                     <div>
                         <label style="display:block; color:#e6b800; margin-bottom:5px;">Nº Pedido</label>
-                        <input type="text" name="numero_pedido" value="<?= htmlspecialchars($num) ?>" style="width:100%; padding:10px; background:#1a1a1a; border:1px solid #e6b800; color:#e6b800; font-weight:bold;">
+                        <input type="text" name="numero_pedido" value="<?= htmlspecialchars($num) ?>" readonly tabindex="-1" onfocus="this.blur()" style="width:100%; padding:10px; background:#1a1a1a; border:1px solid #e6b800; color:#e6b800; font-weight:bold; cursor:not-allowed; outline:none; pointer-events:none;">
                     </div>
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Data Pedido</label>

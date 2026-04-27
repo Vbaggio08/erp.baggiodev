@@ -15,7 +15,7 @@
 <div class="box-relatorio">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 class="login-title">� Ver Produção de Camiseta</h1>
-        <a href="index.php?rota=novo_gabarito" class="btn-green" style="text-decoration:none;">+ Novo Pedido</a>
+        <a href="index.php?rota=iniciar_gabarito" class="btn-green" style="text-decoration:none;">+ Novo Pedido</a>
     </div>
 
     <div style="margin-bottom:15px;">

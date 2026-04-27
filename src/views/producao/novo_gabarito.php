@@ -1,6 +1,10 @@
 
 <?php
-    $cli = $_GET['cliente'] ?? ($ficha['cliente'] ?? '');
+    $clienteBase = $ficha['cliente'] ?? '';
+    if (($ficha['status_pedido'] ?? '') === 'rascunho' && $clienteBase === 'Rascunho') {
+        $clienteBase = '';
+    }
+    $cli = $_GET['cliente'] ?? $clienteBase;
     $tel = $_GET['contato'] ?? ($ficha['contato'] ?? '');
     $num = $_GET['numero_pedido'] ?? ($num ?? ($ficha['numero_pedido'] ?? '01'));
     $plat = $_GET['plataforma'] ?? ($ficha['plataforma'] ?? '');
@@ -8,6 +12,10 @@
     $pedidoSite = $_GET['pedido_site'] ?? ($ficha['pedido_site'] ?? '');
     $dtPed = $_GET['data_pedido'] ?? ($ficha['data_pedido'] ?? date('Y-m-d'));
     $dtEnt = $_GET['data_entrega'] ?? ($ficha['data_entrega'] ?? '');
+    $ehRascunhoInicial = isset($ficha['id'])
+        && (($ficha['status_pedido'] ?? '') === 'rascunho')
+        && trim((string)($ficha['modelo'] ?? '')) === ''
+        && (int)($ficha['quantidade'] ?? 0) === 0;
 ?>
 
 <div class="box-relatorio">
@@ -26,7 +34,7 @@
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 class="login-title">
-            <?= isset($ficha['id']) ? "✏️ Editando Pedido #$num" : '✨ Novo Pedido' ?>
+            <?= $ehRascunhoInicial ? "✨ Novo Pedido #$num" : (isset($ficha['id']) ? "✏️ Editando Pedido #$num" : '✨ Novo Pedido') ?>
         </h1>
         <a href="index.php?rota=listar_gabaritos" class="btn-red" style="text-decoration:none;">Cancelar</a>
     </div>
@@ -133,15 +141,27 @@
                 <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom:20px;">
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Modelo / Produto</label>
-                        <select name="modelo" id="modelo" required style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
-                            <option value="">-- Selecione o Modelo --</option>
-                            <?php foreach($modelos_unicos as $modelo): ?>
-                                <option value="<?= htmlspecialchars($modelo) ?>" <?= (isset($ficha['modelo']) && $ficha['modelo'] == $modelo) ? 'selected' : '' ?>><?= htmlspecialchars($modelo) ?></option>
-                            <?php endforeach; ?>
-                            <?php if (!empty($ficha['modelo']) && !in_array($ficha['modelo'], $modelos_unicos, true)): ?>
-                                <option value="<?= htmlspecialchars($ficha['modelo']) ?>" selected><?= htmlspecialchars($ficha['modelo']) ?> (modelo antigo)</option>
-                            <?php endif; ?>
-                        </select>
+                        <div style="display:flex; gap:10px; align-items:stretch;">
+                            <select name="modelo" id="modelo" required style="flex:1; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                                <option value="">-- Selecione o Modelo --</option>
+                                <?php foreach($modelos_unicos as $modelo): ?>
+                                    <option value="<?= htmlspecialchars($modelo) ?>" <?= (isset($ficha['modelo']) && $ficha['modelo'] == $modelo) ? 'selected' : '' ?>><?= htmlspecialchars($modelo) ?></option>
+                                <?php endforeach; ?>
+                                <?php if (!empty($ficha['modelo']) && !in_array($ficha['modelo'], $modelos_unicos, true)): ?>
+                                    <option value="<?= htmlspecialchars($ficha['modelo']) ?>" selected><?= htmlspecialchars($ficha['modelo']) ?> (modelo antigo)</option>
+                                <?php endif; ?>
+                            </select>
+                            <button type="button" id="btnAdicionarModelo" class="btn-blue" style="white-space:nowrap; padding:10px 14px;" onclick="abrirModalModelo()">Adicionar modelo</button>
+                        </div>
+                        <div id="modelo-feedback" style="display:none; margin-top:8px; font-size:12px;"></div>
+                        <div id="modalAdicionarModelo" style="display:none; margin-top:12px; background:#1a1a1a; border:1px solid #555; border-radius:8px; padding:14px;">
+                            <label for="novoModeloNome" style="display:block; color:#aaa; margin-bottom:8px;">Novo modelo</label>
+                            <input type="text" id="novoModeloNome" placeholder="Ex: Camiseta Dry Fit" style="width:100%; padding:10px; background:#111; border:1px solid #444; color:#fff; margin-bottom:10px;">
+                            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                                <button type="button" class="btn-red" style="padding:10px 12px;" onclick="fecharModalModelo()">Cancelar</button>
+                                <button type="button" class="btn-green" style="padding:10px 12px;" onclick="salvarNovoModelo()">Salvar modelo</button>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label style="display:block; color:#aaa; margin-bottom:5px;">Cor da Peça</label>
@@ -273,8 +293,26 @@ function somarTotal() {
 
 window.tamanhosPorModelo = <?php echo json_encode($tamanhos_por_modelo); ?>;
 
-document.getElementById('modelo').addEventListener('change', function() {
-    const modelo = this.value;
+function exibirFeedbackModelo(mensagem, erro) {
+    const feedback = document.getElementById('modelo-feedback');
+    feedback.textContent = mensagem;
+    feedback.style.display = mensagem ? 'block' : 'none';
+    feedback.style.color = erro ? '#ff8f87' : '#2ecc71';
+}
+
+function abrirModalModelo() {
+    document.getElementById('modalAdicionarModelo').style.display = 'block';
+    const input = document.getElementById('novoModeloNome');
+    input.value = '';
+    exibirFeedbackModelo('', false);
+    input.focus();
+}
+
+function fecharModalModelo() {
+    document.getElementById('modalAdicionarModelo').style.display = 'none';
+}
+
+function aplicarTamanhosDoModelo(modelo) {
     const tamanhosDisponiveis = window.tamanhosPorModelo[modelo] || [];
     const inputs = document.querySelectorAll('.tamanho-input');
     inputs.forEach(div => {
@@ -288,6 +326,59 @@ document.getElementById('modelo').addEventListener('change', function() {
         }
     });
     somarTotal();
+}
+
+async function salvarNovoModelo() {
+    const input = document.getElementById('novoModeloNome');
+    const nomeModelo = input.value.trim();
+
+    if (!nomeModelo) {
+        exibirFeedbackModelo('Digite o nome do novo modelo.', true);
+        input.focus();
+        return;
+    }
+
+    const botao = document.getElementById('btnAdicionarModelo');
+    botao.disabled = true;
+
+    try {
+        const resposta = await fetch('index.php?rota=adicionar_modelo_gabarito', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            body: new URLSearchParams({ nome_modelo: nomeModelo }).toString()
+        });
+
+        const json = await resposta.json();
+        if (!resposta.ok || !json.sucesso) {
+            throw new Error(json.erro || 'Nao foi possivel salvar o modelo.');
+        }
+
+        const select = document.getElementById('modelo');
+        const nome = json.dados.nome;
+        const tamanhos = Array.isArray(json.dados.tamanhos) ? json.dados.tamanhos : [];
+        let option = Array.from(select.options).find(item => item.value === nome);
+
+        if (!option) {
+            option = new Option(nome, nome, true, true);
+            select.add(option);
+        }
+
+        option.selected = true;
+        window.tamanhosPorModelo[nome] = tamanhos;
+        aplicarTamanhosDoModelo(nome);
+        exibirFeedbackModelo(json.dados.ja_existia ? 'Modelo ja existia e foi selecionado.' : 'Modelo salvo com sucesso.', false);
+        fecharModalModelo();
+    } catch (erro) {
+        exibirFeedbackModelo(erro.message || 'Nao foi possivel salvar o modelo.', true);
+    } finally {
+        botao.disabled = false;
+    }
+}
+
+document.getElementById('modelo').addEventListener('change', function() {
+    aplicarTamanhosDoModelo(this.value);
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -295,6 +386,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (modeloSelect.value) {
         modeloSelect.dispatchEvent(new Event('change'));
     }
+
+    const inputNovoModelo = document.getElementById('novoModeloNome');
+    inputNovoModelo.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            salvarNovoModelo();
+        }
+    });
 });
 </script>
 

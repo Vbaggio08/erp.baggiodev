@@ -154,6 +154,16 @@ switch ($rota) {
         require_once 'src/controllers/GabaritoController.php';
         (new GabaritoController())->novo();
         break;
+
+    case 'iniciar_gabarito':
+        require_once 'src/controllers/GabaritoController.php';
+        (new GabaritoController())->iniciarRascunho();
+        break;
+
+    case 'adicionar_modelo_gabarito':
+        require_once 'src/controllers/GabaritoController.php';
+        (new GabaritoController())->adicionarModelo();
+        break;
         
     case 'editar_gabarito': 
         require_once 'src/controllers/GabaritoController.php';
@@ -205,6 +215,11 @@ switch ($rota) {
     case 'novo_dtf':
         require_once 'src/controllers/PedidoController.php';
         (new PedidoController())->novo_dtf();
+        break;
+
+    case 'iniciar_dtf':
+        require_once 'src/controllers/PedidoController.php';
+        (new PedidoController())->iniciar_dtf();
         break;
 
     case 'salvar_dtf':

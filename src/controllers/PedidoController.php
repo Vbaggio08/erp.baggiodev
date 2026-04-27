@@ -4,8 +4,15 @@ require_once __DIR__ . '/../config/database.php';
 class PedidoController {
 
     private const ALLOWED_SCHEMA_TABLES = [
-        'pedidos_dtf' => ['vendedor_id', 'meio_pagamento', 'status']
+        'pedidos_dtf' => ['vendedor_id', 'meio_pagamento', 'status', 'status_pedido', 'reservado_em', 'finalizado_em']
     ];
+
+    private function tabelaExiste(string $tabela): bool {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?');
+        $stmt->execute([$tabela]);
+        return ((int) $stmt->fetchColumn()) > 0;
+    }
 
     private function colunaExiste(string $tabela, string $coluna): bool {
         if (!isset(self::ALLOWED_SCHEMA_TABLES[$tabela]) || !in_array($coluna, self::ALLOWED_SCHEMA_TABLES[$tabela], true)) {
@@ -22,6 +29,10 @@ class PedidoController {
     private function garantirEstruturaPedidosDtf(): void {
         $pdo = Database::getConnection();
 
+        if (!$this->tabelaExiste('sequencias_pedidos')) {
+            $pdo->exec("CREATE TABLE sequencias_pedidos (tipo VARCHAR(50) NOT NULL PRIMARY KEY, proximo_numero INT NOT NULL DEFAULT 1, atualizado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
+        }
+
         if (!$this->colunaExiste('pedidos_dtf', 'vendedor_id')) {
             $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN vendedor_id INT NULL AFTER caminho_comprovante");
         }
@@ -32,6 +43,74 @@ class PedidoController {
 
         if (!$this->colunaExiste('pedidos_dtf', 'status')) {
             $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN status VARCHAR(50) DEFAULT 'Mockup' AFTER data_criacao");
+        }
+
+        if (!$this->colunaExiste('pedidos_dtf', 'status_pedido')) {
+            $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN status_pedido VARCHAR(20) NOT NULL DEFAULT 'finalizado' AFTER status");
+        }
+
+        if (!$this->colunaExiste('pedidos_dtf', 'reservado_em')) {
+            $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN reservado_em DATETIME NULL AFTER status_pedido");
+        }
+
+        if (!$this->colunaExiste('pedidos_dtf', 'finalizado_em')) {
+            $pdo->exec("ALTER TABLE pedidos_dtf ADD COLUMN finalizado_em DATETIME NULL AFTER reservado_em");
+        }
+    }
+
+    private function obterProximoNumeroBase(PDO $pdo, string $tipo): int {
+        $origem = $tipo === 'dtf' ? 'pedidos_dtf' : 'gabaritos';
+        $stmt = $pdo->query("SELECT COALESCE(MAX(CAST(numero_pedido AS UNSIGNED)), 0) + 1 FROM {$origem}");
+        $numero = (int) $stmt->fetchColumn();
+        return $numero > 0 ? $numero : 1;
+    }
+
+    private function reservarNumeroSequencial(PDO $pdo, string $tipo): string {
+        $numeroBase = $this->obterProximoNumeroBase($pdo, $tipo);
+        $stmt = $pdo->prepare("INSERT IGNORE INTO sequencias_pedidos (tipo, proximo_numero) VALUES (?, ?)");
+        $stmt->execute([$tipo, $numeroBase]);
+
+        $stmt = $pdo->prepare("SELECT proximo_numero FROM sequencias_pedidos WHERE tipo = ? FOR UPDATE");
+        $stmt->execute([$tipo]);
+        $numero = (int) $stmt->fetchColumn();
+
+        if ($numero <= 0) {
+            $numero = $numeroBase;
+        }
+
+        $stmt = $pdo->prepare("UPDATE sequencias_pedidos SET proximo_numero = ? WHERE tipo = ?");
+        $stmt->execute([$numero + 1, $tipo]);
+
+        return str_pad((string) $numero, 2, '0', STR_PAD_LEFT);
+    }
+
+    public function iniciar_dtf() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?rota=login');
+            exit;
+        }
+
+        $this->garantirEstruturaPedidosDtf();
+        $pdo = Database::getConnection();
+
+        try {
+            $pdo->beginTransaction();
+            $numeroPedido = $this->reservarNumeroSequencial($pdo, 'dtf');
+
+            $stmt = $pdo->prepare("INSERT INTO pedidos_dtf (cliente, contato, plataforma, numero_pedido, data_pedido, data_entrega, metros, valor_metro, valor_final, observacoes, meio_pagamento, arquivo_impressao, caminho_comprovante, vendedor_id, data_criacao, status, status_pedido, reservado_em) VALUES ('Rascunho', '', '', ?, CURDATE(), NULL, 0, 0, 0, '', '', NULL, NULL, NULL, NOW(), 'Mockup', 'rascunho', NOW())");
+            $stmt->execute([$numeroPedido]);
+            $id = (int) $pdo->lastInsertId();
+            $pdo->commit();
+
+            header("Location: index.php?rota=novo_dtf&id={$id}");
+            exit;
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            header('Location: index.php?rota=ver_producao_dtf');
+            exit;
         }
     }
     
@@ -122,10 +201,8 @@ class PedidoController {
         }
 
         if (!isset($_GET['numero_pedido']) && empty($ficha['numero_pedido'])) {
-            $stmt = $pdo->query("SELECT MAX(CAST(numero_pedido AS UNSIGNED)) FROM pedidos_dtf");
-            $ultimo = $stmt->fetchColumn();
-            $proximo = $ultimo ? (int) $ultimo + 1 : 1;
-            $num = str_pad($proximo, 2, '0', STR_PAD_LEFT);
+            header('Location: index.php?rota=iniciar_dtf');
+            exit;
         } else {
             $num = $_GET['numero_pedido'] ?? ($ficha['numero_pedido'] ?? '01');
         }
@@ -189,6 +266,7 @@ class PedidoController {
         $observacoes = $_POST['obs'] ?? null;
         $meioPagamento = $_POST['meio_pagamento'] ?? null;
         $vendedorId = !empty($_POST['vendedor_id']) ? (int) $_POST['vendedor_id'] : null;
+        $statusPedido = 'finalizado';
 
         // 3. Inserir no Banco de Dados
         try {
@@ -206,21 +284,22 @@ class PedidoController {
                 $meioPagamento,
                 $nomeArquivoImpressao,
                 $nomeArquivoComprovante,
-                $vendedorId
+                $vendedorId,
+                $statusPedido
             ];
 
             if ($id) {
                 $sql = "UPDATE pedidos_dtf
                            SET cliente = ?, contato = ?, plataforma = ?, numero_pedido = ?, data_pedido = ?,
                                data_entrega = ?, metros = ?, valor_metro = ?, valor_final = ?, observacoes = ?,
-                               meio_pagamento = ?, arquivo_impressao = ?, caminho_comprovante = ?, vendedor_id = ?
+                               meio_pagamento = ?, arquivo_impressao = ?, caminho_comprovante = ?, vendedor_id = ?, status_pedido = ?, finalizado_em = NOW()
                          WHERE id = ?";
                 $dados[] = $id;
             } else {
                 $sql = "INSERT INTO pedidos_dtf
-                            (cliente, contato, plataforma, numero_pedido, data_pedido, data_entrega, metros, valor_metro, valor_final, observacoes, meio_pagamento, arquivo_impressao, caminho_comprovante, vendedor_id)
+                            (cliente, contato, plataforma, numero_pedido, data_pedido, data_entrega, metros, valor_metro, valor_final, observacoes, meio_pagamento, arquivo_impressao, caminho_comprovante, vendedor_id, status_pedido, reservado_em, finalizado_em)
                         VALUES
-                            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
             }
 
             $stmt = $pdo->prepare($sql);

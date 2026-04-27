@@ -15,7 +15,7 @@
 <div class="box-relatorio">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 class="login-title">🖨️ Ver Produção DTF</h1>
-        <a href="index.php?rota=novo_dtf" class="btn-green" style="text-decoration:none;">+ Nova Produção DTF</a>
+        <a href="index.php?rota=iniciar_dtf" class="btn-green" style="text-decoration:none;">+ Nova Produção DTF</a>
     </div>
 
     <div style="margin-bottom:15px;">
