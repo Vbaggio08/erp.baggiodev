@@ -1,3 +1,0 @@
-# Bloqueia acesso direto aos logs
-Order allow,deny
-Deny from all
