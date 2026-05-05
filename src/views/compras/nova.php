@@ -8,22 +8,24 @@
 ?>
 
 <div class="box-relatorio">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h1 class="login-title">🛒 Nova Compra / Pedido</h1>
-        <a href="index.php?rota=compras" class="btn-red" style="text-decoration:none;">Cancelar</a>
+    <div class="page-header">
+        <h1 class="login-title"><i class="bi bi-cart3 action-icon"></i>Nova Compra / Pedido</h1>
+        <a href="index.php?rota=compras" class="btn-red text-decoration-none">
+            <i class="bi bi-x-circle action-icon"></i>Cancelar
+        </a>
     </div>
 
-    <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <div class="purchase-grid">
         
         <div>
-            <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
-                <h3 style="color:#e6b800; margin-top:0; font-size:16px; border-bottom:1px solid #444; padding-bottom:10px;">1. Dados da Compra</h3>
+            <div class="panel mb-3">
+                <h3 class="purchase-step-title">1. Dados da Compra</h3>
                 
                 <form action="index.php?rota=salvar_compra" method="POST" id="formSalvar">
-                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div class="purchase-form-grid mb-3">
                         <div>
-                            <label style="display:block; color:#aaa; font-size:12px; margin-bottom:5px;">Fornecedor</label>
-                            <select name="fornecedor" required style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                            <label class="form-label">Fornecedor</label>
+                            <select name="fornecedor" required class="form-select">
                                 <option value="">-- Selecione --</option>
                                 <?php foreach($fornecedores as $f): ?>
                                     <option value="<?= $f['nome'] ?>"><?= $f['nome'] ?></option>
@@ -32,66 +34,66 @@
                             </select>
                         </div>
                         <div>
-                            <label style="display:block; color:#aaa; font-size:12px; margin-bottom:5px;">Data Compra</label>
-                            <input type="date" name="data_compra" value="<?= date('Y-m-d') ?>" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                            <label class="form-label">Data Compra</label>
+                            <input type="date" name="data_compra" value="<?= date('Y-m-d') ?>" class="form-control">
                         </div>
                     </div>
                     <div>
-                        <label style="display:block; color:#aaa; font-size:12px; margin-bottom:5px;">Observações</label>
-                        <input type="text" name="obs" placeholder="Ex: Reposição de estoque camiseta preta" style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                        <label class="form-label">Observações</label>
+                        <input type="text" name="obs" class="form-control" placeholder="Ex: Reposição de estoque camiseta preta">
                     </div>
                 </form>
             </div>
 
-            <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444;">
-                <h3 style="color:#e6b800; margin-top:0; font-size:16px; border-bottom:1px solid #444; padding-bottom:10px;">2. Adicionar Produtos</h3>
+            <div class="panel">
+                <h3 class="purchase-step-title">2. Adicionar Produtos</h3>
                 
                 <form action="index.php?rota=compra_adicionar" method="POST">
-                    <div style="display:flex; gap:10px; align-items:flex-end;">
-                        <div style="flex:3;">
-                            <label style="display:block; color:#aaa; font-size:12px; margin-bottom:5px;">Nome do Produto / Material</label>
+                    <div class="purchase-item-row">
+                        <div class="product-col">
+                            <label class="form-label">Nome do Produto / Material</label>
                             <input type="text" name="produto" placeholder="Ex: Tinta DTF Branca 1L" required 
-                                   style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                                   class="form-control">
                         </div>
-                        <div style="flex:1;">
-                            <label style="display:block; color:#aaa; font-size:12px; margin-bottom:5px;">Qtd</label>
+                        <div class="qty-col">
+                            <label class="form-label">Qtd</label>
                             <input type="number" name="qtd" value="1" step="0.01" required 
-                                   style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff; text-align:center;">
+                                   class="form-control text-center">
                         </div>
-                        <div style="flex:1;">
-                            <label style="display:block; color:#aaa; font-size:12px; margin-bottom:5px;">Custo (R$)</label>
+                        <div class="value-col">
+                            <label class="form-label">Custo (R$)</label>
                             <input type="text" name="valor" placeholder="0,00" required 
-                                   style="width:100%; padding:10px; background:#222; border:1px solid #555; color:#fff;">
+                                   class="form-control">
                         </div>
-                        <button type="submit" class="btn-green" style="padding:10px 20px; height:38px;">+ Add</button>
+                        <button type="submit" class="btn-green add-item-btn"><i class="bi bi-plus-circle action-icon"></i>Add</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444; height:fit-content;">
-            <h3 style="color:#e6b800; margin-top:0; font-size:16px; border-bottom:1px solid #444; padding-bottom:10px;">3. Lista de Compra</h3>
+        <div class="panel purchase-list-panel">
+            <h3 class="purchase-step-title">3. Lista de Compra</h3>
 
-            <div style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">
+            <div class="purchase-list-scroll">
                 <?php if (empty($_SESSION['lista_compra'])): ?>
-                    <p style="color:#666; text-align:center; padding:20px;">Carrinho vazio.</p>
+                    <p class="text-muted text-center py-4">Carrinho vazio.</p>
                 <?php else: ?>
-                    <table style="width:100%; border-collapse: collapse; font-size:13px;">
+                    <table class="purchase-mini-table">
                         <?php foreach ($_SESSION['lista_compra'] as $idx => $item): ?>
-                        <tr style="border-bottom:1px solid #333;">
-                            <td style="padding:8px 0;">
-                                <strong style="display:block; color:#ddd;"><?= htmlspecialchars($item['produto']) ?></strong>
-                                <span style="color:#888;">
+                        <tr>
+                            <td>
+                                <strong class="d-block"><?= htmlspecialchars($item['produto']) ?></strong>
+                                <span class="text-muted small">
                                     <?= $item['qtd'] ?> x R$ <?= number_format($item['valor'] ?? 0, 2, ',', '.') ?>
                                 </span>
                             </td>
-                            <td style="text-align:right; padding:8px 0; color:#2ecc71;">
+                            <td class="text-end text-success-strong">
                                 R$ <?= number_format($item['total'] ?? 0, 2, ',', '.') ?>
                             </td>
-                            <td style="width:20px; text-align:right;">
+                            <td class="text-end remove-col">
                                 <form action="index.php?rota=compra_remover" method="POST">
                                     <input type="hidden" name="index" value="<?= $idx ?>">
-                                    <button style="background:none; border:none; color:#e74c3c; cursor:pointer;">X</button>
+                                    <button class="remove-item-btn" aria-label="Remover item"><i class="bi bi-x-lg"></i></button>
                                 </form>
                             </td>
                         </tr>
@@ -100,19 +102,131 @@
                 <?php endif; ?>
             </div>
 
-            <div style="background:#222; padding:15px; border-radius:4px; margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="color:#aaa;">TOTAL:</span>
-                    <span style="color:#e6b800; font-size:20px; font-weight:bold;">R$ <?= number_format($totalGeral, 2, ',', '.') ?></span>
+            <div class="purchase-total-box">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">TOTAL:</span>
+                    <span class="purchase-total-value">R$ <?= number_format($totalGeral, 2, ',', '.') ?></span>
                 </div>
             </div>
 
             <button type="button" onclick="document.getElementById('formSalvar').submit()" 
-                    class="btn-green" style="width:100%; padding:15px; font-size:16px;">
-                ✅ Finalizar Pedido
+                    class="btn-green w-100 py-3 fs-6">
+                <i class="bi bi-check2-circle action-icon"></i>Finalizar Pedido
             </button>
             
-            <a href="index.php?rota=compra_limpar" style="display:block; text-align:center; color:#e74c3c; margin-top:15px; text-decoration:none; font-size:12px;">Limpar Carrinho</a>
+            <a href="index.php?rota=compra_limpar" class="d-block text-center text-danger text-decoration-none mt-3 small">Limpar Carrinho</a>
         </div>
     </div>
 </div>
+
+<style>
+    .purchase-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+    }
+
+    .purchase-step-title {
+        margin: 0 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--primary-color);
+        font-size: 1rem;
+    }
+
+    .purchase-form-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 15px;
+    }
+
+    .purchase-item-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .product-col {
+        flex: 3;
+    }
+
+    .qty-col,
+    .value-col {
+        flex: 1;
+    }
+
+    .add-item-btn {
+        height: 42px;
+    }
+
+    .purchase-list-panel {
+        height: fit-content;
+    }
+
+    .purchase-list-scroll {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
+
+    .purchase-mini-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .purchase-mini-table tr {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .purchase-mini-table td {
+        padding: 8px 0;
+    }
+
+    .remove-col {
+        width: 24px;
+    }
+
+    .remove-item-btn {
+        background: none;
+        border: none;
+        color: var(--brand-red);
+        cursor: pointer;
+        padding: 2px;
+    }
+
+    .purchase-total-box {
+        background: var(--surface-elevated);
+        padding: 15px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 15px;
+    }
+
+    .purchase-total-value {
+        color: var(--primary-color);
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .text-success-strong {
+        color: var(--brand-green);
+    }
+
+    @media (max-width: 992px) {
+        .purchase-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .purchase-form-grid,
+        .purchase-item-row {
+            grid-template-columns: 1fr;
+            display: grid;
+        }
+
+        .add-item-btn {
+            width: 100%;
+        }
+    }
+</style>
