@@ -1,65 +1,46 @@
 <style>
-    .linha-zerada {
-        background: color-mix(in srgb, var(--brand-red) 10%, transparent) !important;
-    }
-
-    .search-input-stock {
-        flex: 1;
-        min-width: 260px;
-    }
-
-    .text-success-strong {
-        color: var(--brand-green);
-    }
-
-    .text-danger-strong {
-        color: var(--brand-red);
-    }
+    .badge-estoque { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .status-vazio { background: #e74c3c; color: #fff; }
+    .status-baixo { background: #f39c12; color: #fff; }
+    .status-ok { background: #2ecc71; color: #fff; }
+    .linha-zerada { background: rgba(231, 76, 60, 0.05) !important; }
 </style>
 
 <div class="box-relatorio">
-    <div class="page-header">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <div>
-            <h1 class="login-title"><i class="bi bi-box-seam action-icon"></i>Saldo de Estoque</h1>
-            <p class="page-subtitle">Inventário completo, incluindo itens sem saldo.</p>
+            <h1 class="login-title" style="margin-bottom:5px;">📦 Saldo de Estoque</h1>
+            <p style="color:#888; font-size:13px;">Inventário completo, incluindo itens sem saldo.</p>
         </div>
-        <div class="toolbar-actions">
-            <a href="index.php?rota=entrada" class="btn-green text-decoration-none">
-                <i class="bi bi-arrow-left-right action-icon"></i>Nova Movimentação
-            </a>
-            <a href="index.php?rota=estoque_historico" class="btn-blue text-decoration-none">
-                <i class="bi bi-clock-history action-icon"></i>Ver Histórico
-            </a>
+        <div style="display:flex; gap:10px;">
+            <a href="index.php?rota=entrada" class="btn-green" style="text-decoration:none;">+ Nova Movimentação</a>
+            <a href="index.php?rota=estoque_historico" class="btn-blue" style="text-decoration:none;">Ver Histórico</a>
         </div>
     </div>
 
-    <div class="panel" style="margin-bottom: 20px;">
-        <form method="GET" action="index.php" class="filter-bar">
+    <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444; margin-bottom: 20px;">
+        <form method="GET" action="index.php" style="display: flex; gap: 10px; align-items: center;">
             <input type="hidden" name="rota" value="estoque_saldo">
-            <input type="text" name="busca" class="form-control search-input-stock" placeholder="Buscar por SKU, produto ou cor..." 
+            <input type="text" name="busca" placeholder="Buscar por SKU, produto ou cor..." 
                    value="<?= htmlspecialchars($_GET['busca'] ?? '') ?>" 
-                   >
-            <button type="submit" class="btn-green">
-                <i class="bi bi-search action-icon"></i>Buscar
-            </button>
+                   style="flex: 1; padding: 10px; background: #222; border: 1px solid #555; color: #fff; border-radius: 4px;">
+            <button type="submit" style="padding: 10px 15px; background: #2ecc71; color: #fff; border: none; border-radius: 4px; cursor: pointer;">🔍 Buscar</button>
             <?php if (!empty($_GET['busca'])): ?>
-                <a href="index.php?rota=estoque_saldo" class="btn-red text-decoration-none">
-                    <i class="bi bi-x-circle action-icon"></i>Limpar
-                </a>
+                <a href="index.php?rota=estoque_saldo" style="padding: 10px 15px; background: #e74c3c; color: #fff; text-decoration: none; border-radius: 4px;">❌ Limpar</a>
             <?php endif; ?>
         </form>
     </div>
 
-    <div class="table-shell">
-        <table>
+    <div style="background: var(--bg-surface-2); padding: 20px; border-radius: 8px; border: 1px solid #444;">
+        <table style="width:100%; border-collapse: collapse; color:#ddd; font-size:14px;">
             <thead>
-                <tr>
-                    <th>SKU</th>
-                    <th>Produto / Modelo</th>
-                    <th>Cor</th>
-                    <th class="text-center">Tamanho</th>
-                    <th class="text-center">Saldo Atual</th>
-                    <th class="text-center">Status</th>
+                <tr style="background:#222; text-align:left; border-bottom:2px solid #555;">
+                    <th style="padding:12px;">SKU</th>
+                    <th style="padding:12px;">Produto / Modelo</th>
+                    <th style="padding:12px;">Cor</th>
+                    <th style="padding:12px; text-align:center;">Tamanho</th>
+                    <th style="padding:12px; text-align:center;">Saldo Atual</th>
+                    <th style="padding:12px; text-align:center;">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -78,23 +59,23 @@
                                 $textoStatus = 'BAIXO';
                             }
                         ?>
-                        <tr class="<?= $saldo <= 0 ? 'linha-zerada' : '' ?>">
-                            <td class="text-muted"><?= htmlspecialchars($item['sku'] ?? '-') ?></td>
-                            <td><strong><?= htmlspecialchars($item['produto']) ?></strong></td>
-                            <td class="text-muted"><?= htmlspecialchars($item['cor'] ?? '-') ?></td>
-                            <td class="text-center fw-bold"><?= htmlspecialchars($item['tamanho'] ?? 'UN') ?></td>
+                        <tr style="border-bottom:1px solid #333;" class="<?= $saldo <= 0 ? 'linha-zerada' : '' ?>">
+                            <td style="padding:12px; color:#777;"><?= htmlspecialchars($item['sku'] ?? '-') ?></td>
+                            <td style="padding:12px;"><strong style="color:#fff;"><?= htmlspecialchars($item['produto']) ?></strong></td>
+                            <td style="padding:12px; color:#aaa;"><?= htmlspecialchars($item['cor'] ?? '-') ?></td>
+                            <td style="padding:12px; text-align:center; font-weight:bold;"><?= htmlspecialchars($item['tamanho'] ?? 'UN') ?></td>
                             
-                            <td class="text-center fs-6 fw-bold <?= $saldo <= 0 ? 'text-danger-strong' : 'text-success-strong' ?>">
+                            <td style="padding:12px; text-align:center; font-size:16px; font-weight:bold; color: <?= $saldo <= 0 ? '#e74c3c' : '#2ecc71' ?>;">
                                 <?= $saldo ?>
                             </td>
 
-                            <td class="text-center">
-                                <span class="status-badge <?= $classeStatus ?>"><?= $textoStatus ?></span>
+                            <td style="padding:12px; text-align:center;">
+                                <span class="badge-estoque <?= $classeStatus ?>"><?= $textoStatus ?></span>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="6" class="text-center p-4">Nenhum produto encontrado.</td></tr>
+                    <tr><td colspan="6" style="padding:30px; text-align:center;">Nenhum produto encontrado.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
