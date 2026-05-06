@@ -14,64 +14,72 @@ return [
         // Dashboard
         [
             'label' => 'Dashboard',
-            'rota' => 'dashboard',
-            'icon' => '📊',
+            'rota'  => 'dashboard',
+            'icon'  => 'speedometer2',
             'requer' => []
         ],
 
-        // 📦 Estoque
+        // Estoque
         [
             'label' => 'Estoque',
-            'icon' => '📦',
+            'icon'  => 'boxes',
             'requer' => [],
             'submenu' => [
                 [
                     'label' => 'Saldo Atual',
-                    'rota' => 'estoque_saldo',
+                    'rota'  => 'estoque_saldo',
+                    'icon'  => 'bar-chart-line',
                     'requer' => []
                 ],
                 [
                     'label' => 'Movimentar',
-                    'rota' => 'entrada',
+                    'rota'  => 'entrada',
+                    'icon'  => 'arrow-left-right',
                     'requer' => []
                 ],
                 [
                     'label' => 'Histórico',
-                    'rota' => 'estoque_historico',
+                    'rota'  => 'estoque_historico',
+                    'icon'  => 'clock-history',
                     'requer' => []
                 ],
                 [
                     'label' => 'Perdas / Quebras',
-                    'rota' => 'relatorio_perdas',
+                    'rota'  => 'relatorio_perdas',
+                    'icon'  => 'exclamation-triangle',
                     'requer' => []
                 ]
             ]
         ],
 
-        // ⚙️ Operacional
+        // Operacional
         [
             'label' => 'Operacional',
-            'icon' => '⚙️',
+            'icon'  => 'gear-fill',
             'requer' => [],
             'submenu' => [
                 [
                     'label' => 'Produção de Camiseta',
-                    'rota' => 'novo_gabarito',
+                    'rota'  => 'novo_gabarito',
+                    'icon'  => 'file-earmark-plus',
                     'requer' => []
                 ],
                 [
                     'label' => 'Produção DTF',
-                    'rota' => 'novo_dtf',
+                    'rota'  => 'novo_dtf',
+                    'icon'  => 'printer',
                     'requer' => []
                 ],
                 [
                     'label' => 'Ver Produção de Camiseta',
-                    'rota' => 'listar_gabaritos',
+                    'rota'  => 'listar_gabaritos',
+                    'icon'  => 'list-ul',
                     'requer' => []
                 ],
                 [
                     'label' => 'Ver Produção DTF',
-                    'rota' => 'ver_producao_dtf',
+                    'rota'  => 'ver_producao_dtf',
+                    'icon'  => 'collection',
                     'requer' => []
                 ],
                 [
@@ -80,62 +88,69 @@ return [
                 ],
                 [
                     'label' => 'Produção (Pedidos)',
-                    'rota' => 'pedidos',
+                    'rota'  => 'pedidos',
+                    'icon'  => 'clipboard2-check',
                     'requer' => []
                 ],
                 [
                     'label' => 'Compras',
-                    'rota' => 'compras',
+                    'rota'  => 'compras',
+                    'icon'  => 'cart3',
                     'requer' => []
                 ],
                 [
                     'label' => 'Serviços / OS',
-                    'rota' => 'servicos',
+                    'rota'  => 'servicos',
+                    'icon'  => 'tools',
                     'requer' => []
                 ]
             ]
         ],
 
-        // 📝 Cadastros
+        // Cadastros
         [
             'label' => 'Cadastros',
-            'icon' => '📝',
+            'icon'  => 'card-list',
             'requer' => [],
             'submenu' => [
                 [
                     'label' => 'Produtos',
-                    'rota' => 'produtos',
+                    'rota'  => 'produtos',
+                    'icon'  => 'tag',
                     'requer' => []
                 ],
                 [
                     'label' => 'Clientes',
-                    'rota' => 'clientes',
+                    'rota'  => 'clientes',
+                    'icon'  => 'people',
                     'requer' => []
                 ],
                 [
                     'label' => 'Fornecedores',
-                    'rota' => 'fornecedores',
+                    'rota'  => 'fornecedores',
+                    'icon'  => 'truck',
                     'requer' => []
                 ],
                 [
                     'label' => 'Minhas Empresas',
-                    'rota' => 'empresas',
+                    'rota'  => 'empresas',
+                    'icon'  => 'building',
                     'requer' => []
                 ]
             ]
         ],
 
-        // 🔐 ADMINISTRAÇÃO - Transformado em dropdown
+        // Administração
         [
             'label' => 'Administração',
-            'icon' => '🔐',
+            'icon'  => 'shield-lock-fill',
             'requer' => ['admin'],
             'submenu' => [
                 [
                     'label' => 'Gerenciar Usuários',
-                    'rota' => 'gerenciar_usuarios',
-                    'requer' => ['admin'],
-                    'icon' => '👥'
+                    'rota'  => 'gerenciar_usuarios',
+                    'icon'  => 'person-gear',
+                    'requer' => ['admin']
                 ]
             ]
         ]
