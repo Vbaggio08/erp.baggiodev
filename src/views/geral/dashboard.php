@@ -72,15 +72,15 @@
             <h3 class="widget-title">⚡ Acesso Rápido</h3>
             <div class="quick-access-grid">
                 <a href="index.php?rota=novo_gabarito" class="quick-access-link">
-                    <span class="material-icons icon-gold">description</span> 
+                    <span class="material-icons icon-gold"></span> 
                     <span>Criar Nova Ficha Técnica</span>
                 </a>
                 <a href="index.php?rota=entrada" class="quick-access-link">
-                    <span class="material-icons icon-green">add_circle</span> 
+                    <span class="material-icons icon-green"></span> 
                     <span>Dar Entrada no Estoque</span>
                 </a>
                 <a href="index.php?rota=relatorio_perdas" class="quick-access-link">
-                    <span class="material-icons icon-red">warning</span> 
+                    <span class="material-icons icon-red"></span> 
                     <span>Registrar Perda/Quebra</span>
                 </a>
             </div>
