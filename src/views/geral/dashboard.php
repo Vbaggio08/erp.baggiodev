@@ -7,7 +7,7 @@
         <div class="kpi-card-inline" style="border-left-color: #f39c12;">
             <div class="kpi-header">
                 <h3>Pedidos Pendentes</h3>
-                <span class="material-icons" style="color:#f39c12;">pending_actions</span>
+                <span class="material-icons" style="color:#f39c12;"></span>
             </div>
             <p class="kpi-value" style="color:#f39c12;"><?= $totalPendentes ?? 0 ?></p>
             <small class="kpi-subtext">Aguardando produção</small>
@@ -16,7 +16,7 @@
         <div class="kpi-card-inline" style="border-left-color: #2ecc71;">
              <div class="kpi-header">
                 <h3>Peças em Estoque</h3>
-                <span class="material-icons" style="color:#2ecc71;">inventory_2</span>
+                <span class="material-icons" style="color:#2ecc71;"></span>
             </div>
             <p class="kpi-value" style="color:#2ecc71;"><?= $totalPecas ?? 0 ?></p>
             <small class="kpi-subtext">Saldo geral físico</small>
@@ -25,7 +25,7 @@
         <div class="kpi-card-inline" style="border-left-color: #3498db;">
              <div class="kpi-header">
                 <h3>Produzidos Hoje</h3>
-                <span class="material-icons" style="color:#3498db;">check_circle</span>
+                <span class="material-icons" style="color:#3498db;"></span>
             </div>
             <p class="kpi-value" style="color:#3498db;"><?= $produzidosHoje ?? 0 ?></p>
             <small class="kpi-subtext">Baseado nas Fichas</small>
@@ -34,7 +34,7 @@
         <div class="kpi-card-inline" style="border-left-color: #e74c3c;">
              <div class="kpi-header">
                 <h3>Perdas Registradas</h3>
-                <span class="material-icons" style="color:#e74c3c;">warning</span>
+                <span class="material-icons" style="color:#e74c3c;"></span>
             </div>
             <p class="kpi-value" style="color:#e74c3c;"><?= $totalPerdas ?? 0 ?></p>
             <small class="kpi-subtext">Itens descartados</small>
